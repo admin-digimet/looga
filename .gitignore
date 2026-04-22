@@ -1,0 +1,35 @@
+# Secrets — jamais commiter
+.env
+.env.local
+.env.*.local
+*.env
+
+# Claude
+.claude/
+CLAUDE.md
+AGENTS.md
+
+# Dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+
+# Next.js
+.next/
+out/
+
+# Build
+android/
+ios/
+*.apk
+*.aab
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*

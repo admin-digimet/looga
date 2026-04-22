@@ -1,0 +1,53 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+/* Thème looga — cream/orange/violet */
+[data-theme="looga"] {
+  color-scheme: light;
+
+  --color-base-100: oklch(93% 0.008 87);
+  --color-base-200: oklch(90% 0.009 87);
+  --color-base-300: oklch(86% 0.009 87);
+  --color-base-content: oklch(18% 0 0);
+
+  --color-primary: oklch(63% 0.22 36);
+  --color-primary-content: oklch(100% 0 0);
+
+  --color-secondary: oklch(41% 0.18 298);
+  --color-secondary-content: oklch(100% 0 0);
+
+  --color-accent: oklch(73% 0.20 157);
+  --color-accent-content: oklch(100% 0 0);
+
+  --color-neutral: oklch(18% 0 0);
+  --color-neutral-content: oklch(100% 0 0);
+
+  --color-info: oklch(62% 0.18 232);
+  --color-info-content: oklch(100% 0 0);
+  --color-success: oklch(73% 0.20 157);
+  --color-success-content: oklch(100% 0 0);
+  --color-warning: oklch(79% 0.18 71);
+  --color-warning-content: oklch(18% 0 0);
+  --color-error: oklch(57% 0.24 24);
+  --color-error-content: oklch(100% 0 0);
+
+  --radius-selector: 0.5rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.75rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+@theme {
+  --font-sans: var(--font-dm-sans);
+  --font-heading: var(--font-syne);
+}
+
+body {
+  font-family: var(--font-dm-sans, "DM Sans", sans-serif);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-syne, "Syne", sans-serif);
+}
