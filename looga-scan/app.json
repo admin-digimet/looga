@@ -9,6 +9,8 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "android": {
+      "package": "ci.looga.scan",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#EDEAE4",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

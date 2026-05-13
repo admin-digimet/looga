@@ -5,15 +5,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import {
-  Syne_700Bold,
-  Syne_800ExtraBold,
-} from '@expo-google-fonts/syne';
-import {
-  DMSans_400Regular,
-  DMSans_500Medium,
-  DMSans_600SemiBold,
-} from '@expo-google-fonts/dm-sans';
 
 import { useAuthStore } from '@/lib/store/authStore';
 import { useScanStore } from '@/lib/store/scanStore';
@@ -35,11 +26,11 @@ export default function RootLayout() {
   const { loadFromStorage } = useScanStore();
 
   const [fontsLoaded] = useFonts({
-    Syne_700Bold,
-    Syne_800ExtraBold,
-    DMSans_400Regular,
-    DMSans_500Medium,
-    DMSans_600SemiBold,
+    Syne_700Bold: require('../assets/fonts/Syne_700Bold.ttf'),
+    Syne_800ExtraBold: require('../assets/fonts/Syne_800ExtraBold.ttf'),
+    DMSans_400Regular: require('../assets/fonts/DMSans_400Regular.ttf'),
+    DMSans_500Medium: require('../assets/fonts/DMSans_500Medium.ttf'),
+    DMSans_600SemiBold: require('../assets/fonts/DMSans_600SemiBold.ttf'),
   });
 
   useEffect(() => {
