@@ -35,3 +35,5 @@ Thumbs.db
 npm-debug.log*
 UPDATEAPI.MD
 *.docx
+BUILD.md
+DEPLOY.md

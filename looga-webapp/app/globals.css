@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-dm-sans), "DM Sans", system-ui, sans-serif;
+  --font-heading: var(--font-syne), "Syne", system-ui, sans-serif;
+
+  --color-cream: #EDEAE4;
+  --color-cream-2: #F0EDE8;
+  --color-ink: #1A1A1A;
+  --color-ink-muted: #6E6B66;
+  --color-orange: #FF5C1A;
+  --color-violet: #6B3FA0;
+  --color-looga-success: #00C864;
+  --color-looga-error: #FF3B3B;
+  --color-looga-warning: #FFB800;
+}
+
+body {
+  font-family: var(--font-dm-sans), "DM Sans", system-ui, sans-serif;
+  background: #EDEAE4;
+  color: #1A1A1A;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-syne), "Syne", system-ui, sans-serif;
+}
