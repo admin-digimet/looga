@@ -5,6 +5,12 @@ import { Building2, CheckCircle, Pause, Play, XCircle } from 'lucide-react'
 import { getAdminOrganizers, toggleOrganizerSuspension } from '@/lib/api/admin'
 import type { Organizer } from '@/types'
 
+type OrganizerWithOwner = Organizer & {
+  owner_name?: string | null
+  owner_email?: string | null
+  owner_phone?: string | null
+}
+
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('fr-FR', {
     day: '2-digit',
@@ -14,7 +20,7 @@ function formatDate(dateStr: string) {
 }
 
 export function OrganizersTable() {
-  const [organizers, setOrganizers] = useState<Organizer[]>([])
+  const [organizers, setOrganizers] = useState<OrganizerWithOwner[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'suspended'>('all')
@@ -24,7 +30,7 @@ export function OrganizersTable() {
     setLoading(true)
     try {
       const data = await getAdminOrganizers({ status: statusFilter })
-      setOrganizers(data)
+      setOrganizers(data as OrganizerWithOwner[])
       setError(null)
     } catch (e) {
       setError((e as Error).message ?? 'Erreur')
@@ -38,7 +44,7 @@ export function OrganizersTable() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter])
 
-  async function handleToggle(org: Organizer) {
+  async function handleToggle(org: OrganizerWithOwner) {
     setActionLoading(org.id)
     try {
       await toggleOrganizerSuspension(org.id, !org.is_suspended)
@@ -81,6 +87,8 @@ export function OrganizersTable() {
             <thead>
               <tr className="text-base-content/60 text-xs uppercase">
                 <th>Organisation</th>
+                <th>Référent</th>
+                <th>Contact</th>
                 <th>Description</th>
                 <th>Statut</th>
                 <th>Membre depuis</th>
@@ -90,14 +98,14 @@ export function OrganizersTable() {
             <tbody>
               {loading && (
                 <tr>
-                  <td colSpan={5} className="text-center py-10">
+                  <td colSpan={7} className="text-center py-10">
                     <span className="loading loading-spinner loading-md" />
                   </td>
                 </tr>
               )}
               {!loading && organizers.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="text-center py-10 text-base-content/40">
+                  <td colSpan={7} className="text-center py-10 text-base-content/40">
                     Aucun organisateur trouvé
                   </td>
                 </tr>
@@ -113,6 +121,13 @@ export function OrganizersTable() {
                         </div>
                         <p className="font-medium">{org.name}</p>
                       </div>
+                    </td>
+                    <td className="text-base-content/70">{org.owner_name ?? '—'}</td>
+                    <td className="text-xs text-base-content/60">
+                      <p className="truncate max-w-[200px]" title={org.owner_email ?? ''}>
+                        {org.owner_email ?? '—'}
+                      </p>
+                      <p className="text-base-content/40">{org.owner_phone ?? ''}</p>
                     </td>
                     <td className="text-base-content/60 max-w-[200px]">
                       <p className="truncate">{org.description ?? '—'}</p>
