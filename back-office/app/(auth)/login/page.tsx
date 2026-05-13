@@ -1,15 +1,24 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { apiLogin } from '@/lib/api/auth'
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
+  )
+}
+
+function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const reasonError = searchParams.get('error')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
+  const [error, setError] = useState(reasonError === 'not_admin' ? "Ce compte n'est pas un administrateur Looga." : '')
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
@@ -17,31 +26,63 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
 
-    try {
-      const result = await apiLogin(email, password)
+    const supabase = createClient()
 
-      if (result.user.role !== 'admin' && result.user.role !== 'super_admin') {
-        setError("Ce compte n'est pas un compte administrateur Looga.")
+    try {
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (signInError || !data.user) {
+        setError('Email ou mot de passe incorrect.')
         return
       }
 
-      const supabase = createClient()
-      await supabase.auth.setSession({
-        access_token: result.token,
-        refresh_token: result.refresh_token,
-      })
+      // Vérifier le rôle admin
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role, is_active')
+        .eq('id', data.user.id)
+        .single()
 
-      router.push('/')
-      router.refresh()
-    } catch (err: unknown) {
-      const e = err as { status?: number; message?: string }
-      if (e.status === 403) {
-        setError('Compte suspendu. Contactez le support.')
-      } else if (e.status === 401) {
-        setError('Email ou mot de passe incorrect.')
-      } else {
-        setError('Une erreur est survenue. Réessaie.')
+      if (!profile) {
+        await supabase.auth.signOut()
+        setError("Profil introuvable. Contactez léquipe support.")
+        return
       }
+
+      if (!profile.is_active) {
+        await supabase.auth.signOut()
+        setError('Compte suspendu. Contactez l\'equipe support.')
+        return
+      }
+
+      if (profile.role !== 'admin' && profile.role !== 'super_admin') {
+        await supabase.auth.signOut()
+        setError("Ce compte n'est pas un administrateur Looga.")
+        return
+      }
+
+      // Router selon l'état MFA
+      const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+
+      if (!aal) {
+        router.push('/overview')
+        router.refresh()
+        return
+      }
+
+      if (aal.nextLevel === 'aal2' && aal.currentLevel === 'aal1') {
+        router.push('/login/verify')
+      } else if (aal.nextLevel === 'aal1' && aal.currentLevel === 'aal1') {
+        router.push('/setup-mfa')
+      } else {
+        router.push('/overview')
+        router.refresh()
+      }
+    } catch {
+      setError('Une erreur est survenue. Réessaie.')
     } finally {
       setLoading(false)
     }
@@ -50,7 +91,6 @@ export default function LoginPage() {
   return (
     <div className="card bg-base-200 shadow-sm">
       <div className="card-body gap-6">
-        {/* Logo */}
         <div className="text-center">
           <h1 className="text-2xl font-bold font-heading text-primary">looga</h1>
           <p className="text-sm text-base-content/60 mt-1">Administration</p>
@@ -104,7 +144,7 @@ export default function LoginPage() {
         </form>
 
         <p className="text-xs text-center text-base-content/40">
-          Accès réservé aux administrateurs Looga
+          Accès réservé aux administrateurs Looga  
         </p>
       </div>
     </div>

@@ -29,16 +29,18 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   const { pathname } = request.nextUrl
-  const isAuthPage = pathname === '/login'
+  const isLoginPage = pathname === '/login'
+  const isMfaRoute = pathname === '/setup-mfa' || pathname.startsWith('/login/verify')
   const isCallbackRoute = pathname.startsWith('/auth/')
+  const isPublic = isLoginPage || isMfaRoute || isCallbackRoute
 
   // Non connecté → login
-  if (!user && !isAuthPage && !isCallbackRoute) {
+  if (!user && !isPublic) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Connecté → hors de la page login
-  if (user && isAuthPage) {
+  // Connecté → ne plus afficher la page de login email/mdp
+  if (user && isLoginPage) {
     return NextResponse.redirect(new URL('/', request.url))
   }
 

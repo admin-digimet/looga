@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Trash2, Ban, Search } from 'lucide-react'
-import { deleteAdminEvent, updateAdminEventStatus } from '@/lib/api/admin'
+import { deleteAdminEvent, updateAdminEventStatus, getAdminEvents } from '@/lib/api/admin'
 import type { AdminEventListItem } from '@/types'
 
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
@@ -35,14 +35,26 @@ function formatFCFA(amount: number) {
   return new Intl.NumberFormat('fr-FR').format(amount) + ' F'
 }
 
-export function EventsTable({ events: initialEvents }: { events: AdminEventListItem[] }) {
+export function EventsTable({ events: initialEvents }: { events?: AdminEventListItem[] } = {}) {
   const router = useRouter()
-  const [events, setEvents] = useState(initialEvents)
+  const [events, setEvents] = useState<AdminEventListItem[]>(initialEvents ?? [])
+  const [loadingList, setLoadingList] = useState(!initialEvents)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [confirmDelete, setConfirmDelete] = useState<AdminEventListItem | null>(null)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [actionError, setActionError] = useState('')
+
+  useEffect(() => {
+    if (initialEvents) return
+    let cancelled = false
+    getAdminEvents()
+      .then((res) => { if (!cancelled) setEvents(res.data) })
+      .catch((e) => { if (!cancelled) setLoadError(e?.message ?? 'Erreur') })
+      .finally(() => { if (!cancelled) setLoadingList(false) })
+    return () => { cancelled = true }
+  }, [initialEvents])
 
   const filtered = events.filter((e) => {
     const matchStatus = statusFilter === 'all' || e.status === statusFilter
@@ -56,19 +68,13 @@ export function EventsTable({ events: initialEvents }: { events: AdminEventListI
     setActionLoading(event.id)
     setActionError('')
     try {
-      await deleteAdminEvent('', event.id)
+      await deleteAdminEvent(event.id)
       setEvents((prev) => prev.filter((e) => e.id !== event.id))
       setConfirmDelete(null)
       router.refresh()
     } catch (err: unknown) {
       const e = err as { message?: string }
-      // API non disponible — simulation côté mock
-      if (e.message?.includes('Failed to fetch') || e.message?.includes('404')) {
-        setEvents((prev) => prev.filter((ev) => ev.id !== event.id))
-        setConfirmDelete(null)
-      } else {
-        setActionError(e.message ?? 'Erreur lors de la suppression')
-      }
+      setActionError(e.message ?? 'Erreur lors de la suppression')
     } finally {
       setActionLoading(null)
     }
@@ -78,12 +84,12 @@ export function EventsTable({ events: initialEvents }: { events: AdminEventListI
     setActionLoading(event.id)
     setActionError('')
     try {
-      await updateAdminEventStatus('', event.id, 'cancelled')
+      await updateAdminEventStatus(event.id, 'cancelled')
       setEvents((prev) => prev.map((e) => e.id === event.id ? { ...e, status: 'cancelled' } : e))
       router.refresh()
-    } catch {
-      // Simulation mock
-      setEvents((prev) => prev.map((e) => e.id === event.id ? { ...e, status: 'cancelled' } : e))
+    } catch (err: unknown) {
+      const e = err as { message?: string }
+      setActionError(e.message ?? 'Erreur lors de la mise à jour')
     } finally {
       setActionLoading(null)
     }
@@ -121,6 +127,11 @@ export function EventsTable({ events: initialEvents }: { events: AdminEventListI
           <span>{actionError}</span>
         </div>
       )}
+      {loadError && (
+        <div className="alert alert-warning py-2 text-sm">
+          <span>{loadError}</span>
+        </div>
+      )}
 
       {/* Table */}
       <div className="card bg-base-200 shadow-sm overflow-hidden">
@@ -139,7 +150,14 @@ export function EventsTable({ events: initialEvents }: { events: AdminEventListI
               </tr>
             </thead>
             <tbody>
-              {filtered.length === 0 && (
+              {loadingList && (
+                <tr>
+                  <td colSpan={8} className="text-center py-10">
+                    <span className="loading loading-spinner loading-md" />
+                  </td>
+                </tr>
+              )}
+              {!loadingList && filtered.length === 0 && (
                 <tr>
                   <td colSpan={8} className="text-center py-10 text-base-content/40">
                     Aucun événement trouvé

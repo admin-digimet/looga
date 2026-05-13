@@ -1,12 +1,12 @@
 import { TopNav } from '@/components/layout/TopNav'
-import { EventsTable } from './EventsTable'
+import { TeamTable } from './TeamTable'
 
-export default function EventsPage() {
+export default function TeamPage() {
   return (
     <div className="flex flex-col h-full">
-      <TopNav title="Événements" />
+      <TopNav title="Équipe" />
       <div className="flex-1 p-6 flex flex-col gap-4">
-        <EventsTable />
+        <TeamTable />
       </div>
     </div>
   )

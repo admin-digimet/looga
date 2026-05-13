@@ -10,16 +10,23 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect('/login')
   }
 
-  // Vérification rôle admin côté serveur
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role')
+    .select('role, is_active')
     .eq('id', user.id)
     .single()
 
-  if (profile && profile.role !== 'admin' && profile.role !== 'super_admin') {
+  if (!profile || (profile.role !== 'admin' && profile.role !== 'super_admin') || !profile.is_active) {
     await supabase.auth.signOut()
     redirect('/login?error=not_admin')
+  }
+
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+  if (aal?.nextLevel === 'aal2' && aal.currentLevel === 'aal1') {
+    redirect('/login/verify')
+  }
+  if (aal?.nextLevel === 'aal1' && aal.currentLevel === 'aal1') {
+    redirect('/setup-mfa')
   }
 
   return (

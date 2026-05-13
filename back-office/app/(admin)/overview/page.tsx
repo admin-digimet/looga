@@ -1,105 +1,192 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import {
+  Building2,
+  Calendar,
+  LayoutDashboard,
+  Ticket,
+  TrendingUp,
+  Users,
+  Wallet,
+} from 'lucide-react'
 import { TopNav } from '@/components/layout/TopNav'
 import { getAdminStats } from '@/lib/api/admin'
-import { LayoutDashboard, Calendar, Building2, Ticket } from 'lucide-react'
+import type { AdminStatsResponse } from '@/app/api/admin/stats/route'
 
 function formatFCFA(amount: number) {
   return new Intl.NumberFormat('fr-FR').format(amount) + ' FCFA'
 }
 
-export default async function OverviewPage() {
-  // TODO: passer le token réel une fois l'API admin disponible
-  const stats = await getAdminStats('').catch(() => null)
+const ROLE_LABELS: Record<string, string> = {
+  user: 'Utilisateurs',
+  organizer: 'Organisateurs',
+  staff: 'Scanners',
+  admin: 'Admins',
+  super_admin: 'Super-admins',
+}
+
+export default function OverviewPage() {
+  const [stats, setStats] = useState<AdminStatsResponse | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    getAdminStats()
+      .then((s) => { if (!cancelled) setStats(s) })
+      .catch((e) => { if (!cancelled) setError(e?.message ?? 'Erreur') })
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+  }, [])
+
+  const maxRevenue = Math.max(...(stats?.revenue_30d.map((d) => d.amount) ?? [0]), 1)
 
   return (
     <div className="flex flex-col h-full">
       <TopNav title="Vue d'ensemble" />
 
       <div className="flex-1 p-6 flex flex-col gap-6">
-        {/* Bandeau info mock */}
-        <div className="alert alert-info py-2 text-sm">
-          <span>
-            Les données affichées sont des mocks en attendant les APIs admin backend.
-            Voir <code className="font-mono text-xs">lib/api/admin.ts</code> pour la liste des endpoints à implémenter.
-          </span>
-        </div>
-
-        {/* Stats cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard
-            icon={<Calendar size={20} />}
-            label="Événements publiés"
-            value={stats?.published_events ?? '—'}
-            sub={`sur ${stats?.total_events ?? '—'} total`}
-            color="primary"
-          />
-          <StatCard
-            icon={<Building2 size={20} />}
-            label="Organisateurs"
-            value={stats?.total_organizers ?? '—'}
-            color="secondary"
-          />
-          <StatCard
-            icon={<Ticket size={20} />}
-            label="Billets vendus"
-            value={stats?.total_tickets_sold?.toLocaleString('fr-FR') ?? '—'}
-            color="accent"
-          />
-          <StatCard
-            icon={<LayoutDashboard size={20} />}
-            label="Revenus totaux"
-            value={stats ? formatFCFA(stats.total_revenue) : '—'}
-            color="neutral"
-          />
-        </div>
-
-        {/* Statuts événements */}
-        <div className="card bg-base-200 shadow-sm">
-          <div className="card-body gap-4">
-            <h2 className="card-title text-base font-heading">Répartition des événements</h2>
-            <div className="flex flex-wrap gap-4">
-              <StatusItem label="Publiés" count={stats?.published_events ?? 0} color="success" />
-              <StatusItem label="Brouillons" count={stats?.draft_events ?? 0} color="warning" />
-              <StatusItem label="Annulés" count={stats?.cancelled_events ?? 0} color="error" />
-            </div>
+        {error && (
+          <div className="alert alert-error py-2 text-sm">
+            <span>{error}</span>
           </div>
-        </div>
+        )}
 
-        {/* Raccourcis */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <a href="/events" className="card bg-base-200 shadow-sm hover:bg-base-300 transition-colors cursor-pointer">
-            <div className="card-body flex-row items-center gap-4">
-              <div className="bg-primary/10 text-primary p-3 rounded-lg">
-                <Calendar size={22} />
+        {loading ? (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="card bg-base-200 shadow-sm">
+                <div className="card-body gap-3 p-4 animate-pulse">
+                  <div className="w-10 h-10 rounded-lg bg-base-300" />
+                  <div className="h-7 bg-base-300 rounded w-16" />
+                  <div className="h-3 bg-base-300 rounded w-24" />
+                </div>
               </div>
-              <div>
-                <p className="font-semibold font-heading">Modérer les événements</p>
-                <p className="text-sm text-base-content/60">Voir, suspendre ou supprimer</p>
+            ))}
+          </div>
+        ) : stats ? (
+          <>
+            {/* KPI principales */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <StatCard
+                icon={<Users size={20} />}
+                label="Utilisateurs totaux"
+                value={stats.total_users.toLocaleString('fr-FR')}
+                sub={Object.entries(stats.users_by_role)
+                  .map(([role, count]) => `${ROLE_LABELS[role] ?? role}: ${count}`)
+                  .join(' · ')}
+                color="primary"
+              />
+              <StatCard
+                icon={<Building2 size={20} />}
+                label="Organisateurs"
+                value={stats.total_organizers.toLocaleString('fr-FR')}
+                color="secondary"
+              />
+              <StatCard
+                icon={<Ticket size={20} />}
+                label="Billets vendus"
+                value={stats.total_tickets_sold.toLocaleString('fr-FR')}
+                color="accent"
+              />
+              <StatCard
+                icon={<Wallet size={20} />}
+                label="Revenus circulés"
+                value={formatFCFA(stats.total_revenue)}
+                sub="cumul des paiements réussis"
+                color="neutral"
+              />
+            </div>
+
+            {/* Graphique revenu 30 jours + répartition events */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div className="card bg-base-200 shadow-sm lg:col-span-2">
+                <div className="card-body gap-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="card-title text-base font-heading">
+                      <TrendingUp size={18} className="text-primary" />
+                      Revenus — 30 derniers jours
+                    </h2>
+                    <span className="text-xs text-base-content/60">
+                      Total : {formatFCFA(stats.revenue_30d.reduce((s, d) => s + d.amount, 0))}
+                    </span>
+                  </div>
+                  <div className="flex items-end gap-1 h-32">
+                    {stats.revenue_30d.map((d) => {
+                      const pct = (d.amount / maxRevenue) * 100
+                      return (
+                        <div
+                          key={d.date}
+                          className="flex-1 bg-primary/30 hover:bg-primary rounded-t transition-colors"
+                          style={{ height: `${Math.max(pct, 2)}%` }}
+                          title={`${d.date} · ${formatFCFA(d.amount)}`}
+                        />
+                      )
+                    })}
+                  </div>
+                  <div className="flex justify-between text-xs text-base-content/60">
+                    <span>{stats.revenue_30d[0]?.date}</span>
+                    <span>{stats.revenue_30d[stats.revenue_30d.length - 1]?.date}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card bg-base-200 shadow-sm">
+                <div className="card-body gap-4">
+                  <h2 className="card-title text-base font-heading">
+                    <Calendar size={18} className="text-secondary" />
+                    Événements ({stats.total_events})
+                  </h2>
+                  <ul className="space-y-2 text-sm">
+                    <StatusRow label="Publiés" count={stats.events_by_status.published ?? 0} color="success" />
+                    <StatusRow label="Brouillons" count={stats.events_by_status.draft ?? 0} color="warning" />
+                    <StatusRow label="Annulés" count={stats.events_by_status.cancelled ?? 0} color="error" />
+                    <StatusRow label="Passés" count={stats.events_by_status.past ?? 0} color="neutral" />
+                  </ul>
+                </div>
               </div>
             </div>
-          </a>
-          <a href="/organizers" className="card bg-base-200 shadow-sm hover:bg-base-300 transition-colors cursor-pointer">
-            <div className="card-body flex-row items-center gap-4">
-              <div className="bg-secondary/10 text-secondary p-3 rounded-lg">
-                <Building2 size={22} />
-              </div>
-              <div>
-                <p className="font-semibold font-heading">Gérer les organisateurs</p>
-                <p className="text-sm text-base-content/60">Voir et suspendre des comptes</p>
-              </div>
+
+            {/* Raccourcis */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <ShortcutCard
+                href="/events"
+                icon={<Calendar size={22} />}
+                title="Modérer les événements"
+                subtitle="Suspendre ou supprimer"
+                color="primary"
+              />
+              <ShortcutCard
+                href="/payouts"
+                icon={<Wallet size={22} />}
+                title="Demandes de payout"
+                subtitle={
+                  stats.pending_payouts > 0
+                    ? `${stats.pending_payouts} en attente`
+                    : 'Aucune en attente'
+                }
+                color="secondary"
+                highlight={stats.pending_payouts > 0}
+              />
+              <ShortcutCard
+                href="/users"
+                icon={<LayoutDashboard size={22} />}
+                title="Utilisateurs"
+                subtitle="Gérer les comptes"
+                color="accent"
+              />
             </div>
-          </a>
-        </div>
+          </>
+        ) : null}
       </div>
     </div>
   )
 }
 
 function StatCard({
-  icon,
-  label,
-  value,
-  sub,
-  color,
+  icon, label, value, sub, color,
 }: {
   icon: React.ReactNode
   label: string
@@ -122,18 +209,53 @@ function StatCard({
         <div>
           <p className="text-2xl font-bold font-heading">{value}</p>
           <p className="text-sm text-base-content/60">{label}</p>
-          {sub && <p className="text-xs text-base-content/40 mt-0.5">{sub}</p>}
+          {sub && <p className="text-xs text-base-content/40 mt-1 line-clamp-1" title={sub}>{sub}</p>}
         </div>
       </div>
     </div>
   )
 }
 
-function StatusItem({ label, count, color }: { label: string; count: number; color: string }) {
+function StatusRow({ label, count, color }: { label: string; count: number; color: string }) {
   return (
-    <div className="flex items-center gap-2">
+    <li className="flex items-center justify-between">
+      <span className="text-base-content/70">{label}</span>
       <span className={`badge badge-${color} badge-sm`}>{count}</span>
-      <span className="text-sm text-base-content/70">{label}</span>
-    </div>
+    </li>
+  )
+}
+
+function ShortcutCard({
+  href, icon, title, subtitle, color, highlight,
+}: {
+  href: string
+  icon: React.ReactNode
+  title: string
+  subtitle: string
+  color: 'primary' | 'secondary' | 'accent'
+  highlight?: boolean
+}) {
+  const colorMap = {
+    primary: 'bg-primary/10 text-primary',
+    secondary: 'bg-secondary/10 text-secondary',
+    accent: 'bg-accent/10 text-accent',
+  }
+  return (
+    <Link
+      href={href}
+      className={`card bg-base-200 shadow-sm hover:bg-base-300 transition-colors ${
+        highlight ? 'ring-2 ring-secondary/40' : ''
+      }`}
+    >
+      <div className="card-body flex-row items-center gap-4">
+        <div className={`p-3 rounded-lg ${colorMap[color]}`}>
+          {icon}
+        </div>
+        <div>
+          <p className="font-semibold font-heading">{title}</p>
+          <p className="text-sm text-base-content/60">{subtitle}</p>
+        </div>
+      </div>
+    </Link>
   )
 }
