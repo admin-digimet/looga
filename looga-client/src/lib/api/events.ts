@@ -1,11 +1,9 @@
-import * as SecureStore from 'expo-secure-store';
 import { apiClient } from './client';
 import { ENDPOINTS } from '@/constants/api';
 import type { Event, EventCategory, PaginatedEvents } from '@/types/event';
 
 const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
 const ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '';
-const TOKEN_KEY = 'looga_auth_token';
 
 interface GetEventsParams {
   page?: number;
@@ -55,16 +53,15 @@ export async function getEvents(params: GetEventsParams = {}): Promise<Paginated
 }
 
 export async function getEventById(id: string): Promise<Event> {
-  // Appel PostgREST direct pour récupérer event + organizer + ticket_types en un round-trip.
-  // L'Edge Function /events/:id ne fait pas le join organizer.
+  // PostgREST direct : event + organizer + ticket_types en un round-trip.
+  // Lecture publique → on n'utilise QUE l'anon key (le user token peut être expiré → 401).
   const select = 'id,organizer_id,title,description,category,event_date,event_time,location_name,location_address,image_url,status,is_sold_out,min_price,views_count,created_at,organizer:organizers(id,name,description,logo_url,website),ticket_types(id,name,description,price,advantages,stock_total,stock_remaining,is_active)';
   const url = `${SUPABASE_URL}/rest/v1/events?id=eq.${id}&select=${encodeURIComponent(select)}`;
-  const token = await SecureStore.getItemAsync(TOKEN_KEY);
 
   const res = await fetch(url, {
     headers: {
       apikey: ANON_KEY,
-      Authorization: `Bearer ${token ?? ANON_KEY}`,
+      Authorization: `Bearer ${ANON_KEY}`,
       Accept: 'application/vnd.pgrst.object+json',
     },
   });

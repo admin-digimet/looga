@@ -1,7 +1,10 @@
 # Documentation API — Looga Backend
 
-> Document à transmettre au développeur backend Laravel.
-> Toutes les réponses doivent être en JSON. Toutes les routes authentifiées requièrent un header `Authorization: Bearer {token}`.
+> Backend Looga = **Supabase à 100 %** (pas de Laravel). L'app combine deux modes d'accès :
+> - **PostgREST direct** (`${SUPABASE_URL}/rest/v1/<table>`) pour les ressources read-only avec RLS
+> - **Edge Functions Supabase** (`${SUPABASE_URL}/functions/v1/<route>`) pour la logique serveur (achat, webhook KKiaPay, push token, etc.)
+>
+> Toutes les réponses sont en JSON. Toutes les routes authentifiées requièrent `Authorization: Bearer {access_token}` + `apikey: SUPABASE_ANON_KEY`.
 
 ---
 
@@ -9,11 +12,14 @@
 
 | Propriété | Valeur |
 |-----------|--------|
-| Base URL | `https://api.looga.ci/api/v1` |
-| Auth | Laravel Sanctum (tokens Bearer) |
+| Base URL Edge Functions | `${SUPABASE_URL}/functions/v1` |
+| Base URL PostgREST | `${SUPABASE_URL}/rest/v1` |
+| Auth | Supabase Auth (JWT Bearer + refresh token) |
 | Format | JSON (`Content-Type: application/json`) |
 | Encodage | UTF-8 |
 | Langue des messages d'erreur | Français |
+
+> Note : ce document décrit les endpoints "logiques" attendus par l'app (héritage du brief initial qui mentionnait Laravel). Côté implémentation, **chaque endpoint est soit une Edge Function Supabase, soit un appel PostgREST direct** vers les tables Supabase. Le mapping concret est dans `lib/api/*.ts`.
 
 ---
 
@@ -446,7 +452,7 @@ L'app utilise `useInfiniteQuery` de React Query. Le format de pagination **doit*
   "total": 47
 }
 ```
-Ne pas utiliser un format Laravel standard `links/meta` — l'app attend exactement `data`, `nextPage`, `total`.
+Pour les Edge Functions, retourner exactement `data`, `nextPage`, `total`. Pour PostgREST direct, utiliser `Prefer: count=exact` côté request + lire `Content-Range` côté response pour calculer `total`/`nextPage` côté client.
 
 ### Champ `qrCode` dans les billets
 La valeur `qrCode` est stockée en local sur l'appareil (MMKV) pour fonctionner hors connexion. Elle doit :

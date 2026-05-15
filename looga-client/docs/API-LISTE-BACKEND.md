@@ -1,8 +1,10 @@
 # Endpoints API — App Utilisateur Looga
 
-> Liste des endpoints que l'app mobile utilisateur a besoin.
-> Base URL : `https://api.looga.ci/api/v1`
-> Auth : Laravel Sanctum — toutes les routes marquées 🔒 requièrent `Authorization: Bearer {token}`
+> Liste des endpoints utilisés par l'app mobile utilisateur.
+> Backend : **Supabase** (PostgREST direct + quelques Edge Functions). Pas de Laravel.
+> Base URL Edge Functions : `${SUPABASE_URL}/functions/v1` (ex : `https://<project>.supabase.co/functions/v1`)
+> Base URL PostgREST : `${SUPABASE_URL}/rest/v1`
+> Auth : **Supabase Auth** (JWT) — toutes les routes 🔒 requièrent `Authorization: Bearer {access_token}` + header `apikey: SUPABASE_ANON_KEY`
 
 ---
 
@@ -56,14 +58,15 @@
 
 ## Points critiques à respecter
 
-- **Pagination** : le format doit être `{ data: [...], nextPage: 2, total: 47 }` — `nextPage` vaut `null` sur la dernière page
-- **`/tickets/purchase`** : ne décrémenter le stock qu'**après** confirmation du webhook KKiaPay
+- **Pagination** : format `{ data: [...], nextPage: 2, total: 47 }` — `nextPage` vaut `null` sur la dernière page (côté Edge Function). Si appel PostgREST direct, utiliser le header `Prefer: count=exact` et lire `Content-Range`.
+- **`/tickets/purchase`** : Edge Function obligatoire (logique serveur stock + paiement). Ne décrémenter le stock qu'**après** confirmation du webhook KKiaPay.
 - **`qrCode`** dans la réponse billet : valeur unique lisible par l'app de scan (ex: `LOOGA-{eventId}-{ticketId}`)
 - **`minPrice`** dans les événements : prix le plus bas parmi les types non sold out
 - **`isSoldOut`** dans les événements : `true` si tous les types de billets sont épuisés
-- **Durée du token** : prévoir 7 à 30 jours (l'app n'a pas de refresh token)
+- **Tokens Supabase** : access_token court (~1h) + refresh_token long (30j). L'app refresh automatiquement via `/auth/v1/token?grant_type=refresh_token` sur 401 (voir `lib/api/client.ts`).
+- **PostgREST direct possible** pour les ressources read-only (events list, event detail, organizers, ticket_types) — voir `lib/api/events.ts:getEventById` qui fait `SUPABASE_URL/rest/v1/events?id=eq.X&select=*,organizer:organizers(*)`. Permet d'inclure le join sans dépendre d'Edge Function.
 - **Langue** : tous les messages d'erreur en français
 
 ---
 
-**Total : 13 endpoints** (10 MVP + 3 post-MVP)
+**Total : 13 routes utiles** (mixte Edge Functions + PostgREST direct)
