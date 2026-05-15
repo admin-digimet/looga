@@ -116,7 +116,8 @@ export default async function ScannerDetailPage({ params }: Params) {
             ) : (
               <div className="flex flex-col">
                 {assignments.map((a) => {
-                  const ev = a.events as { id: string; title: string; event_date: string; status: string } | null
+                  const rawEv = a.events as unknown
+                  const ev = (Array.isArray(rawEv) ? rawEv[0] : rawEv) as { id: string; title: string; event_date: string; status: string } | null
                   if (!ev) return null
                   return (
                     <Link
@@ -127,7 +128,7 @@ export default async function ScannerDetailPage({ params }: Params) {
                       <span className="text-sm font-medium">{ev.title}</span>
                       <div className="flex items-center gap-3">
                         <span className="text-xs text-base-content/50">{formatDate(ev.event_date)}</span>
-                        <EventStatusBadge status={ev.status as 'draft' | 'published' | 'cancelled' | 'completed'} />
+                        <EventStatusBadge status={ev.status as 'draft' | 'published' | 'cancelled' | 'past'} />
                       </div>
                     </Link>
                   )

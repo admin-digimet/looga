@@ -110,8 +110,9 @@ export default async function DashboardPage() {
   const eventsWithFill = (allEvents ?? []).map((ev: any) => {
     const capacity: number = (ev.ticket_types ?? []).reduce((s: number, tt: { stock_total: number }) => s + tt.stock_total, 0)
     const sold = revenueByEventId.get(ev.id)?.sold ?? 0
+    const revenue = revenueByEventId.get(ev.id)?.revenue ?? 0
     const fillRate = capacity > 0 ? Math.round((sold / capacity) * 100) : 0
-    return { id: ev.id, title: ev.title, capacity, sold, fillRate, status: ev.status }
+    return { id: ev.id, title: ev.title, capacity, sold, revenue, fillRate, status: ev.status }
   })
     .filter((ev) => ev.capacity > 0)
     .sort((a, b) => b.revenue - a.revenue || b.fillRate - a.fillRate)

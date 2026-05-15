@@ -3,7 +3,7 @@ interface StatsCardProps {
   value: string | number
   subtitle?: string
   icon: React.ReactNode
-  accent?: 'primary' | 'secondary' | 'success' | 'warning'
+  accent?: 'primary' | 'secondary' | 'success' | 'warning' | 'error'
 }
 
 export default function StatsCard({ title, value, subtitle, icon, accent = 'primary' }: StatsCardProps) {
@@ -12,6 +12,7 @@ export default function StatsCard({ title, value, subtitle, icon, accent = 'prim
     secondary: 'bg-secondary/10 text-secondary',
     success:   'bg-success/10 text-success',
     warning:   'bg-warning/10 text-warning',
+    error:     'bg-error/10 text-error',
   }[accent]
 
   return (
