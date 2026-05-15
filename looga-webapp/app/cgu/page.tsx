@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { InfoPage } from '@/components/InfoPage';
+import { DynamicInfoPage } from '@/components/DynamicInfoPage';
 
 export const metadata: Metadata = {
   title: 'Conditions générales d’utilisation — Looga',
@@ -8,10 +8,11 @@ export const metadata: Metadata = {
 
 export default function CguPage() {
   return (
-    <InfoPage
-      title="Conditions générales d’utilisation"
-      intro="Merci de lire attentivement ces conditions avant d’utiliser la plateforme Looga."
-      sections={[
+    <DynamicInfoPage
+      pageKey="cgu"
+      fallbackTitle="Conditions générales d’utilisation"
+      fallbackIntro="Merci de lire attentivement ces conditions avant d’utiliser la plateforme Looga."
+      fallbackSections={[
         {
           heading: '1. Objet',
           body: (

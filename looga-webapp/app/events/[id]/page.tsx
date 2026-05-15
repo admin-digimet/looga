@@ -6,7 +6,10 @@ import { ChevronLeft, Clock, MapPin, Share, Heart, Flag, ChevronDown, Globe, Ext
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { TicketModal } from '@/components/TicketModal';
-import { useEvent } from '@/hooks/useEvents';
+import { EventCard } from '@/components/EventCard';
+import { ReportEventModal } from '@/components/ReportEventModal';
+import { useEvent, useSimilarEvents } from '@/hooks/useEvents';
+import { useSavedStore } from '@/lib/store/savedStore';
 import { formatEventDate, formatPrice, formatPriceFrom } from '@/lib/utils';
 
 function EventDetailSkeleton() {
@@ -36,6 +39,32 @@ export default function EventDetailPage() {
   const router = useRouter();
   const { data: event, isLoading, isError } = useEvent(id);
   const [showModal, setShowModal] = useState(false);
+  const { data: similarEvents } = useSimilarEvents({
+    category: event?.category,
+    excludeId: event?.id ?? '',
+    limit: 4,
+  });
+  const isSaved = useSavedStore((s) => (event ? s.saved.includes(event.id) : false));
+  const toggleSaved = useSavedStore((s) => s.toggle);
+  const [shareMessage, setShareMessage] = useState<string | null>(null);
+  const [reportOpen, setReportOpen] = useState(false);
+
+  async function handleShare() {
+    if (!event) return;
+    const url = typeof window !== 'undefined' ? window.location.href : '';
+    const data = { title: event.name, text: `Découvre ${event.name} sur Looga`, url };
+    try {
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        await navigator.share(data);
+      } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        await navigator.clipboard.writeText(url);
+        setShareMessage('Lien copié dans le presse-papier ✓');
+        setTimeout(() => setShareMessage(null), 2500);
+      }
+    } catch {
+      // user cancelled share — no-op
+    }
+  }
 
   if (isLoading) {
     return (
@@ -100,12 +129,32 @@ export default function EventDetailPage() {
           </div>
 
           {/* Action icons */}
-          <div className="flex justify-end gap-4 mb-4">
-            <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+          <div className="flex justify-end items-center gap-4 mb-4">
+            {shareMessage && (
+              <span className="text-xs text-green-600 font-medium animate-in fade-in">
+                {shareMessage}
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={handleShare}
+              aria-label="Partager l'événement"
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            >
               <Share className="w-5 h-5 text-gray-600" />
             </button>
-            <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-              <Heart className="w-5 h-5 text-gray-600" />
+            <button
+              type="button"
+              onClick={() => toggleSaved(event.id)}
+              aria-label={isSaved ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+              aria-pressed={isSaved}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <Heart
+                className={`w-5 h-5 transition-colors ${
+                  isSaved ? 'text-orange fill-orange' : 'text-gray-600'
+                }`}
+              />
             </button>
           </div>
 
@@ -156,9 +205,6 @@ export default function EventDetailPage() {
                     )}
                   </div>
                 </div>
-                <button className="text-orange bg-orange/10 hover:bg-orange/15 px-4 py-2 rounded-lg font-semibold text-sm transition-colors border border-orange/30">
-                  Suivre
-                </button>
               </div>
 
               {/* Date & Location */}
@@ -281,53 +327,26 @@ export default function EventDetailPage() {
                 ))}
               </div>
 
-              {/* Organizer full block */}
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Organisé par</h2>
-              <div className="bg-gray-50 rounded-xl p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-12">
-                <div className="flex items-center gap-5 w-full md:w-auto">
-                  {organizer?.logo_url ? (
-                    <img
-                      src={organizer.logo_url}
-                      alt={organizer.name}
-                      className="w-16 h-16 rounded-full object-cover border border-gray-200 shrink-0"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 bg-orange/15 rounded-full flex items-center justify-center text-orange font-bold text-2xl shrink-0">
-                      {organizerInitial}
-                    </div>
-                  )}
-                  <div>
-                    <p className="font-bold text-gray-900 text-lg">
-                      {organizer?.name ?? event.organizerName ?? 'Organisateur'}
-                    </p>
-                    {organizer?.description && (
-                      <p className="text-sm text-gray-500 mt-1 max-w-sm">{organizer.description}</p>
-                    )}
-                    {organizer?.website && (
-                      <a
-                        href={organizer.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-orange hover:underline flex items-center gap-1 mt-1"
-                      >
-                        <Globe className="w-4 h-4" />
-                        {organizer.website}
-                      </a>
-                    )}
+              {/* Événements similaires */}
+              {similarEvents && similarEvents.length > 0 && (
+                <>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                    Pourrait aussi t&apos;intéresser
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
+                    {similarEvents.map((e) => (
+                      <EventCard key={e.id} event={e} />
+                    ))}
                   </div>
-                </div>
-                <div className="flex gap-3 w-full md:w-auto shrink-0">
-                  <button className="flex-1 md:flex-none border border-gray-300 text-gray-700 font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">
-                    Contact
-                  </button>
-                  <button className="flex-1 md:flex-none bg-orange text-white font-semibold px-6 py-2.5 rounded-lg hover:opacity-90 transition-colors">
-                    Suivre
-                  </button>
-                </div>
-              </div>
+                </>
+              )}
 
               <div className="flex justify-center mb-16 lg:mb-0">
-                <button className="flex items-center gap-2 text-orange hover:underline text-sm font-semibold">
+                <button
+                  type="button"
+                  onClick={() => setReportOpen(true)}
+                  className="flex items-center gap-2 text-orange hover:underline text-sm font-semibold"
+                >
                   <Flag className="w-4 h-4" /> Signaler cet événement
                 </button>
               </div>
@@ -380,6 +399,14 @@ export default function EventDetailPage() {
 
       {/* Ticket purchase modal */}
       {showModal && <TicketModal event={event} onClose={() => setShowModal(false)} />}
+
+      {/* Report event modal */}
+      <ReportEventModal
+        eventId={event.id}
+        eventTitle={event.name}
+        open={reportOpen}
+        onClose={() => setReportOpen(false)}
+      />
     </div>
   );
 }

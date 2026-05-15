@@ -54,10 +54,8 @@ export function Footer() {
           <p>© 2026 Looga</p>
           <div className="flex flex-wrap gap-4 mt-4 md:mt-0">
             <Link href="/a-propos" className="hover:text-white">À propos</Link>
-            <Link href="/blog" className="hover:text-white">Blog</Link>
             <Link href="/aide" className="hover:text-white">Aide</Link>
             <Link href="/carrieres" className="hover:text-white">Carrières</Link>
-            <Link href="/presse" className="hover:text-white">Presse</Link>
             <Link href="/cgu" className="hover:text-white">Conditions</Link>
             <Link href="/confidentialite" className="hover:text-white">Confidentialité</Link>
           </div>

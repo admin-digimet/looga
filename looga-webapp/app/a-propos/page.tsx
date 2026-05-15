@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { InfoPage } from '@/components/InfoPage';
+import { DynamicInfoPage } from '@/components/DynamicInfoPage';
 
 export const metadata: Metadata = {
   title: 'À propos — Looga',
@@ -8,21 +8,20 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <InfoPage
-      title="À propos de Looga"
-      intro="La plateforme qui réunit les meilleurs événements et leurs publics en Afrique de l’Ouest."
-      sections={[
+    <DynamicInfoPage
+      pageKey="a-propos"
+      fallbackTitle="À propos de Looga"
+      fallbackIntro="La plateforme qui réunit les meilleurs événements et leurs publics en Afrique de l’Ouest."
+      fallbackSections={[
         {
           heading: 'Notre mission',
           body: (
-            <>
-              <p>
-                Looga rend la billetterie événementielle simple et accessible.
-                Nous donnons aux organisateurs les outils pour vendre, scanner et
-                suivre leurs événements en temps réel, et aux publics une expérience
-                claire pour découvrir et acheter leurs billets en quelques clics.
-              </p>
-            </>
+            <p>
+              Looga rend la billetterie événementielle simple et accessible.
+              Nous donnons aux organisateurs les outils pour vendre, scanner et
+              suivre leurs événements en temps réel, et aux publics une expérience
+              claire pour découvrir et acheter leurs billets en quelques clics.
+            </p>
           ),
         },
         {

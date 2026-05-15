@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { InfoPage } from '@/components/InfoPage';
+import { DynamicInfoPage } from '@/components/DynamicInfoPage';
 
 export const metadata: Metadata = {
   title: 'Politique de confidentialité — Looga',
@@ -8,10 +8,11 @@ export const metadata: Metadata = {
 
 export default function ConfidentialitePage() {
   return (
-    <InfoPage
-      title="Politique de confidentialité"
-      intro="Nous prenons la protection de vos données personnelles au sérieux."
-      sections={[
+    <DynamicInfoPage
+      pageKey="confidentialite"
+      fallbackTitle="Politique de confidentialité"
+      fallbackIntro="Nous prenons la protection de vos données personnelles au sérieux."
+      fallbackSections={[
         {
           heading: 'Données collectées',
           body: (

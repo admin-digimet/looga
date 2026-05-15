@@ -37,3 +37,6 @@ UPDATEAPI.MD
 *.docx
 BUILD.md
 DEPLOY.md
+
+# SQL livrables (ne pas publier — contiennent des refs aux schémas DB internes)
+**/supabase/

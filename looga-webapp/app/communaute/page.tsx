@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { InfoPage } from '@/components/InfoPage';
+import { DynamicInfoPage } from '@/components/DynamicInfoPage';
 
 export const metadata: Metadata = {
   title: 'Règles de la communauté — Looga',
@@ -8,10 +8,11 @@ export const metadata: Metadata = {
 
 export default function CommunautePage() {
   return (
-    <InfoPage
-      title="Règles de la communauté"
-      intro="Looga rassemble des publics et des organisateurs autour d’événements de qualité. Ces règles garantissent une expérience saine et respectueuse pour tous."
-      sections={[
+    <DynamicInfoPage
+      pageKey="communaute"
+      fallbackTitle="Règles de la communauté"
+      fallbackIntro="Looga rassemble des publics et des organisateurs autour d’événements de qualité. Ces règles garantissent une expérience saine et respectueuse pour tous."
+      fallbackSections={[
         {
           heading: 'Ce que nous attendons',
           body: (

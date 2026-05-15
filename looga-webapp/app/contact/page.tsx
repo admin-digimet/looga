@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Mail, MessageSquare, Phone } from 'lucide-react';
 import { InfoPage } from '@/components/InfoPage';
+import { ContactForm } from '@/components/ContactForm';
 
 export const metadata: Metadata = {
   title: 'Contactez-nous — Looga',
@@ -48,6 +49,10 @@ export default function ContactPage() {
             </div>
           );
         })}
+      </div>
+
+      <div className="mb-10">
+        <ContactForm />
       </div>
 
       <div className="bg-white rounded-2xl p-6 md:p-8 border border-cream-2">

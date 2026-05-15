@@ -30,3 +30,12 @@ export function useEvent(id: string) {
     enabled: !!id,
   });
 }
+
+export function useSimilarEvents(params: { category?: string; excludeId: string; limit?: number }) {
+  return useQuery({
+    queryKey: ['events', 'similar', params.category ?? '', params.excludeId, params.limit ?? 4],
+    queryFn: () => eventsApi.getSimilarEvents(params),
+    staleTime: 60_000,
+    enabled: !!params.excludeId,
+  });
+}

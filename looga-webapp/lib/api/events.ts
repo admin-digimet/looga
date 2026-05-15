@@ -1,5 +1,5 @@
 import { apiClient } from '@/lib/api/client';
-import { ENDPOINTS, SUPABASE_URL, SUPABASE_ANON_KEY, TOKEN_KEY } from '@/lib/constants';
+import { ENDPOINTS, SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/constants';
 import type { Event, EventCategory, PaginatedEvents } from '@/types';
 
 interface GetEventsParams {
@@ -60,17 +60,40 @@ export async function getEvents(params: GetEventsParams = {}): Promise<Paginated
   };
 }
 
-export async function getEventById(id: string): Promise<Event> {
-  // Appel PostgREST direct pour récupérer event + organizer + ticket_types en un round-trip.
-  // L'Edge Function /events/:id ne fait pas le join organizer, donc on bypass ici.
-  const select = 'id,organizer_id,title,description,category,event_date,event_time,location_name,location_address,image_url,status,is_sold_out,min_price,views_count,created_at,organizer:organizers(id,name,description,logo_url,website),ticket_types(id,name,description,price,advantages,stock_total,stock_remaining,is_active)';
-  const url = `${SUPABASE_URL}/rest/v1/events?id=eq.${id}&select=${encodeURIComponent(select)}`;
-  const token = typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null;
+export async function getSimilarEvents(params: {
+  category?: string;
+  excludeId: string;
+  limit?: number;
+}): Promise<Event[]> {
+  const { category, excludeId, limit = 4 } = params;
+  const select =
+    'id,organizer_id,title,description,category,event_date,event_time,location_name,image_url,status,is_sold_out,min_price,views_count,created_at,organizer:organizers(id,name,description,logo_url,website),ticket_types(id,name,price,stock_remaining,is_active)';
+
+  let url = `${SUPABASE_URL}/rest/v1/events?status=eq.published&id=neq.${excludeId}&select=${encodeURIComponent(select)}&order=event_date.asc&limit=${limit}`;
+  if (category) url += `&category=eq.${category}`;
 
   const res = await fetch(url, {
     headers: {
       apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${token ?? SUPABASE_ANON_KEY}`,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    },
+  });
+
+  if (!res.ok) return [];
+  const raw = await res.json();
+  return Array.isArray(raw) ? raw.map(transformEvent) : [];
+}
+
+export async function getEventById(id: string): Promise<Event> {
+  // PostgREST direct : event + organizer + ticket_types en un round-trip.
+  // Lecture publique → on n'utilise QUE l'anon key (le user token peut être expiré → 401).
+  const select = 'id,organizer_id,title,description,category,event_date,event_time,location_name,location_address,image_url,status,is_sold_out,min_price,views_count,created_at,organizer:organizers(id,name,description,logo_url,website),ticket_types(id,name,description,price,advantages,stock_total,stock_remaining,is_active)';
+  const url = `${SUPABASE_URL}/rest/v1/events?id=eq.${id}&select=${encodeURIComponent(select)}`;
+
+  const res = await fetch(url, {
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
       Accept: 'application/vnd.pgrst.object+json',
     },
   });

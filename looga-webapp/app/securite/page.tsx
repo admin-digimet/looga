@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { InfoPage } from '@/components/InfoPage';
+import { DynamicInfoPage } from '@/components/DynamicInfoPage';
 
 export const metadata: Metadata = {
   title: 'Sécurité — Looga',
@@ -8,10 +8,11 @@ export const metadata: Metadata = {
 
 export default function SecuritePage() {
   return (
-    <InfoPage
-      title="Sécurité"
-      intro="Vos paiements et vos données sont notre priorité absolue."
-      sections={[
+    <DynamicInfoPage
+      pageKey="securite"
+      fallbackTitle="Sécurité"
+      fallbackIntro="Vos paiements et vos données sont notre priorité absolue."
+      fallbackSections={[
         {
           heading: 'Paiements sécurisés',
           body: (

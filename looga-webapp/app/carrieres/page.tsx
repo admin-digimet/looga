@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { InfoPage } from '@/components/InfoPage';
+import { DynamicInfoPage } from '@/components/DynamicInfoPage';
 
 export const metadata: Metadata = {
   title: 'Carrières — Looga',
@@ -8,10 +8,11 @@ export const metadata: Metadata = {
 
 export default function CarrieresPage() {
   return (
-    <InfoPage
-      title="Rejoignez Looga"
-      intro="Nous bâtissons la plateforme événementielle de référence en Afrique de l’Ouest. Si l’aventure vous tente, on aimerait vous parler."
-      sections={[
+    <DynamicInfoPage
+      pageKey="carrieres"
+      fallbackTitle="Rejoignez Looga"
+      fallbackIntro="Nous bâtissons la plateforme événementielle de référence en Afrique de l’Ouest. Si l’aventure vous tente, on aimerait vous parler."
+      fallbackSections={[
         {
           heading: 'Nous recrutons (bientôt)',
           body: (
@@ -39,3 +40,4 @@ export default function CarrieresPage() {
     />
   );
 }
+
