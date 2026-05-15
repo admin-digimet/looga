@@ -1,14 +1,15 @@
 'use client'
 
 import { useState } from 'react'
+import { PaymentMethodIcon } from '@/components/PaymentMethodIcon'
 
 type Method = 'mtn_momo' | 'orange_money' | 'wave' | 'bank_transfer'
 
-const METHODS: { value: Method; label: string; icon: string }[] = [
-  { value: 'mtn_momo', label: 'MTN Mobile Money', icon: '🟡' },
-  { value: 'orange_money', label: 'Orange Money', icon: '🟠' },
-  { value: 'wave', label: 'Wave', icon: '🔵' },
-  { value: 'bank_transfer', label: 'Virement bancaire', icon: '🏦' },
+const METHODS: { value: Method; label: string }[] = [
+  { value: 'mtn_momo', label: 'MTN Mobile Money' },
+  { value: 'orange_money', label: 'Orange Money' },
+  { value: 'wave', label: 'Wave' },
+  { value: 'bank_transfer', label: 'Virement bancaire' },
 ]
 
 interface NewPayoutModalProps {
@@ -102,11 +103,11 @@ export function NewPayoutModal({ available, onClose, onCreated }: NewPayoutModal
                   key={m.value}
                   type="button"
                   onClick={() => setMethod(m.value)}
-                  className={`btn btn-sm justify-start gap-2 ${
+                  className={`btn btn-sm h-auto py-2 justify-start gap-2 ${
                     method === m.value ? 'btn-primary' : 'btn-ghost border border-base-300'
                   }`}
                 >
-                  <span>{m.icon}</span>
+                  <PaymentMethodIcon method={m.value} size="sm" />
                   <span className="truncate text-xs">{m.label}</span>
                 </button>
               ))}

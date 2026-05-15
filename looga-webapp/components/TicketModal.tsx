@@ -6,6 +6,7 @@ import { X, ChevronRight, Minus, Plus, CheckCircle } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
 import { usePurchase } from '@/hooks/usePurchase';
 import { formatPrice } from '@/lib/utils';
+import { PaymentMethodIcon } from '@/components/PaymentMethodIcon';
 import type { Event, TicketType, PaymentMethod } from '@/types';
 import type { AxiosError } from 'axios';
 
@@ -14,11 +15,11 @@ interface Props {
   onClose: () => void;
 }
 
-const PAYMENT_METHODS: { id: PaymentMethod; label: string; icon: string }[] = [
-  { id: 'mtn_momo',      label: 'MTN MoMo',      icon: '🟡' },
-  { id: 'orange_money',  label: 'Orange Money',   icon: '🟠' },
-  { id: 'wave',          label: 'Wave',            icon: '🔵' },
-  { id: 'card',          label: 'Carte bancaire',  icon: '💳' },
+const PAYMENT_METHODS: { id: PaymentMethod; label: string }[] = [
+  { id: 'mtn_momo',      label: 'MTN MoMo' },
+  { id: 'orange_money',  label: 'Orange Money' },
+  { id: 'wave',          label: 'Wave' },
+  { id: 'card',          label: 'Carte bancaire' },
 ];
 
 const MOBILE_MONEY_IDS: PaymentMethod[] = ['mtn_momo', 'orange_money', 'wave'];
@@ -248,7 +249,7 @@ export function TicketModal({ event, onClose }: Props) {
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
-                      <span className="text-2xl">{pm.icon}</span>
+                      <PaymentMethodIcon method={pm.id} size="md" />
                       <span className="text-xs font-semibold text-gray-700 text-center">{pm.label}</span>
                     </button>
                   ))}

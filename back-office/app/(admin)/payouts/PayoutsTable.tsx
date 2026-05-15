@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { Check, CircleSlash, Search, Wallet } from 'lucide-react'
 import { getAdminPayouts, updatePayout } from '@/lib/api/admin'
 import type { PayoutRequest, PayoutStatus } from '@/lib/api/admin'
+import { PaymentMethodIcon } from '@/components/PaymentMethodIcon'
 
 const STATUS_LABEL: Record<PayoutStatus, string> = {
   pending: 'En attente',
@@ -152,7 +153,12 @@ export function PayoutsTable() {
                       </div>
                     </td>
                     <td className="font-bold">{formatFCFA(p.amount)}</td>
-                    <td>{METHOD_LABEL[p.method] ?? p.method}</td>
+                    <td>
+                      <div className="flex items-center gap-2">
+                        <PaymentMethodIcon method={p.method} size="sm" />
+                        <span>{METHOD_LABEL[p.method] ?? p.method}</span>
+                      </div>
+                    </td>
                     <td className="text-xs text-base-content/60">
                       {p.phone_number || (p.bank_details ? 'Voir détails' : '—')}
                     </td>

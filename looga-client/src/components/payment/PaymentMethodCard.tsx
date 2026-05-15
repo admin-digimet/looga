@@ -1,5 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { CreditCard } from 'lucide-react-native';
+import { Image, StyleSheet, Text, TouchableOpacity } from 'react-native';
 
 import { Colors } from '@/constants/colors';
 import { Fonts, FontSize } from '@/constants/typography';
@@ -11,15 +10,16 @@ interface PaymentMethodCardProps {
   onSelect: (method: PaymentMethod) => void;
 }
 
-const METHOD_CONFIG: Record<PaymentMethod, { brandColor: string; label: string; isCard: boolean }> = {
-  mtn_momo:     { brandColor: '#FFCC00', label: 'MTN MoMo',      isCard: false },
-  orange_money: { brandColor: '#FF6600', label: 'Orange Money',   isCard: false },
-  wave:         { brandColor: '#1AC9FF', label: 'Wave',           isCard: false },
-  card:         { brandColor: Colors.violetLight, label: 'Carte bancaire', isCard: true },
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const METHOD_CONFIG: Record<PaymentMethod, { source: number; label: string }> = {
+  mtn_momo:     { source: require('@/assets/payment/mtn-momo.png'),        label: 'MTN MoMo' },
+  orange_money: { source: require('@/assets/payment/orange-money.png'),    label: 'Orange Money' },
+  wave:         { source: require('@/assets/payment/wave.png'),            label: 'Wave' },
+  card:         { source: require('@/assets/payment/carte-bancaire.webp'), label: 'Carte bancaire' },
 };
 
 export function PaymentMethodCard({ method, selected, onSelect }: PaymentMethodCardProps) {
-  const { brandColor, label, isCard } = METHOD_CONFIG[method];
+  const { source, label } = METHOD_CONFIG[method];
 
   return (
     <TouchableOpacity
@@ -27,11 +27,7 @@ export function PaymentMethodCard({ method, selected, onSelect }: PaymentMethodC
       onPress={() => onSelect(method)}
       activeOpacity={0.75}
     >
-      {isCard ? (
-        <CreditCard size={28} color={brandColor} />
-      ) : (
-        <View style={[styles.brandDot, { backgroundColor: brandColor }]} />
-      )}
+      <Image source={source} style={styles.logo} resizeMode="contain" />
       <Text style={[styles.label, selected && styles.labelSelected]}>{label}</Text>
       {selected && (
         <Text style={styles.selectedLabel}>Sélectionné</Text>
@@ -56,10 +52,9 @@ const styles = StyleSheet.create({
     borderColor: Colors.orange,
     backgroundColor: Colors.surface,
   },
-  brandDot: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
+  logo: {
+    width: 40,
+    height: 40,
   },
   label: {
     fontFamily: Fonts.bodyMedium,

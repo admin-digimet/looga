@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { NewPayoutModal } from './NewPayoutModal'
+import { PaymentMethodIcon } from '@/components/PaymentMethodIcon'
 
 type PayoutStatus = 'pending' | 'approved' | 'paid' | 'rejected'
 type PayoutMethod = 'mtn_momo' | 'orange_money' | 'wave' | 'bank_transfer'
@@ -177,7 +178,12 @@ export function PayoutsClient() {
                   {requests.map((r) => (
                     <tr key={r.id} className="hover">
                       <td className="font-bold">{formatFCFA(r.amount)}</td>
-                      <td>{METHOD_LABEL[r.method]}</td>
+                      <td>
+                        <div className="flex items-center gap-2">
+                          <PaymentMethodIcon method={r.method} size="sm" />
+                          <span>{METHOD_LABEL[r.method]}</span>
+                        </div>
+                      </td>
                       <td className="text-xs text-base-content/60">
                         {r.method === 'bank_transfer'
                           ? `${r.bank_details?.holder ?? ''} · ${r.bank_details?.bank ?? ''}`
