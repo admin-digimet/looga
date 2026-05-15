@@ -150,6 +150,119 @@ export async function updatePayout(
   }))
 }
 
+// ─── Signalements ────────────────────────────────────────────────────────────
+
+export type ReportStatus = 'pending' | 'reviewed' | 'dismissed'
+export type ReportTargetType = 'event' | 'user' | 'organizer'
+
+export interface AdminReport {
+  id: string
+  reporter_id: string
+  reporter_name: string | null
+  target_type: ReportTargetType
+  target_id: string
+  target_label: string | null
+  reason: string
+  status: ReportStatus
+  reviewed_by: string | null
+  reviewed_at: string | null
+  created_at: string
+}
+
+export async function getAdminReports(params: { status?: string; target_type?: ReportTargetType } = {}): Promise<AdminReport[]> {
+  const qs = new URLSearchParams()
+  if (params.status) qs.set('status', params.status)
+  if (params.target_type) qs.set('target_type', params.target_type)
+  return jsonOrThrow(await fetch(`/api/admin/reports?${qs.toString()}`, { cache: 'no-store' }))
+}
+
+export async function updateReport(id: string, status: ReportStatus): Promise<void> {
+  await jsonOrThrow(await fetch(`/api/admin/reports/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
+  }))
+}
+
+// ─── Messages de support ─────────────────────────────────────────────────────
+
+export type SupportStatus = 'pending' | 'responded' | 'closed'
+
+export interface SupportMessage {
+  id: string
+  name: string
+  email: string
+  subject: string
+  message: string
+  user_id: string | null
+  status: SupportStatus
+  admin_note: string | null
+  responded_by: string | null
+  responded_at: string | null
+  created_at: string
+}
+
+export async function getAdminSupport(params: { status?: string; search?: string } = {}): Promise<SupportMessage[]> {
+  const qs = new URLSearchParams()
+  if (params.status) qs.set('status', params.status)
+  if (params.search) qs.set('search', params.search)
+  return jsonOrThrow(await fetch(`/api/admin/support?${qs.toString()}`, { cache: 'no-store' }))
+}
+
+export async function updateSupportMessage(
+  id: string,
+  patch: { status: SupportStatus; admin_note?: string },
+): Promise<void> {
+  await jsonOrThrow(await fetch(`/api/admin/support/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(patch),
+  }))
+}
+
+// ─── Contenu pages statiques ─────────────────────────────────────────────────
+
+export interface PageSection {
+  heading: string
+  body: string
+}
+
+export interface PageContentListItem {
+  key: string
+  label: string
+  title: string | null
+  updated_at: string | null
+  configured: boolean
+}
+
+export interface PageContent {
+  key: string
+  title: string
+  intro: string | null
+  sections: PageSection[]
+  updated_at: string
+  updated_by: string | null
+}
+
+export async function getAdminContent(): Promise<PageContentListItem[]> {
+  return jsonOrThrow(await fetch('/api/admin/content', { cache: 'no-store' }))
+}
+
+export async function getAdminContentByKey(key: string): Promise<PageContent | null> {
+  return jsonOrThrow(await fetch(`/api/admin/content/${key}`, { cache: 'no-store' }))
+}
+
+export async function updateAdminContent(
+  key: string,
+  payload: { title: string; intro: string | null; sections: PageSection[] },
+): Promise<void> {
+  await jsonOrThrow(await fetch(`/api/admin/content/${key}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  }))
+}
+
 // ─── Équipe ──────────────────────────────────────────────────────────────────
 
 export interface TeamMember extends Profile {

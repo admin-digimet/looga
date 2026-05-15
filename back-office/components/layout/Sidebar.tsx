@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Building2, Calendar, ChevronLeft, ChevronRight, LayoutDashboard, LogOut, Shield, Users, Wallet } from 'lucide-react'
+import { Building2, Calendar, ChevronLeft, ChevronRight, FileText, Flag, LayoutDashboard, LogOut, MessageSquare, Shield, Users, Wallet } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 const NAV_ITEMS = [
@@ -11,7 +11,10 @@ const NAV_ITEMS = [
   { href: '/users', label: 'Utilisateurs', icon: Users },
   { href: '/organizers', label: 'Organisateurs', icon: Building2 },
   { href: '/events', label: 'Événements', icon: Calendar },
+  { href: '/reports', label: 'Signalements', icon: Flag },
+  { href: '/support', label: 'Messages', icon: MessageSquare },
   { href: '/payouts', label: 'Payouts', icon: Wallet },
+  { href: '/content', label: 'Contenu', icon: FileText },
   { href: '/team', label: 'Équipe', icon: Shield },
 ]
 
