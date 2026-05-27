@@ -16,9 +16,8 @@ export async function POST(req: Request) {
     }
 
     // Invite via Supabase Auth (envoie le mail d'invitation)
-    const origin = new URL(req.url).origin
     const { data, error } = await adminCtx.admin.auth.admin.inviteUserByEmail(email, {
-      redirectTo: `${origin}/auth/callback`,
+      redirectTo: 'https://backoffice.looga-ci.com/auth/callback',
       data: { name: name ?? email.split('@')[0], role },
     })
     if (error) throw error
