@@ -24,6 +24,18 @@ const CATEGORY_LABELS: Record<string, string> = {
   networking:   'Networking',
   mode:         'Mode',
   famille:      'Famille',
+  humour:       'Humour',
+  religieux:    'Religieux',
+  cinema:       'Cinéma',
+  caritatif:    'Caritatif',
+  enfants:      'Enfants',
+  gaming:       'Gaming',
+  tournee:      'Tournée',
+  salon:        'Salon',
+  theatre:      'Théâtre',
+  bien_etre:    'Bien-être',
+  festival:     'Festival',
+  auto_moto:    'Auto-Moto',
   autre:        'Autre',
 }
 

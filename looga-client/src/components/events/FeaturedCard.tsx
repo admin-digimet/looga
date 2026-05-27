@@ -14,12 +14,30 @@ interface FeaturedCardProps {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  concerts: 'Concert',
-  soirees: 'Soirée',
-  culture: 'Culture',
-  sports: 'Sport',
-  workshops: 'Workshop',
-  tout: 'Événement',
+  concerts:    'Concert',
+  soirees:     'Soirée',
+  culture:     'Culture',
+  sports:      'Sport',
+  workshops:   'Workshop',
+  gastronomie: 'Food',
+  conferences: 'Conférence',
+  networking:  'Networking',
+  mode:        'Lifestyle',
+  famille:     'Famille',
+  humour:      'Humour',
+  religieux:   'Religieux',
+  cinema:      'Cinéma',
+  caritatif:   'Caritatif',
+  enfants:     'Enfants',
+  gaming:      'Gaming',
+  tournee:     'Tournée',
+  salon:       'Salon',
+  theatre:     'Théâtre',
+  bien_etre:   'Bien-être',
+  festival:    'Festival',
+  auto_moto:   'Auto-Moto',
+  autre:       'Événement',
+  tout:        'Événement',
 };
 
 export function FeaturedCard({ event, microTag }: FeaturedCardProps) {

@@ -32,6 +32,19 @@ const CATEGORIES: { key: EventCategory; label: string }[] = [
   { key: 'networking', label: 'Networking' },
   { key: 'mode',       label: 'Lifestyle' },
   { key: 'famille',    label: 'Famille' },
+  { key: 'humour',     label: 'Humour' },
+  { key: 'religieux',  label: 'Religieux' },
+  { key: 'cinema',     label: 'Cinéma' },
+  { key: 'caritatif',  label: 'Caritatif' },
+  { key: 'enfants',    label: 'Enfants' },
+  { key: 'gaming',     label: 'Gaming' },
+  { key: 'tournee',    label: 'Tournée' },
+  { key: 'salon',      label: 'Salon' },
+  { key: 'theatre',    label: 'Théâtre' },
+  { key: 'bien_etre',  label: 'Bien-être' },
+  { key: 'festival',   label: 'Festival' },
+  { key: 'auto_moto',  label: 'Auto-Moto' },
+  { key: 'autre',      label: 'Autre' },
 ];
 
 const QUICK_FILTERS: {

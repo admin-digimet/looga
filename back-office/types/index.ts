@@ -11,6 +11,18 @@ export type EventCategory =
   | 'networking'
   | 'mode'
   | 'famille'
+  | 'humour'
+  | 'religieux'
+  | 'cinema'
+  | 'caritatif'
+  | 'enfants'
+  | 'gaming'
+  | 'tournee'
+  | 'salon'
+  | 'theatre'
+  | 'bien_etre'
+  | 'festival'
+  | 'auto_moto'
   | 'autre'
 
 export interface Profile {
