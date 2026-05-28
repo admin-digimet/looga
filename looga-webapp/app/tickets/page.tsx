@@ -1,35 +1,32 @@
-﻿'use client';
+'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Ticket as TicketIcon } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { TicketCard } from '@/components/tickets/TicketCard';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useTickets } from '@/hooks/useTickets';
-import { formatEventDate, formatPrice } from '@/lib/utils';
-import type { TicketStatus } from '@/types';
+import type { Ticket } from '@/types';
 
-const STATUS_STYLE: Record<TicketStatus, string> = {
-  pending: 'bg-orange-100 text-orange-700',
-  valid: 'bg-green-100 text-green-700',
-  used: 'bg-gray-100 text-gray-500',
-  expired: 'bg-red-100 text-red-600',
-  cancelled: 'bg-gray-100 text-gray-400',
-};
+type Tab = 'upcoming' | 'past';
 
-const STATUS_LABEL: Record<TicketStatus, string> = {
-  pending: 'En attente',
-  valid: '✓ Valide',
-  used: 'Utilisé',
-  expired: 'Expiré',
-  cancelled: 'Annulé',
-};
+function isUpcoming(ticket: Ticket): boolean {
+  if (!ticket.eventDate) return true; // pas de date connue → on suppose à venir
+  const eventTs = new Date(ticket.eventDate).getTime();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return eventTs >= today.getTime();
+}
 
 export default function TicketsPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuthStore();
   const router = useRouter();
   const { data: tickets, isLoading: ticketsLoading } = useTickets();
+
+  const [tab, setTab] = useState<Tab>('upcoming');
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -37,101 +34,113 @@ export default function TicketsPage() {
     }
   }, [isAuthenticated, authLoading, router]);
 
+  const { upcoming, past } = useMemo(() => {
+    const list = tickets ?? [];
+    const u: Ticket[] = [];
+    const p: Ticket[] = [];
+    for (const t of list) {
+      if (isUpcoming(t)) u.push(t);
+      else p.push(t);
+    }
+    // Tri : à venir = plus proche en premier, passés = plus récent en premier
+    u.sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime());
+    p.sort((a, b) => new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime());
+    return { upcoming: u, past: p };
+  }, [tickets]);
+
+  const visible = tab === 'upcoming' ? upcoming : past;
+
   if (authLoading || (!isAuthenticated && !authLoading)) return null;
 
   return (
-    <div className="min-h-screen bg-white font-sans">
+    <div className="min-h-screen bg-cream flex flex-col">
       <Navbar />
-      <main className="max-w-[900px] mx-auto px-4 md:px-8 py-12">
-        <h1 className="text-3xl font-extrabold text-gray-900 mb-8">Mes Billets</h1>
+      <main className="flex-1 max-w-[820px] w-full mx-auto px-4 md:px-8 py-10">
+        <h1 className="font-heading text-3xl md:text-4xl font-extrabold text-ink mb-2">Mes billets</h1>
+        <p className="text-sm text-ink-muted mb-8">
+          Présente ton QR à l&apos;entrée. Tu peux l&apos;agrandir d&apos;un clic.
+        </p>
 
+        {/* Tabs */}
+        {!ticketsLoading && (upcoming.length > 0 || past.length > 0) && (
+          <div className="flex items-center gap-1 mb-6 border-b border-black/10">
+            <button
+              type="button"
+              onClick={() => setTab('upcoming')}
+              className={`relative px-4 py-3 text-sm font-semibold transition-colors ${
+                tab === 'upcoming' ? 'text-orange' : 'text-ink-muted hover:text-ink'
+              }`}
+            >
+              À venir
+              {upcoming.length > 0 && (
+                <span className="ml-1.5 inline-flex items-center justify-center text-[11px] px-1.5 py-0.5 rounded-full bg-orange/15 text-orange font-bold">
+                  {upcoming.length}
+                </span>
+              )}
+              {tab === 'upcoming' && <span className="absolute left-2 right-2 -bottom-px h-0.5 bg-orange rounded-full" />}
+            </button>
+            <button
+              type="button"
+              onClick={() => setTab('past')}
+              className={`relative px-4 py-3 text-sm font-semibold transition-colors ${
+                tab === 'past' ? 'text-orange' : 'text-ink-muted hover:text-ink'
+              }`}
+            >
+              Passés
+              {past.length > 0 && (
+                <span className="ml-1.5 inline-flex items-center justify-center text-[11px] px-1.5 py-0.5 rounded-full bg-black/8 text-ink-muted font-bold">
+                  {past.length}
+                </span>
+              )}
+              {tab === 'past' && <span className="absolute left-2 right-2 -bottom-px h-0.5 bg-orange rounded-full" />}
+            </button>
+          </div>
+        )}
+
+        {/* Content */}
         {ticketsLoading ? (
-          <div className="space-y-4">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="animate-pulse bg-gray-100 rounded-2xl h-40" />
+          <div className="space-y-6">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div key={i} className="animate-pulse bg-white/60 rounded-2xl h-[360px] sm:h-[260px]" />
             ))}
           </div>
-        ) : !tickets?.length ? (
-          <div className="text-center py-24">
-            <p className="text-5xl mb-4">🎫</p>
-            <p className="text-gray-500 text-lg mb-2">Aucun billet pour le moment</p>
-            <p className="text-gray-400 text-sm mb-8">Découvrez les événements et réservez votre place !</p>
-            <Link
-              href="/"
-              className="bg-orange text-white font-bold px-8 py-3 rounded-lg hover:opacity-90 transition-colors"
-            >
-              Explorer les événements
-            </Link>
-          </div>
+        ) : visible.length === 0 ? (
+          tab === 'upcoming' && past.length === 0 ? (
+            <EmptyState />
+          ) : (
+            <div className="text-center py-16 text-ink-muted text-sm">
+              {tab === 'upcoming' ? 'Aucun billet à venir.' : 'Aucun billet passé.'}
+            </div>
+          )
         ) : (
-          <div className="space-y-6">
-            {tickets.map((ticket) => (
-              <div
-                key={ticket.id}
-                className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm"
-              >
-                {/* Top */}
-                <div className="flex gap-4 p-5">
-                  {ticket.eventImage ? (
-                    <img
-                      src={ticket.eventImage}
-                      alt={ticket.eventName}
-                      className="w-16 h-16 rounded-xl object-cover shrink-0"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 rounded-xl bg-orange/15 flex items-center justify-center text-2xl shrink-0">
-                      🎉
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-gray-900 text-lg truncate">{ticket.eventName}</h3>
-                    <p className="text-sm text-orange font-semibold">
-                      {formatEventDate(ticket.eventDate, ticket.eventTime)}
-                    </p>
-                    <p className="text-sm text-gray-500">{ticket.eventLocation}</p>
-                  </div>
-                  <span className={`self-start text-xs font-bold px-3 py-1 rounded-full shrink-0 ${STATUS_STYLE[ticket.status]}`}>
-                    {STATUS_LABEL[ticket.status]}
-                  </span>
-                </div>
-
-                {/* Divider with holes */}
-                <div className="relative border-t border-dashed border-gray-200 mx-5" />
-
-                {/* Bottom — QR + details */}
-                <div className="p-5 flex flex-col sm:flex-row items-center gap-6">
-                  <div className="bg-white border-2 border-gray-100 rounded-xl p-3">
-                    <div className="w-28 h-28 bg-gray-100 rounded-lg flex items-center justify-center">
-                      <code className="text-xs text-gray-500 break-all text-center px-2">
-                        {ticket.qrCode || ticket.ticketNumber}
-                      </code>
-                    </div>
-                  </div>
-                  <div className="space-y-2 text-sm flex-1">
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Type</span>
-                      <span className="font-semibold text-gray-900">{ticket.ticketTypeName}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Quantité</span>
-                      <span className="font-semibold text-gray-900">{ticket.quantity}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Total</span>
-                      <span className="font-semibold text-orange">{formatPrice(ticket.totalPrice)}</span>
-                    </div>
-                    <div className="flex justify-between pt-2 border-t border-gray-100">
-                      <span className="text-gray-400 text-xs">N° billet</span>
-                      <span className="font-mono text-xs text-gray-500">{ticket.ticketNumber}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+          <div className="space-y-5">
+            {visible.map((t) => (
+              <TicketCard key={t.id} ticket={t} />
             ))}
           </div>
         )}
       </main>
       <Footer />
+    </div>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div className="text-center py-20">
+      <div className="w-16 h-16 rounded-2xl bg-orange/10 mx-auto flex items-center justify-center mb-5">
+        <TicketIcon className="w-8 h-8 text-orange" />
+      </div>
+      <h2 className="font-heading text-xl font-extrabold text-ink mb-2">Aucun billet pour le moment</h2>
+      <p className="text-sm text-ink-muted mb-8">
+        Découvre les événements à Abidjan et réserve ta place en quelques clics.
+      </p>
+      <Link
+        href="/"
+        className="inline-block bg-orange text-white font-bold px-7 py-3 rounded-xl hover:opacity-90 transition-colors"
+      >
+        Explorer les événements
+      </Link>
     </div>
   );
 }
