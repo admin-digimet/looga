@@ -56,9 +56,9 @@ export interface InitFreeTicketResult {
 }
 
 interface RawFreeTicketRpcRow {
-  ticket_id: string;
-  ticket_number: string;
-  qr_code: string;
+  out_ticket_id?: string;
+  out_ticket_number?: string;
+  out_qr_code?: string;
 }
 
 export async function initFreeTicket(payload: InitPaymentPayload): Promise<InitFreeTicketResult> {
@@ -82,14 +82,14 @@ export async function initFreeTicket(payload: InitPaymentPayload): Promise<InitF
   );
 
   const row = Array.isArray(data) ? data[0] : data;
-  if (!row?.ticket_id) {
+  if (!row?.out_ticket_id) {
     throw new Error('Réponse de création de ticket gratuit invalide');
   }
 
   return {
-    ticketId: row.ticket_id,
-    ticketNumber: row.ticket_number,
-    qrCode: row.qr_code,
+    ticketId: row.out_ticket_id,
+    ticketNumber: row.out_ticket_number ?? '',
+    qrCode: row.out_qr_code ?? '',
   };
 }
 
