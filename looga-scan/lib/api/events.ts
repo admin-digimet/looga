@@ -12,11 +12,11 @@ export interface TicketForCache {
 
 export const eventsApi = {
   getAll: async (): Promise<ScanEvent[]> => {
-    console.log('[EVENTS] fetching assigned events...')
+    if (__DEV__) console.log('[EVENTS] fetching assigned events...')
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      console.log('[EVENTS] not authenticated:', authError?.message)
+      if (__DEV__) console.log('[EVENTS] not authenticated:', authError?.message)
       throw new Error('Non authentifié')
     }
 
@@ -28,11 +28,11 @@ export const eventsApi = {
       .single()
 
     if (staffError || !staff) {
-      console.log('[EVENTS] staff_accounts not found:', staffError?.message)
+      if (__DEV__) console.log('[EVENTS] staff_accounts not found:', staffError?.message)
       throw new Error('Compte scanner introuvable')
     }
 
-    console.log('[EVENTS] staff_id:', staff.id)
+    if (__DEV__) console.log('[EVENTS] staff_id:', staff.id)
 
     // Récupérer les événements assignés à ce scanner
     const { data, error } = await supabase
@@ -51,11 +51,11 @@ export const eventsApi = {
       .eq('staff_id', staff.id)
 
     if (error) {
-      console.log('[EVENTS] query error:', error.message)
+      if (__DEV__) console.log('[EVENTS] query error:', error.message)
       throw error
     }
 
-    console.log('[EVENTS] assignments found:', data?.length ?? 0)
+    if (__DEV__) console.log('[EVENTS] assignments found:', data?.length ?? 0)
 
     const events: ScanEvent[] = (data ?? [])
       .map((a) => a.events as any)

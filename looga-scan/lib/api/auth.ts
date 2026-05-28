@@ -3,16 +3,16 @@ import type { AuthResponse } from '@/types/user'
 
 export const authApi = {
   login: async (email: string, password: string): Promise<AuthResponse> => {
-    console.log('[AUTH] login attempt:', email)
+    if (__DEV__) console.log('[AUTH] login attempt:', email)
 
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
-      console.log('[AUTH] signInWithPassword error:', error.message, error.status)
+      if (__DEV__) console.log('[AUTH] signInWithPassword error:', error.message, error.status)
       throw error
     }
 
-    console.log('[AUTH] auth OK, checking staff_accounts for user:', data.user.id)
+    if (__DEV__) console.log('[AUTH] auth OK, checking staff_accounts for user:', data.user.id)
 
     // Vérifier que ce compte est bien un scanner créé par un organisateur
     const { data: staff, error: staffError } = await supabase
@@ -22,18 +22,18 @@ export const authApi = {
       .single()
 
     if (staffError || !staff) {
-      console.log('[AUTH] staff_accounts not found:', staffError?.message)
+      if (__DEV__) console.log('[AUTH] staff_accounts not found:', staffError?.message)
       await supabase.auth.signOut()
       throw new Error('Compte scanner introuvable. Contacte ton organisateur.')
     }
 
     if (!staff.is_active) {
-      console.log('[AUTH] staff account disabled')
+      if (__DEV__) console.log('[AUTH] staff account disabled')
       await supabase.auth.signOut()
       throw new Error('Ce compte scanner est désactivé.')
     }
 
-    console.log('[AUTH] staff OK:', staff.name)
+    if (__DEV__) console.log('[AUTH] staff OK:', staff.name)
 
     return {
       token: data.session.access_token,

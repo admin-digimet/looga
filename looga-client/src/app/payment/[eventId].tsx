@@ -88,7 +88,7 @@ export default function PaymentScreen() {
         }
       } else {
         const msg = (error as Error).message ?? 'Une erreur est survenue.';
-        console.error('[PAYMENT] erreur non-Axios:', msg);
+        if (__DEV__) console.error('[PAYMENT] erreur non-Axios:', msg);
         setPaymentError(msg);
       }
     },

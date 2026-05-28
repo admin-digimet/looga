@@ -29,24 +29,12 @@ apiClient.interceptors.request.use(async (config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  console.log(`[API] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`, {
-    hasToken: !!token,
-    tokenPreview: token ? token.slice(0, 20) + '...' : null,
-  });
   return config;
 });
 
 apiClient.interceptors.response.use(
-  (response) => {
-    console.log(`[API] ✅ ${response.status} ${response.config.url}`, response.data);
-    return response;
-  },
+  (response) => response,
   async (error) => {
-    console.log(`[API] ❌ ${error.response?.status ?? 'NO_RESPONSE'} ${error.config?.url}`, {
-      message: error.message,
-      data: error.response?.data,
-      code: error.code,
-    });
     if (error.response?.status === 401) {
       await useAuthStore.getState().logout();
       router.replace('/(auth)/login');

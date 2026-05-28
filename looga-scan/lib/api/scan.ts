@@ -4,10 +4,10 @@ import type { OfflineScanRecord } from '@/lib/offline/queue'
 
 export const scanApi = {
   verify: async (qrCode: string, eventId: string, scannerName?: string): Promise<ScanResult> => {
-    console.log('[SCAN] verify qr:', qrCode, 'event:', eventId)
+    if (__DEV__) console.log('[SCAN] verify qr:', qrCode, 'event:', eventId)
 
     const { data: { user } } = await supabase.auth.getUser()
-    console.log('[SCAN] auth user:', user?.id)
+    if (__DEV__) console.log('[SCAN] auth user:', user?.id)
 
     // Trouver le billet par QR code + événement
     const { data: ticket, error: ticketError } = await supabase
@@ -18,16 +18,18 @@ export const scanApi = {
       .single()
 
     if (ticketError || !ticket) {
-      console.log('[SCAN] ticket not found:', ticketError?.message, 'code:', ticketError?.code)
-      // Debug: check if tickets exist for event at all (ignoring qr_code filter)
-      const { data: debugTickets, error: debugErr } = await supabase
-        .from('tickets')
-        .select('id, qr_code, ticket_number, status')
-        .eq('event_id', eventId)
-        .limit(5)
-      console.log('[SCAN] debug - tickets in event:', debugTickets?.length ?? 0, debugErr?.message)
-      if (debugTickets && debugTickets.length > 0) {
-        console.log('[SCAN] debug - sample qr_codes:', debugTickets.map(t => t.qr_code))
+      if (__DEV__) {
+        console.log('[SCAN] ticket not found:', ticketError?.message, 'code:', ticketError?.code)
+        // Debug: check if tickets exist for event at all (ignoring qr_code filter)
+        const { data: debugTickets, error: debugErr } = await supabase
+          .from('tickets')
+          .select('id, qr_code, ticket_number, status')
+          .eq('event_id', eventId)
+          .limit(5)
+        console.log('[SCAN] debug - tickets in event:', debugTickets?.length ?? 0, debugErr?.message)
+        if (debugTickets && debugTickets.length > 0) {
+          console.log('[SCAN] debug - sample qr_codes:', debugTickets.map(t => t.qr_code))
+        }
       }
 
       // Insérer un scan invalide pour traçabilité
@@ -38,7 +40,7 @@ export const scanApi = {
         scanner_name: scannerName ?? 'Scanner',
         scanned_at: new Date().toISOString(),
       })
-      if (insertErr) console.log('[SCAN] insert scan error:', insertErr.message)
+      if (__DEV__ && insertErr) console.log('[SCAN] insert scan error:', insertErr.message)
       return { status: 'invalid' }
     }
 
@@ -63,7 +65,7 @@ export const scanApi = {
         scanner_name: scannerName ?? 'Scanner',
         scanned_at: new Date().toISOString(),
       })
-      if (insertUsedErr) console.log('[SCAN] insert already_used error:', insertUsedErr.message)
+      if (__DEV__ && insertUsedErr) console.log('[SCAN] insert already_used error:', insertUsedErr.message)
 
       return {
         status: 'already_used',
@@ -90,7 +92,7 @@ export const scanApi = {
       scanner_name: scannerName ?? 'Scanner',
       scanned_at: new Date().toISOString(),
     })
-    if (insertValidErr) console.log('[SCAN] insert valid scan error:', insertValidErr.message)
+    if (__DEV__ && insertValidErr) console.log('[SCAN] insert valid scan error:', insertValidErr.message)
 
     return {
       status: 'valid',
@@ -180,6 +182,6 @@ export const scanApi = {
       })
     )
     const { error } = await supabase.from('ticket_scans').insert(rows)
-    if (error) console.log('[SYNC] error:', error.message)
+    if (__DEV__ && error) console.log('[SYNC] error:', error.message)
   },
 }

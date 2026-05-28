@@ -10,12 +10,12 @@ export function useLogin(redirectTo?: string) {
   return useMutation({
     mutationFn: authApi.login,
     onSuccess: async ({ token, user, refresh_token }) => {
-      console.log('[Auth] Login OK →', user.email ?? user.phone);
+      if (__DEV__) console.log('[Auth] Login OK →', user.email ?? user.phone);
       await login(token, user, refresh_token);
       router.replace((redirectTo ?? '/(tabs)') as any);
     },
     onError: (error) => {
-      console.warn('[Auth] Login échoué →', error.message);
+      if (__DEV__) console.warn('[Auth] Login échoué →', error.message);
     },
   });
 }
@@ -26,12 +26,12 @@ export function useRegister(redirectTo?: string) {
   return useMutation({
     mutationFn: authApi.register,
     onSuccess: async ({ token, user, refresh_token }) => {
-      console.log('[Auth] Register OK →', user.email ?? user.phone);
+      if (__DEV__) console.log('[Auth] Register OK →', user.email ?? user.phone);
       await login(token, user, refresh_token);
       router.replace((redirectTo ?? '/(tabs)') as any);
     },
     onError: (error) => {
-      console.warn('[Auth] Register échoué →', error.message);
+      if (__DEV__) console.warn('[Auth] Register échoué →', error.message);
     },
   });
 }
@@ -42,7 +42,6 @@ export function useLogout() {
   return useMutation({
     mutationFn: authApi.logout,
     onSettled: async () => {
-      console.log('[Auth] Logout → /(tabs)');
       await logout();
       router.replace('/(tabs)');
     },

@@ -27,7 +27,7 @@ function createStorage(): Storage {
     return new MMKV({ id: 'looga-scan-storage' });
   } catch {
     // Fallback pour Expo Go (module natif non disponible)
-    console.warn('[MMKV] Module natif non disponible — fallback mémoire (Expo Go)');
+    if (__DEV__) console.warn('[MMKV] Module natif non disponible — fallback mémoire (Expo Go)');
     return createMemoryStorage();
   }
 }

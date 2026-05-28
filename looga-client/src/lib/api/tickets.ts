@@ -32,7 +32,6 @@ export async function purchaseTicket(payload: PurchasePayload): Promise<Ticket> 
 async function simulatePurchase(payload: PurchasePayload): Promise<Ticket> {
   // Injecter le token Supabase pour que RLS fonctionne
   const { token, refreshToken } = useAuthStore.getState();
-  console.log('[SIMULATE] token exists:', !!token, 'refreshToken exists:', !!refreshToken);
   if (!token) throw new Error('Non authentifié');
 
   await supabase.auth.setSession({
@@ -41,7 +40,6 @@ async function simulatePurchase(payload: PurchasePayload): Promise<Ticket> {
   });
 
   const { data: { user } } = await supabase.auth.getUser();
-  console.log('[SIMULATE] supabase user:', user?.id ?? 'null');
   if (!user) throw new Error('Session invalide');
 
   // Récupérer le prix unitaire du type de billet
@@ -76,12 +74,11 @@ async function simulatePurchase(payload: PurchasePayload): Promise<Ticket> {
     .single();
 
   if (error) {
-    console.error('[SIMULATE] Supabase insert error:', error.message, error.code, error.details);
+    if (__DEV__) console.error('[SIMULATE] Supabase insert error:', error.message, error.code);
     throw new Error(error.message);
   }
 
   const d = data as any;
-  console.log('[SIMULATE] event join:', JSON.stringify(d.events));
   return {
     id: d.id,
     ticketNumber: d.ticket_number,

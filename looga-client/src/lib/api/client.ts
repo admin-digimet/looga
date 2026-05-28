@@ -105,7 +105,7 @@ apiClient.interceptors.response.use(
       } catch (refreshError) {
         // Refresh échoué → déconnexion (token expiré et non renouvelable)
         processQueue(refreshError, null);
-        console.warn('[API] Refresh échoué — déconnexion');
+        if (__DEV__) console.warn('[API] Refresh échoué — déconnexion');
         await useAuthStore.getState().logout();
         router.replace('/(tabs)');
         return Promise.reject(refreshError);
@@ -114,9 +114,9 @@ apiClient.interceptors.response.use(
       }
     }
 
-    if (status >= 500) {
+    if (__DEV__ && status >= 500) {
       console.error('[API] Erreur serveur', status, url);
-    } else if (!error.response) {
+    } else if (__DEV__ && !error.response) {
       console.error('[API] Erreur réseau', error.message, url);
     }
 
