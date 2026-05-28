@@ -31,7 +31,6 @@ export default function FavoritesScreen() {
         data={savedEvents}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        estimatedItemSize={280}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={

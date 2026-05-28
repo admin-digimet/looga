@@ -126,12 +126,6 @@ export default function AccountScreen() {
             label="Support"
             onPress={() => Linking.openURL('mailto:support@looga.ci')}
           />
-          <View style={styles.divider} />
-          <MenuItem
-            Icon={Info}
-            label="À propos de Looga"
-            onPress={() => router.push('/about')}
-          />
         </View>
 
         {/* ── DÉCONNEXION ── */}

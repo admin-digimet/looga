@@ -8,12 +8,30 @@ import type { EventCategory } from '@/types/event';
 const CATEGORIES: EventCategory[] = ['tout', 'concerts', 'soirees', 'culture', 'sports', 'workshops'];
 
 const LABELS: Record<EventCategory, string> = {
-  tout: 'Tout',
-  concerts: 'Concerts',
-  soirees: 'Soirées',
-  culture: 'Culture',
-  sports: 'Sports',
-  workshops: 'Workshops',
+  tout:        'Tout',
+  concerts:    'Concerts',
+  soirees:     'Soirées',
+  culture:     'Culture',
+  sports:      'Sports',
+  workshops:   'Workshops',
+  gastronomie: 'Food',
+  conferences: 'Conférences',
+  networking:  'Networking',
+  mode:        'Lifestyle',
+  famille:     'Famille',
+  humour:      'Humour',
+  religieux:   'Religieux',
+  cinema:      'Cinéma',
+  caritatif:   'Caritatif',
+  enfants:     'Enfants',
+  gaming:      'Gaming',
+  tournee:     'Tournée',
+  salon:       'Salon',
+  theatre:     'Théâtre',
+  bien_etre:   'Bien-être',
+  festival:    'Festival',
+  auto_moto:   'Auto-Moto',
+  autre:       'Autre',
 };
 
 interface CategoryTabsProps {

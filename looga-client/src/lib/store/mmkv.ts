@@ -1,6 +1,11 @@
-import type { MMKVInterface } from 'react-native-mmkv';
+interface MMKVLike {
+  set: (key: string, value: string) => void;
+  getString: (key: string) => string | undefined;
+  delete: (key: string) => void;
+  contains: (key: string) => boolean;
+}
 
-let storage: MMKVInterface;
+let storage: MMKVLike;
 
 try {
   const { MMKV } = require('react-native-mmkv');
@@ -13,7 +18,7 @@ try {
     getString: (key: string) => _store[key],
     delete: (key: string) => { delete _store[key]; },
     contains: (key: string) => key in _store,
-  } as unknown as MMKVInterface;
+  };
 }
 
 export { storage };

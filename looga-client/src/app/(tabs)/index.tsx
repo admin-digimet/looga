@@ -292,7 +292,6 @@ export default function HomeScreen() {
         data={feedEvents}
         keyExtractor={(item) => item.id}
         renderItem={renderFeedItem}
-        estimatedItemSize={114}
         ListHeaderComponent={listHeader}
         ListFooterComponent={listFooter}
         onEndReached={handleEndReached}

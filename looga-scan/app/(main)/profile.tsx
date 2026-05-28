@@ -29,10 +29,15 @@ import { storage } from '@/lib/store/mmkv';
 import { useScanStore } from '@/lib/store/scanStore';
 
 const SOUND_ENABLED_KEY = 'sound_enabled';
+const SCANNER_NAME_KEY = 'scanner_name';
 
 function readSoundEnabled(): boolean {
   const val = storage.getString(SOUND_ENABLED_KEY);
   return val !== 'false'; // par défaut activé
+}
+
+function readScannerName(): string {
+  return storage.getString(SCANNER_NAME_KEY) ?? 'Scanner';
 }
 
 export default function SettingsScreen() {
@@ -41,6 +46,7 @@ export default function SettingsScreen() {
   const logoutMutation = useLogout();
 
   const [soundEnabled, setSoundEnabled] = useState(readSoundEnabled);
+  const [scannerName] = useState(readScannerName);
   const [refreshing, setRefreshing] = useState(false);
 
   const handleRefresh = useCallback(async () => {

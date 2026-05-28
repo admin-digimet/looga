@@ -227,7 +227,6 @@ export default function ExploreScreen() {
           onEndReachedThreshold={0.5}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listContent}
-          estimatedItemSize={280}
         />
       )}
     </SafeAreaView>

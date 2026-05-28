@@ -68,7 +68,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   iconWrap: {
-    lineHeight: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   label: {
     fontFamily: Fonts.bodySemiBold,
