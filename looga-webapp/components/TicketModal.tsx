@@ -1,13 +1,12 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { X, ChevronRight, Minus, Plus, CheckCircle } from 'lucide-react';
+import { X, ChevronRight, Minus, Plus, Loader2 } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
-import { usePurchase } from '@/hooks/usePurchase';
+import { useInitPayment, useInitFreeTicket } from '@/hooks/usePurchase';
 import { formatPrice } from '@/lib/utils';
-import { PaymentMethodIcon } from '@/components/PaymentMethodIcon';
-import type { Event, TicketType, PaymentMethod } from '@/types';
+import type { Event, TicketType } from '@/types';
 import type { AxiosError } from 'axios';
 
 interface Props {
@@ -15,21 +14,13 @@ interface Props {
   onClose: () => void;
 }
 
-const PAYMENT_METHODS: { id: PaymentMethod; label: string }[] = [
-  { id: 'mtn_momo',      label: 'MTN MoMo' },
-  { id: 'orange_money',  label: 'Orange Money' },
-  { id: 'wave',          label: 'Wave' },
-  { id: 'card',          label: 'Carte bancaire' },
-];
-
-const MOBILE_MONEY_IDS: PaymentMethod[] = ['mtn_momo', 'orange_money', 'wave'];
-
-type Step = 'select' | 'payment' | 'success';
+type Step = 'select' | 'redirecting';
 
 export function TicketModal({ event, onClose }: Props) {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
-  const purchaseMutation = usePurchase();
+  const initPaymentMutation = useInitPayment();
+  const initFreeTicketMutation = useInitFreeTicket();
 
   const availableTypes = event.ticketTypes.filter((t) => !t.soldOut);
 
@@ -38,48 +29,64 @@ export function TicketModal({ event, onClose }: Props) {
     availableTypes[0] ?? null
   );
   const [quantity, setQuantity] = useState(1);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('mtn_momo');
-  const [phoneNumber, setPhoneNumber] = useState('');
 
   const total = selectedType ? selectedType.price * quantity : 0;
-  const serviceFee = Math.round(total * 0.05);
+  const serviceFee = total > 0 ? Math.round(total * 0.05) : 0;
   const grandTotal = total + serviceFee;
+  const isFree = total === 0;
 
-  const getErrorMessage = (error: unknown): string => {
-    const e = error as AxiosError<any>;
+  const isPending = initPaymentMutation.isPending || initFreeTicketMutation.isPending;
+  const error = initPaymentMutation.error ?? initFreeTicketMutation.error;
+
+  const getErrorMessage = (err: unknown): string => {
+    const e = err as AxiosError<{ message?: string; error?: { message?: string } }>;
     const status = e?.response?.status;
+    if (status === 401) return 'Session expirée. Reconnecte-toi puis réessaie.';
     if (status === 422) {
-      const errors = e.response?.data?.errors;
-      if (errors) return Object.values(errors).flat().join(' ');
       return e.response?.data?.message ?? 'Données invalides.';
     }
-    if (!e?.response) return 'Impossible de se connecter. Vérifiez votre connexion internet.';
-    return 'Une erreur est survenue. Veuillez réessayer.';
+    if (status === 409) return 'Stock épuisé pour ce billet.';
+    if (e?.response?.data?.error?.message) return e.response.data.error.message;
+    if (e?.response?.data?.message) return e.response.data.message;
+    if (!e?.response) return 'Impossible de se connecter. Vérifie ta connexion internet.';
+    return 'Une erreur est survenue. Réessaie.';
   };
 
-  const handleConfirm = () => {
+  const handleContinue = async () => {
     if (!isAuthenticated) {
       router.push(`/auth/login?redirect=/events/${event.id}`);
       return;
     }
     if (!selectedType) return;
 
-    purchaseMutation.mutate(
-      {
-        eventId: event.id,
-        ticketTypeId: selectedType.id,
-        quantity,
-        paymentMethod,
-        phoneNumber: MOBILE_MONEY_IDS.includes(paymentMethod) ? phoneNumber : undefined,
-      },
-      {
-        onSuccess: () => setStep('success'),
-      }
-    );
+    setStep('redirecting');
+
+    const payload = {
+      eventId: event.id,
+      ticketTypeId: selectedType.id,
+      quantity,
+    };
+
+    if (isFree) {
+      initFreeTicketMutation.mutate(payload, {
+        onSuccess: () => {
+          onClose();
+          router.push('/tickets');
+        },
+        onError: () => setStep('select'),
+      });
+    } else {
+      initPaymentMutation.mutate(payload, {
+        onSuccess: ({ checkoutUrl, reference }) => {
+          if (reference) sessionStorage.setItem('looga_last_payment_ref', reference);
+          window.location.href = checkoutUrl;
+        },
+        onError: () => setStep('select'),
+      });
+    }
   };
 
   return (
-    // Overlay
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 px-0 sm:px-4"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
@@ -88,12 +95,11 @@ export function TicketModal({ event, onClose }: Props) {
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
-          <h2 className="font-extrabold text-gray-900 text-lg">
-            {step === 'success' ? 'Réservation confirmée 🎉' : 'Obtenir des billets'}
-          </h2>
+          <h2 className="font-extrabold text-gray-900 text-lg">Obtenir des billets</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            disabled={isPending}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50"
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>
@@ -101,29 +107,18 @@ export function TicketModal({ event, onClose }: Props) {
 
         <div className="overflow-y-auto flex-1">
 
-          {/* ========= STEP: SUCCESS ========= */}
-          {step === 'success' && (
-            <div className="flex flex-col items-center text-center px-6 py-12">
-              <CheckCircle className="w-20 h-20 text-green-500 mb-6" />
-              <h3 className="text-2xl font-extrabold text-gray-900 mb-2">Paiement confirmé !</h3>
-              <p className="text-gray-500 mb-2">
-                Votre billet pour <strong>{event.name}</strong> a bien été enregistré.
+          {/* ========= STEP: REDIRECTING ========= */}
+          {step === 'redirecting' && (
+            <div className="flex flex-col items-center text-center px-6 py-16">
+              <Loader2 className="w-12 h-12 text-orange animate-spin mb-6" />
+              <h3 className="text-lg font-bold text-gray-900 mb-2">
+                {isFree ? 'Création du billet…' : 'Préparation du paiement…'}
+              </h3>
+              <p className="text-sm text-gray-500">
+                {isFree
+                  ? 'Ton billet est en cours de génération.'
+                  : 'Tu vas être redirigé vers la page de paiement sécurisée.'}
               </p>
-              <p className="text-sm text-gray-400 mb-8">
-                Vous pouvez retrouver votre QR code dans la section Mes Billets.
-              </p>
-              <button
-                onClick={() => { onClose(); router.push('/tickets'); }}
-                className="w-full bg-orange text-white font-bold py-3.5 rounded-xl hover:opacity-90 transition-colors mb-3"
-              >
-                Voir mes billets
-              </button>
-              <button
-                onClick={onClose}
-                className="w-full border border-gray-300 text-gray-700 font-semibold py-3.5 rounded-xl hover:bg-gray-50 transition-colors"
-              >
-                Continuer à explorer
-              </button>
             </div>
           )}
 
@@ -133,6 +128,7 @@ export function TicketModal({ event, onClose }: Props) {
               {/* Event recap */}
               <div className="flex gap-3 items-center bg-gray-50 rounded-xl p-4">
                 {event.image && (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img src={event.image} alt={event.name} className="w-14 h-14 rounded-xl object-cover shrink-0" />
                 )}
                 <div className="min-w-0">
@@ -146,7 +142,7 @@ export function TicketModal({ event, onClose }: Props) {
                 <p className="text-center text-gray-500 py-6">Tous les billets sont épuisés.</p>
               ) : (
                 <div>
-                  <p className="text-sm font-bold text-gray-700 mb-3">Choisissez votre billet</p>
+                  <p className="text-sm font-bold text-gray-700 mb-3">Choisis ton billet</p>
                   <div className="space-y-2">
                     {event.ticketTypes.map((tt) => (
                       <button
@@ -175,7 +171,7 @@ export function TicketModal({ event, onClose }: Props) {
                             <span className="text-sm font-bold text-gray-400">Complet</span>
                           ) : (
                             <span className="text-base font-extrabold text-orange">
-                              {formatPrice(tt.price)}
+                              {tt.price === 0 ? 'Gratuit' : formatPrice(tt.price)}
                             </span>
                           )}
                           {!tt.soldOut && selectedType?.id === tt.id && (
@@ -213,114 +209,57 @@ export function TicketModal({ event, onClose }: Props) {
                   </div>
                 </div>
               )}
-            </div>
-          )}
 
-          {/* ========= STEP: PAYMENT ========= */}
-          {step === 'payment' && (
-            <div className="px-6 py-5 space-y-6">
-              {/* Recap */}
-              <div className="bg-gray-50 rounded-xl p-4 space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-500">{selectedType?.name} × {quantity}</span>
-                  <span className="font-semibold text-gray-900">{formatPrice(total)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Frais de service (5%)</span>
-                  <span className="font-semibold text-gray-900">{formatPrice(serviceFee)}</span>
-                </div>
-                <div className="flex justify-between border-t border-gray-200 pt-2 mt-2">
-                  <span className="font-bold text-gray-900">Total</span>
-                  <span className="font-extrabold text-orange text-base">{formatPrice(grandTotal)}</span>
-                </div>
-              </div>
-
-              {/* Payment methods */}
-              <div>
-                <p className="text-sm font-bold text-gray-700 mb-3">Mode de paiement</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {PAYMENT_METHODS.map((pm) => (
-                    <button
-                      key={pm.id}
-                      onClick={() => setPaymentMethod(pm.id)}
-                      className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${
-                        paymentMethod === pm.id
-                          ? 'border-orange bg-orange/10'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <PaymentMethodIcon method={pm.id} size="md" />
-                      <span className="text-xs font-semibold text-gray-700 text-center">{pm.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Phone number for mobile money */}
-              {MOBILE_MONEY_IDS.includes(paymentMethod) && (
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Numéro de téléphone
-                  </label>
-                  <input
-                    type="tel"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    placeholder="+225 07 00 00 00 00"
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange focus:ring-1 focus:ring-orange transition"
-                  />
+              {/* Recap (seulement si payant) */}
+              {selectedType && !isFree && (
+                <div className="bg-gray-50 rounded-xl p-4 space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">{selectedType.name} × {quantity}</span>
+                    <span className="font-semibold text-gray-900">{formatPrice(total)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Frais de service (5%)</span>
+                    <span className="font-semibold text-gray-900">{formatPrice(serviceFee)}</span>
+                  </div>
+                  <div className="flex justify-between border-t border-gray-200 pt-2 mt-2">
+                    <span className="font-bold text-gray-900">Total</span>
+                    <span className="font-extrabold text-orange text-base">{formatPrice(grandTotal)}</span>
+                  </div>
                 </div>
               )}
 
               {/* Auth warning */}
               {!isAuthenticated && (
                 <div className="bg-orange/10 border border-orange/30 rounded-xl p-4 text-sm text-orange-700">
-                  Vous devez être connecté pour finaliser l&apos;achat.
+                  Tu dois être connecté pour finaliser l&apos;achat.
                 </div>
               )}
 
               {/* Error */}
-              {purchaseMutation.isError && (
+              {error && (
                 <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700">
-                  {getErrorMessage(purchaseMutation.error)}
+                  {getErrorMessage(error)}
                 </div>
               )}
             </div>
           )}
         </div>
 
-        {/* Footer buttons */}
-        {step !== 'success' && (
-          <div className="px-6 py-4 border-t border-gray-100 space-y-2">
-            {step === 'select' ? (
-              <button
-                onClick={() => setStep('payment')}
-                disabled={!selectedType || availableTypes.length === 0}
-                className="w-full bg-orange text-white font-bold py-3.5 rounded-xl hover:opacity-90 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                Continuer <ChevronRight className="w-5 h-5" />
-              </button>
-            ) : (
-              <>
-                <button
-                  onClick={handleConfirm}
-                  disabled={purchaseMutation.isPending}
-                  className="w-full bg-orange text-white font-bold py-3.5 rounded-xl hover:opacity-90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {purchaseMutation.isPending
-                    ? 'Traitement en cours…'
-                    : isAuthenticated
-                    ? `Confirmer & Payer — ${formatPrice(grandTotal)}`
-                    : 'Se connecter pour payer'}
-                </button>
-                <button
-                  onClick={() => { setStep('select'); purchaseMutation.reset(); }}
-                  className="w-full border border-gray-300 text-gray-700 font-semibold py-3 rounded-xl hover:bg-gray-50 transition-colors"
-                >
-                  Retour
-                </button>
-              </>
-            )}
+        {/* Footer button */}
+        {step === 'select' && (
+          <div className="px-6 py-4 border-t border-gray-100">
+            <button
+              onClick={handleContinue}
+              disabled={!selectedType || availableTypes.length === 0 || isPending}
+              className="w-full bg-orange text-white font-bold py-3.5 rounded-xl hover:opacity-90 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {!isAuthenticated
+                ? 'Se connecter pour continuer'
+                : isFree
+                ? 'Obtenir le billet gratuit'
+                : `Payer ${formatPrice(grandTotal)}`}
+              {!isPending && <ChevronRight className="w-5 h-5" />}
+            </button>
           </div>
         )}
       </div>

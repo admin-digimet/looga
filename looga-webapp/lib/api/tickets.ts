@@ -1,6 +1,6 @@
 import { apiClient } from '@/lib/api/client';
 import { ENDPOINTS } from '@/lib/constants';
-import type { Ticket, PurchasePayload } from '@/types';
+import type { Ticket } from '@/types';
 
 function transformTicket(raw: any): Ticket {
   return {
@@ -33,7 +33,3 @@ export async function getTicketById(id: string): Promise<Ticket> {
   return transformTicket(data);
 }
 
-export async function purchaseTicket(payload: PurchasePayload): Promise<Ticket> {
-  const { data } = await apiClient.post<any>(ENDPOINTS.ticketPurchase, payload);
-  return transformTicket(data);
-}

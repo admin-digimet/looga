@@ -16,5 +16,10 @@ export const ENDPOINTS = {
   eventById: (id: string) => `/events/${id}`,
   tickets: '/tickets',
   ticketById: (id: string) => `/tickets/${id}`,
-  ticketPurchase: '/tickets/purchase',
+  paymentInit: '/payment/init',
 } as const;
+
+export const SITE_URL = (() => {
+  if (typeof window !== 'undefined') return window.location.origin;
+  return process.env.NEXT_PUBLIC_SITE_URL ?? 'https://looga-ci.com';
+})();

@@ -121,7 +121,7 @@ export interface AuthResponse {
 }
 
 // Ticket types
-export type TicketStatus = 'valid' | 'used' | 'expired';
+export type TicketStatus = 'pending' | 'valid' | 'used' | 'expired' | 'cancelled';
 
 export type PaymentMethod = 'mtn_momo' | 'orange_money' | 'wave' | 'card';
 

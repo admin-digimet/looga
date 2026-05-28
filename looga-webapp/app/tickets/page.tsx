@@ -11,15 +11,19 @@ import { formatEventDate, formatPrice } from '@/lib/utils';
 import type { TicketStatus } from '@/types';
 
 const STATUS_STYLE: Record<TicketStatus, string> = {
+  pending: 'bg-orange-100 text-orange-700',
   valid: 'bg-green-100 text-green-700',
   used: 'bg-gray-100 text-gray-500',
   expired: 'bg-red-100 text-red-600',
+  cancelled: 'bg-gray-100 text-gray-400',
 };
 
 const STATUS_LABEL: Record<TicketStatus, string> = {
+  pending: 'En attente',
   valid: '✓ Valide',
   used: 'Utilisé',
   expired: 'Expiré',
+  cancelled: 'Annulé',
 };
 
 export default function TicketsPage() {

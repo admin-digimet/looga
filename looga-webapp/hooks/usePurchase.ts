@@ -1,15 +1,19 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import * as ticketsApi from '@/lib/api/tickets';
-import type { PurchasePayload } from '@/types';
+import { initPayment, initFreeTicket, type InitPaymentPayload } from '@/lib/api/payment';
 
-export function usePurchase() {
+export function useInitPayment() {
+  return useMutation({
+    mutationFn: (payload: InitPaymentPayload) => initPayment(payload),
+  });
+}
+
+export function useInitFreeTicket() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: PurchasePayload) => ticketsApi.purchaseTicket(payload),
+    mutationFn: (payload: InitPaymentPayload) => initFreeTicket(payload),
     onSuccess: () => {
-      // Invalide le cache des tickets pour forcer un rechargement
       queryClient.invalidateQueries({ queryKey: ['tickets'] });
     },
   });
