@@ -1,8 +1,7 @@
 ﻿'use client';
 
-import { Suspense, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { EventCard } from '@/components/EventCard';
@@ -37,35 +36,13 @@ const TAB_MAP: Record<string, EventCategory | undefined> = {
 const TABS = ['Tous', 'Concerts', 'Soirées', 'Ce week-end'];
 
 export default function HomePage() {
-  return (
-    <Suspense fallback={null}>
-      <HomeContent />
-    </Suspense>
-  );
-}
-
-function HomeContent() {
   const [activeTab, setActiveTab] = useState('Tous');
   const category = TAB_MAP[activeTab];
 
-  const searchParams = useSearchParams();
-  const searchQuery = searchParams.get('search') ?? undefined;
-  const cityQuery = searchParams.get('city') ?? undefined;
-
   const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
-    useEvents({ category, search: searchQuery, city: cityQuery });
+    useEvents({ category });
 
   const events = data?.pages.flatMap((p) => p.data) ?? [];
-
-  const filteredEvents = searchQuery
-    ? events.filter((e) => {
-        const q = searchQuery.toLowerCase();
-        return (
-          e.name.toLowerCase().includes(q) ||
-          e.location.toLowerCase().includes(q)
-        );
-      })
-    : events;
 
   return (
     <div className="min-h-screen bg-white font-sans">
@@ -105,14 +82,7 @@ function HomeContent() {
           <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
               <h2 className="text-2xl font-extrabold text-gray-900 flex items-center gap-2">
-                {searchQuery ? (
-                  <>Résultats pour <span className="text-orange">«&nbsp;{searchQuery}&nbsp;»</span></>
-                ) : (
-                  <>
-                    Événements à{' '}
-                    <span className="text-orange">{cityQuery || 'Abidjan'}</span>
-                  </>
-                )}
+                Événements à <span className="text-orange">Abidjan</span>
               </h2>
 
               <div className="flex overflow-x-auto gap-6 border-b border-gray-200 pb-[1px]">
@@ -149,15 +119,13 @@ function HomeContent() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10">
                   {isLoading
                     ? Array.from({ length: 8 }).map((_, i) => <EventCardSkeleton key={i} />)
-                    : filteredEvents.length === 0
+                    : events.length === 0
                     ? (
                       <div className="col-span-4 text-center py-16 text-gray-500">
-                        {searchQuery
-                          ? `Aucun événement ne correspond à « ${searchQuery} ».`
-                          : 'Aucun événement trouvé pour cette catégorie.'}
+                        Aucun événement trouvé pour cette catégorie.
                       </div>
                     )
-                    : filteredEvents.map((event) => <EventCard key={event.id} event={event} />)}
+                    : events.map((event) => <EventCard key={event.id} event={event} />)}
                 </div>
 
                 {hasNextPage && (
@@ -185,7 +153,7 @@ function HomeContent() {
               {destinations.map((dest) => (
                 <Link
                   key={dest.name}
-                  href={`/?city=${encodeURIComponent(dest.name)}`}
+                  href={`/search?cities=${encodeURIComponent(dest.name)}`}
                   className="relative aspect-[4/3] rounded-2xl overflow-hidden group focus:outline-none focus-visible:ring-4 focus-visible:ring-orange/40"
                 >
                   <img
@@ -210,7 +178,7 @@ function HomeContent() {
             {popularCities.map((city) => (
               <Link
                 key={city}
-                href={`/?city=${encodeURIComponent(city)}`}
+                href={`/search?cities=${encodeURIComponent(city)}`}
                 className="text-sm font-medium text-gray-600 bg-gray-100 hover:bg-orange/10 hover:text-orange px-4 py-2 rounded-full transition-colors"
               >
                 Événements à {city}

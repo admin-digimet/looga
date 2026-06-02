@@ -28,13 +28,12 @@ function NavbarContent() {
   const searchParams = useSearchParams();
   const { isAuthenticated, isLoading } = useAuthStore();
 
-  const [search, setSearch] = useState(searchParams.get('search') ?? '');
-  const [city, setCity] = useState(searchParams.get('city') ?? '');
+  const [search, setSearch] = useState(searchParams.get('q') ?? '');
+  const [city, setCity] = useState('');
 
-  // Resync inputs when the URL changes (e.g. user clicks a city chip on the home page)
+  // Resync l'input search depuis l'URL (utile quand on est sur /search)
   useEffect(() => {
-    setSearch(searchParams.get('search') ?? '');
-    setCity(searchParams.get('city') ?? '');
+    setSearch(searchParams.get('q') ?? '');
   }, [searchParams]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -42,10 +41,10 @@ function NavbarContent() {
     const params = new URLSearchParams();
     const trimmedSearch = search.trim();
     const trimmedCity = city.trim();
-    if (trimmedSearch) params.set('search', trimmedSearch);
-    if (trimmedCity) params.set('city', trimmedCity);
+    if (trimmedSearch) params.set('q', trimmedSearch);
+    if (trimmedCity) params.set('cities', trimmedCity);
     const qs = params.toString();
-    router.push(qs ? `/?${qs}` : '/');
+    router.push(qs ? `/search?${qs}` : '/search');
   };
 
   return (

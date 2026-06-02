@@ -2,6 +2,7 @@
 
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import * as eventsApi from '@/lib/api/events';
+import type { SearchEventsParams } from '@/lib/api/events';
 import type { EventCategory } from '@/types';
 
 interface UseEventsParams {
@@ -28,6 +29,26 @@ export function useEvent(id: string) {
     queryFn: () => eventsApi.getEventById(id),
     staleTime: 30_000,
     enabled: !!id,
+  });
+}
+
+export function useSearchEvents(params: SearchEventsParams) {
+  const key = [
+    'search-events',
+    params.q ?? '',
+    (params.cities ?? []).join(','),
+    (params.categories ?? []).join(','),
+    params.price ?? 'all',
+    params.period ?? 'all',
+    params.sort ?? 'date_asc',
+  ];
+  return useInfiniteQuery({
+    queryKey: key,
+    queryFn: ({ pageParam = 1 }) =>
+      eventsApi.searchEvents({ ...params, page: pageParam as number }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    staleTime: 30_000,
   });
 }
 
