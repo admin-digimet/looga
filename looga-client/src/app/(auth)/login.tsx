@@ -29,22 +29,6 @@ export default function LoginScreen() {
   const loginMutation = useLogin(returnTo);
   const { login } = useAuthStore();
 
-  async function handleDevBypass() {
-    await login('dev-token-local', {
-      id: 'dev-001',
-      name: 'Dev Looga',
-      phone: '',
-      email: 'dev@looga.ci',
-      avatar_url: null,
-      role: 'user',
-      push_token: null,
-      is_active: true,
-      createdAt: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    });
-    router.replace('/(tabs)');
-  }
-
   function clearErrors() {
     setFieldErrors({});
     setGlobalError('');
@@ -165,11 +149,6 @@ export default function LoginScreen() {
             </TouchableOpacity>
           </Link>
 
-          {__DEV__ && (
-            <TouchableOpacity style={styles.devBtn} onPress={handleDevBypass}>
-              <Text style={styles.devBtnText}>⚡ Dev — Passer l'auth</Text>
-            </TouchableOpacity>
-          )}
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -284,19 +263,5 @@ const styles = StyleSheet.create({
   linkAccent: {
     fontFamily: Fonts.bodySemiBold,
     color: Colors.orange,
-  },
-  devBtn: {
-    alignSelf: 'center',
-    borderWidth: 1,
-    borderColor: Colors.violet,
-    borderRadius: 100,
-    paddingVertical: 7,
-    paddingHorizontal: 16,
-    borderStyle: 'dashed',
-  },
-  devBtnText: {
-    fontFamily: Fonts.bodyMedium,
-    fontSize: FontSize.xs,
-    color: Colors.violet,
   },
 });

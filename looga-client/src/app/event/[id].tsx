@@ -364,7 +364,7 @@ export default function EventDetailScreen() {
 
         <View style={styles.buyButtonWrapper}>
           <Button
-            label={event.isSoldOut ? 'Sold out' : 'Réserver ma place'}
+            label={event.isSoldOut ? 'Sold out' : 'Réservez'}
             onPress={() => {
               if (!isAuthenticated) {
                 router.push({

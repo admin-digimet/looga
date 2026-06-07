@@ -1,8 +1,7 @@
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import type { ReactElement } from 'react';
 
-import { Colors, Gradient } from '@/constants/colors';
+import { Colors } from '@/constants/colors';
 import { Fonts, FontSize } from '@/constants/typography';
 
 interface ButtonProps {
@@ -29,21 +28,14 @@ export function Button({
       activeOpacity={0.85}
       style={[styles.wrapper, isDisabled && styles.disabled]}
     >
-      <LinearGradient
-        colors={Gradient.primary}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={styles.gradient}
-      >
-        {loading ? (
-          <ActivityIndicator color={Colors.text} size="small" />
-        ) : (
-          <View style={styles.inner}>
-            {leftIcon && <View style={styles.iconWrap}>{leftIcon}</View>}
-            <Text style={styles.label}>{label}</Text>
-          </View>
-        )}
-      </LinearGradient>
+      {loading ? (
+        <ActivityIndicator color="#FFFFFF" size="small" />
+      ) : (
+        <View style={styles.inner}>
+          {leftIcon && <View style={styles.iconWrap}>{leftIcon}</View>}
+          <Text style={styles.label}>{label}</Text>
+        </View>
+      )}
     </TouchableOpacity>
   );
 }
@@ -51,16 +43,14 @@ export function Button({
 const styles = StyleSheet.create({
   wrapper: {
     borderRadius: 100,
-    overflow: 'hidden',
-  },
-  disabled: {
-    opacity: 0.6,
-  },
-  gradient: {
+    backgroundColor: Colors.orange,
     paddingVertical: 16,
     paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  disabled: {
+    opacity: 0.6,
   },
   inner: {
     flexDirection: 'row',
@@ -74,7 +64,7 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSize.base,
-    color: Colors.text,
+    color: '#FFFFFF',
     letterSpacing: 0.3,
   },
 });

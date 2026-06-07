@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -37,6 +38,7 @@ const SERVICE_FEE_RATE = 0.05;
 const POLL_INTERVAL_MS = 2000;
 const POLL_TIMEOUT_MS = 60_000;
 const PAYMENT_REF_STORAGE_KEY = 'looga_last_payment_ref';
+const GENIUS_BASE_URL = 'https://pay.genius.ci';
 
 export default function PaymentScreen() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
@@ -57,6 +59,27 @@ export default function PaymentScreen() {
   const initFreeMutation = useMutation({
     mutationFn: initFreeTicket,
   });
+
+  // ── Pré-chauffage Chrome Custom Tabs (Android uniquement) ──
+  // warmUp = bind le service, mayInitWithUrl = DNS+TLS+HTML pré-fetch
+  // sur https://pay.genius.ci → l'ouverture du checkout est quasi-instantanée
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+    let cancelled = false;
+    (async () => {
+      try {
+        await WebBrowser.warmUpAsync();
+        if (cancelled) return;
+        await WebBrowser.mayInitWithUrlAsync(GENIUS_BASE_URL);
+      } catch {
+        // pas critique, on continue sans pré-chauffage
+      }
+    })();
+    return () => {
+      cancelled = true;
+      WebBrowser.coolDownAsync().catch(() => {});
+    };
+  }, []);
 
   function handleBack() {
     if (step === 1) {

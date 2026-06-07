@@ -100,13 +100,7 @@ export default function HomeScreen() {
     }
   }, [isLoading, feedEvents.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const firstName = user?.name?.split(' ')[0] ?? 'toi';
-  const initials = user?.name
-    ?.split(' ')
-    .slice(0, 2)
-    .map((w) => w[0])
-    .join('')
-    .toUpperCase() ?? 'U';
+  const firstName = user?.name?.split(' ')[0] ?? '';
 
   const renderFeedItem = useCallback(({ item }: { item: Event }) => (
     <View style={styles.cardWrapper}>
@@ -129,7 +123,9 @@ export default function HomeScreen() {
       <SafeAreaView style={styles.container} edges={['top']}>
         <ScrollView showsVerticalScrollIndicator={false} refreshControl={refreshControl}>
           <View style={styles.greetingWrapper}>
-            <Text style={styles.greeting}>{getGreeting()}, {firstName}</Text>
+            <Text style={styles.greeting}>
+              {getGreeting()}{firstName ? `, ${firstName}` : ''}
+            </Text>
             <Text style={styles.greetingSub}>Tu fais quoi aujourd'hui ?</Text>
           </View>
           <View style={styles.searchWrapper}>
@@ -179,22 +175,13 @@ export default function HomeScreen() {
         >
           <Text style={styles.logoText}>looga</Text>
         </LinearGradient>
-
-        <View style={styles.topNavRight}>
-          <LinearGradient
-            colors={Gradient.primary}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.avatar}
-          >
-            <Text style={styles.avatarText}>{initials}</Text>
-          </LinearGradient>
-        </View>
       </View>
 
-      {/* Greeting — compact */}
+      {/* Greeting */}
       <View style={styles.greetingWrapper}>
-        <Text style={styles.greeting}>{getGreeting()}, {firstName} 👋</Text>
+        <Text style={styles.greeting}>
+          {getGreeting()}{firstName ? `, ${firstName}` : ''} 👋
+        </Text>
         <Text style={styles.greetingSub}>Tu fais quoi ce soir ?</Text>
       </View>
 
@@ -355,9 +342,10 @@ const styles = StyleSheet.create({
     gap: 1,
   },
   greeting: {
-    fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSize.base,
+    fontFamily: Fonts.headingBold,
+    fontSize: FontSize.lg,
     color: Colors.text,
+    letterSpacing: -0.3,
   },
   greetingSub: {
     fontFamily: Fonts.body,

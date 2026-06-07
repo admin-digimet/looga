@@ -104,7 +104,6 @@ export default function AccountScreen() {
 
         {/* ── USER CARD ── */}
         <View style={styles.userCard}>
-          <Text style={styles.welcomeText}>Bienvenue {user?.name?.split(' ')[0]} 👋</Text>
           <View style={styles.userRow}>
             <View style={styles.avatar}>
               <Text style={styles.initials}>{initials}</Text>
@@ -341,12 +340,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.body,
     fontSize: FontSize.xs,
     color: Colors.textMuted,
-  },
-  welcomeText: {
-    fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSize.sm,
-    color: Colors.orange,
-    marginBottom: 10,
   },
   divider: {
     height: StyleSheet.hairlineWidth,
