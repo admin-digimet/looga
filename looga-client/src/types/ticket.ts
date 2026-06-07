@@ -1,4 +1,4 @@
-export type TicketStatus = 'valid' | 'used' | 'expired';
+export type TicketStatus = 'pending' | 'valid' | 'used' | 'expired' | 'cancelled';
 
 export interface Ticket {
   id: string;
@@ -31,13 +31,3 @@ export interface LocalTicket {
   qrValue: string;
   status: TicketStatus;
 }
-
-export interface PurchasePayload {
-  eventId: string;
-  ticketTypeId: string;
-  quantity: number;
-  paymentMethod: PaymentMethod;
-  phoneNumber?: string;
-}
-
-export type PaymentMethod = 'mtn_momo' | 'orange_money' | 'wave' | 'card';

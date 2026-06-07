@@ -13,9 +13,11 @@ interface TicketCardProps {
 }
 
 const STATUS_CONFIG: Record<TicketStatus, { label: string; bg: string; fg: string }> = {
-  valid:   { label: 'Valide',  bg: 'rgba(0,200,100,0.12)', fg: Colors.success },
-  used:    { label: 'Utilisé', bg: 'rgba(0,0,0,0.06)',     fg: Colors.textMuted },
-  expired: { label: 'Expiré',  bg: 'rgba(255,59,59,0.12)', fg: Colors.error },
+  pending:   { label: 'En attente', bg: 'rgba(255,184,0,0.12)', fg: Colors.warning },
+  valid:     { label: 'Valide',     bg: 'rgba(0,200,100,0.12)', fg: Colors.success },
+  used:      { label: 'Utilisé',    bg: 'rgba(0,0,0,0.06)',     fg: Colors.textMuted },
+  expired:   { label: 'Expiré',     bg: 'rgba(255,59,59,0.12)', fg: Colors.error },
+  cancelled: { label: 'Annulé',     bg: 'rgba(0,0,0,0.06)',     fg: Colors.textMuted },
 };
 
 function parseDate(dateStr: string): string {

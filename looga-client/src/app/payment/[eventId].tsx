@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -9,40 +10,33 @@ import {
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation } from '@tanstack/react-query';
-import axios from 'axios';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AlertTriangle, ArrowLeft, Check, Lock, Minus, Plus, Smartphone } from 'lucide-react-native';
+import { ArrowLeft, Check, Lock, Minus, Plus } from 'lucide-react-native';
+import * as WebBrowser from 'expo-web-browser';
 
-import { PaymentMethodCard } from '@/components/payment/PaymentMethodCard';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { useEvent } from '@/hooks/useEvents';
-import { purchaseTicket } from '@/lib/api/tickets';
+import { initPayment, initFreeTicket, getTicketByReference } from '@/lib/api/payment';
 import { useTicketStore } from '@/lib/store/ticketStore';
+import { storage } from '@/lib/store/mmkv';
 import { Colors } from '@/constants/colors';
+import { LOOGA_WEBSITE_URL } from '@/constants/links';
 import { Fonts, FontSize } from '@/constants/typography';
 import { formatPrice } from '@/lib/utils/formatters';
-import type { PaymentMethod, LocalTicket } from '@/types/ticket';
+import type { LocalTicket } from '@/types/ticket';
 import type { TicketType } from '@/types/event';
 
-type Step = 1 | 2 | 3;
-
-const PAYMENT_METHODS: PaymentMethod[] = ['mtn_momo', 'orange_money', 'wave', 'card'];
-const PHONE_METHODS: PaymentMethod[] = ['mtn_momo', 'orange_money', 'wave'];
-const SERVICE_FEE_RATE = 0.05;
+type Step = 1 | 2;
 
 const STEP_TITLES: Record<Step, string> = {
   1: 'Choisis ton billet',
-  2: 'Choisis ton paiement',
-  3: 'Vérifie et confirme',
+  2: 'Vérifie et confirme',
 };
 
-const METHOD_LABELS: Record<PaymentMethod, string> = {
-  mtn_momo:     'MTN MoMo',
-  orange_money: 'Orange Money',
-  wave:         'Wave',
-  card:         'Carte bancaire',
-};
+const SERVICE_FEE_RATE = 0.05;
+const POLL_INTERVAL_MS = 2000;
+const POLL_TIMEOUT_MS = 60_000;
+const PAYMENT_REF_STORAGE_KEY = 'looga_last_payment_ref';
 
 export default function PaymentScreen() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
@@ -53,52 +47,22 @@ export default function PaymentScreen() {
   const [step, setStep] = useState<Step>(1);
   const [selectedType, setSelectedType] = useState<TicketType | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('mtn_momo');
-  const [phoneNumber, setPhoneNumber] = useState('');
   const [paymentError, setPaymentError] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const mutation = useMutation({
-    mutationFn: purchaseTicket,
-    onSuccess: (ticket) => {
-      const local: LocalTicket = {
-        id: ticket.id,
-        ticketNumber: ticket.ticketNumber,
-        eventId: ticket.eventId,
-        eventName: ticket.eventName,
-        eventDate: ticket.eventDate,
-        eventTime: ticket.eventTime,
-        eventLocation: ticket.eventLocation,
-        eventCategory: ticket.eventCategory,
-        eventImage: ticket.eventImage,
-        qrValue: ticket.qrCode,
-        status: 'valid',
-      };
-      addTicket(local);
-      router.replace('/(tabs)/tickets');
-    },
-    onError: (error) => {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 422) {
-          const msg = error.response.data?.message ?? 'Données invalides.';
-          setPaymentError(msg);
-        } else if (!error.response) {
-          setPaymentError('Vérifie ta connexion internet.');
-        } else {
-          setPaymentError('Paiement échoué. Réessaie.');
-        }
-      } else {
-        const msg = (error as Error).message ?? 'Une erreur est survenue.';
-        if (__DEV__) console.error('[PAYMENT] erreur non-Axios:', msg);
-        setPaymentError(msg);
-      }
-    },
+  const initPaymentMutation = useMutation({
+    mutationFn: initPayment,
+  });
+
+  const initFreeMutation = useMutation({
+    mutationFn: initFreeTicket,
   });
 
   function handleBack() {
     if (step === 1) {
       router.back();
     } else {
-      setStep((s) => (s - 1) as Step);
+      setStep(1);
       setPaymentError('');
     }
   }
@@ -108,20 +72,128 @@ export default function PaymentScreen() {
     setStep(2);
   }
 
-  function handleStep2Continue() {
-    setStep(3);
+  async function pollTicket(reference: string): Promise<LocalTicket | null> {
+    const start = Date.now();
+    while (Date.now() - start < POLL_TIMEOUT_MS) {
+      try {
+        const ticket = await getTicketByReference(reference);
+        if (ticket && ticket.status !== 'pending' && ticket.status !== 'cancelled') {
+          return {
+            id: ticket.id,
+            ticketNumber: ticket.ticketNumber,
+            eventId: ticket.eventId,
+            eventName: ticket.eventName,
+            eventDate: ticket.eventDate,
+            eventTime: ticket.eventTime,
+            eventLocation: ticket.eventLocation,
+            eventCategory: ticket.eventCategory,
+            eventImage: ticket.eventImage,
+            qrValue: ticket.qrCode,
+            status: 'valid',
+          };
+        }
+      } catch (err) {
+        if (__DEV__) console.warn('[PAYMENT] poll error', err);
+      }
+      await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
+    }
+    return null;
   }
 
-  function handleConfirm() {
+  async function handleConfirmFree() {
     if (!selectedType || !event) return;
     setPaymentError('');
-    mutation.mutate({
-      eventId,
-      ticketTypeId: selectedType.id,
-      quantity,
-      paymentMethod,
-      phoneNumber: PHONE_METHODS.includes(paymentMethod) ? phoneNumber : undefined,
-    });
+    setIsProcessing(true);
+    try {
+      const result = await initFreeMutation.mutateAsync({
+        eventId,
+        ticketTypeId: selectedType.id,
+        quantity,
+      });
+      addTicket({
+        id: result.ticketId,
+        ticketNumber: result.ticketNumber,
+        eventId,
+        eventName: event.name,
+        eventDate: event.date,
+        eventTime: event.time,
+        eventLocation: event.location,
+        eventCategory: event.category,
+        eventImage: event.image,
+        qrValue: result.qrCode,
+        status: 'valid',
+      });
+      router.replace('/(tabs)/tickets');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Une erreur est survenue.';
+      setPaymentError(msg);
+    } finally {
+      setIsProcessing(false);
+    }
+  }
+
+  async function handleConfirmPaid() {
+    if (!selectedType || !event) return;
+    setPaymentError('');
+    setIsProcessing(true);
+
+    try {
+      // 1. Init paiement → reçoit checkoutUrl + reference
+      const { checkoutUrl, reference } = await initPaymentMutation.mutateAsync({
+        eventId,
+        ticketTypeId: selectedType.id,
+        quantity,
+      });
+
+      // 2. Persist reference (fallback si l'URL de retour ne la contient pas)
+      if (reference) storage.set(PAYMENT_REF_STORAGE_KEY, reference);
+
+      // 3. Ouvre Genius Pay en in-app browser, attend retour sur /payment/success ou /payment/error
+      const result = await WebBrowser.openAuthSessionAsync(
+        checkoutUrl,
+        `${LOOGA_WEBSITE_URL}/payment/`,
+        { showInRecents: false }
+      );
+
+      // 4. Gestion du retour
+      if (result.type === 'cancel' || result.type === 'dismiss') {
+        setPaymentError('Paiement annulé. Tu peux réessayer.');
+        setIsProcessing(false);
+        return;
+      }
+
+      if (result.type === 'success' && result.url) {
+        if (result.url.includes('/payment/error')) {
+          setPaymentError("Le paiement n'a pas abouti. Réessaie ou contacte le support.");
+          setIsProcessing(false);
+          return;
+        }
+
+        // 5. Polling sur le ticket — il sera marqué `valid` quand le webhook arrive
+        const refFromUrl = new URL(result.url).searchParams.get('reference') ?? reference;
+        const localTicket = await pollTicket(refFromUrl);
+
+        if (localTicket) {
+          addTicket(localTicket);
+          router.replace('/(tabs)/tickets');
+        } else {
+          Alert.alert(
+            'Paiement en cours de traitement',
+            "Ton paiement a été reçu, mais la confirmation prend plus de temps que prévu. Ton billet apparaîtra dans 'Mes billets' dès que c'est validé.",
+            [{ text: 'OK', onPress: () => router.replace('/(tabs)/tickets') }]
+          );
+        }
+        return;
+      }
+
+      // 6. Cas inattendu
+      setPaymentError('Réponse inattendue. Réessaie.');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Une erreur est survenue.';
+      setPaymentError(msg);
+    } finally {
+      setIsProcessing(false);
+    }
   }
 
   if (isLoading || !event) {
@@ -133,12 +205,12 @@ export default function PaymentScreen() {
   }
 
   const subtotal = (selectedType?.price ?? 0) * quantity;
-  const serviceFee = Math.round(subtotal * SERVICE_FEE_RATE);
+  const serviceFee = subtotal > 0 ? Math.round(subtotal * SERVICE_FEE_RATE) : 0;
   const total = subtotal + serviceFee;
+  const isFree = subtotal === 0;
   const stickyBottom = insets.bottom || 16;
 
   return (
-    // edges={['top']} — le bas est géré manuellement via insets.bottom dans le footer sticky
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
@@ -146,10 +218,10 @@ export default function PaymentScreen() {
           <ArrowLeft size={20} color={Colors.text} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <Text style={styles.stepIndicator}>Étape {step}/3</Text>
+          <Text style={styles.stepIndicator}>Étape {step}/2</Text>
           <Text style={styles.stepTitle}>{STEP_TITLES[step]}</Text>
           {step === 1 && (
-            <Text style={styles.stepSubtitle}>Accès garanti à l'événement</Text>
+            <Text style={styles.stepSubtitle}>Accès garanti à l&apos;événement</Text>
           )}
         </View>
         <View style={styles.headerPlaceholder} />
@@ -222,43 +294,8 @@ export default function PaymentScreen() {
           </View>
         )}
 
-        {/* ── Étape 2 : Mode de paiement ── */}
+        {/* ── Étape 2 : Récapitulatif ── */}
         {step === 2 && (
-          <View style={styles.section}>
-            {/* Récap billet en haut */}
-            <View style={styles.step2Recap}>
-              <Text style={styles.step2RecapTitle} numberOfLines={1}>{event.name}</Text>
-              <View style={styles.step2RecapDivider} />
-              <View style={styles.step2RecapRow}>
-                <Text style={styles.step2RecapLabel}>
-                  {selectedType?.name ?? ''} × {quantity}
-                </Text>
-                <Text style={styles.step2RecapValue}>{formatPrice(subtotal)}</Text>
-              </View>
-            </View>
-
-            {/* Grille moyens de paiement */}
-            <View style={styles.paymentGrid}>
-              {PAYMENT_METHODS.map((method) => (
-                <PaymentMethodCard
-                  key={method}
-                  method={method}
-                  selected={paymentMethod === method}
-                  onSelect={setPaymentMethod}
-                />
-              ))}
-            </View>
-
-            {/* Trust badges */}
-            <View style={styles.payTrustRow}>
-              <PayTrustItem label="Paiement sécurisé" />
-              <PayTrustItem label="Billet envoyé instantanément" />
-            </View>
-          </View>
-        )}
-
-        {/* ── Étape 3 : Récapitulatif ── */}
-        {step === 3 && (
           <View style={styles.section}>
             {/* Récap billet */}
             <View style={styles.recapCard}>
@@ -267,55 +304,38 @@ export default function PaymentScreen() {
 
               <RecapLine
                 label={`${selectedType?.name ?? ''} × ${quantity}`}
-                value={formatPrice(subtotal)}
+                value={isFree ? 'Gratuit' : formatPrice(subtotal)}
               />
-              <RecapLine label="Frais de service (5%)" value={formatPrice(serviceFee)} muted />
+              {!isFree && (
+                <RecapLine label="Frais de service (5%)" value={formatPrice(serviceFee)} muted />
+              )}
 
               <View style={styles.recapDivider} />
               <View style={styles.recapTotalRow}>
-                <Text style={styles.recapTotalLabel}>Total à payer</Text>
-                <Text style={styles.recapTotalValue}>{formatPrice(total)}</Text>
+                <Text style={styles.recapTotalLabel}>Total</Text>
+                <Text style={styles.recapTotalValue}>
+                  {isFree ? 'Gratuit' : formatPrice(total)}
+                </Text>
               </View>
 
-              {/* Garantie entrée */}
               <View style={styles.recapGuarantee}>
                 <Text style={styles.recapGuaranteeText}>✔ Entrée garantie</Text>
               </View>
             </View>
 
-            {/* Mode sélectionné */}
-            <View style={styles.methodCard}>
-              <Text style={styles.methodChipText}>
-                Paiement via{' '}
-                <Text style={styles.methodChipAccent}>{METHOD_LABELS[paymentMethod]}</Text>
-              </Text>
-              {PHONE_METHODS.includes(paymentMethod) && (
-                <View style={styles.methodHintRow}>
-                  <Smartphone size={13} color={Colors.textMuted} />
-                  <Text style={styles.methodHint}>Tu recevras une demande de confirmation</Text>
-                </View>
-              )}
-            </View>
-
-            {/* Numéro de téléphone si mobile money */}
-            {PHONE_METHODS.includes(paymentMethod) && (
-              <>
-                <Input
-                  label="Numéro de téléphone"
-                  value={phoneNumber}
-                  onChangeText={setPhoneNumber}
-                  placeholder="07 00 00 00 00"
-                  keyboardType="phone-pad"
-                  phonePrefix
-                />
-                <View style={styles.phoneHintRow}>
-                  <AlertTriangle size={13} color={Colors.warning} />
-                  <Text style={styles.phoneHint}>Vérifie ton numéro avant de confirmer</Text>
-                </View>
-              </>
+            {/* Info paiement (sauf si gratuit) */}
+            {!isFree && (
+              <View style={styles.methodCard}>
+                <Text style={styles.methodChipText}>
+                  Paiement sécurisé par{' '}
+                  <Text style={styles.methodChipAccent}>Genius Pay</Text>
+                </Text>
+                <Text style={styles.methodHint}>
+                  Tu choisiras ton mode de paiement (MTN, Orange, Wave ou carte) sur la page de paiement sécurisée.
+                </Text>
+              </View>
             )}
 
-            {/* Trust avant le bouton */}
             <View style={styles.confirmTrust}>
               <PayTrustItem label="Paiement sécurisé" />
               <PayTrustItem label="Billet envoyé immédiatement après paiement" />
@@ -333,7 +353,7 @@ export default function PaymentScreen() {
         {step === 1 && (
           <>
             <Button
-              label="Continuer vers le paiement"
+              label="Continuer"
               onPress={handleStep1Continue}
               disabled={!selectedType}
             />
@@ -344,20 +364,17 @@ export default function PaymentScreen() {
         )}
         {step === 2 && (
           <>
-            <Button label="Continuer vers la confirmation" onPress={handleStep2Continue} />
-            <View style={styles.footerBrandingRow}>
-              <Lock size={11} color={Colors.textMuted} />
-              <Text style={styles.footerBranding}>Transaction sécurisée par Looga</Text>
-            </View>
-          </>
-        )}
-        {step === 3 && (
-          <>
             <Button
-              label={mutation.isPending ? 'Traitement...' : `Payer ${formatPrice(total)}`}
-              leftIcon={<Lock size={15} color="#FFFFFF" />}
-              onPress={handleConfirm}
-              disabled={mutation.isPending}
+              label={
+                isProcessing
+                  ? isFree ? 'Création…' : 'Préparation du paiement…'
+                  : isFree
+                  ? 'Obtenir le billet gratuit'
+                  : `Payer ${formatPrice(total)}`
+              }
+              leftIcon={!isProcessing && !isFree ? <Lock size={15} color="#FFFFFF" /> : undefined}
+              onPress={isFree ? handleConfirmFree : handleConfirmPaid}
+              disabled={isProcessing}
             />
             <View style={styles.footerBrandingRow}>
               <Lock size={11} color={Colors.textMuted} />
@@ -389,6 +406,7 @@ function TicketTypeRow({
       ]}
       onPress={onSelect}
       activeOpacity={0.8}
+      disabled={type.soldOut}
     >
       <View style={[styles.radio, selected && styles.radioSelected]}>
         {selected && <View style={styles.radioDot} />}
@@ -411,7 +429,7 @@ function TicketTypeRow({
           </View>
         ) : (
           <Text style={[styles.ticketPrice, type.soldOut && styles.textDisabled]}>
-            {formatPrice(type.price)}
+            {type.price === 0 ? 'Gratuit' : formatPrice(type.price)}
           </Text>
         )}
       </View>
@@ -456,7 +474,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  // Header
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -504,45 +521,6 @@ const styles = StyleSheet.create({
     padding: 20,
     gap: 12,
   },
-  // ── Step 2 recap ─────────────────────────────────────────────────────────
-  step2Recap: {
-    backgroundColor: Colors.surface,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    padding: 14,
-    gap: 10,
-  },
-  step2RecapTitle: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSize.base,
-    color: Colors.text,
-  },
-  step2RecapDivider: {
-    height: 1,
-    backgroundColor: Colors.border,
-  },
-  step2RecapRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  step2RecapLabel: {
-    fontFamily: Fonts.body,
-    fontSize: FontSize.sm,
-    color: Colors.textMuted,
-  },
-  step2RecapValue: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSize.base,
-    color: Colors.orange,
-  },
-
-  // ── Pay trust ────────────────────────────────────────────────────────────
-  payTrustRow: {
-    gap: 8,
-    marginTop: 4,
-  },
   payTrustItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -553,39 +531,27 @@ const styles = StyleSheet.create({
     fontSize: FontSize.sm,
     color: Colors.textMuted,
   },
-
-  // ── Method card (step 3) ─────────────────────────────────────────────────
   methodCard: {
     backgroundColor: Colors.surface2,
     borderRadius: 12,
     padding: 14,
     gap: 6,
   },
-  methodHintRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 7,
-  },
-  methodHint: {
+  methodChipText: {
     fontFamily: Fonts.body,
     fontSize: FontSize.sm,
     color: Colors.textMuted,
-    flex: 1,
   },
-  phoneHintRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 7,
-    marginTop: -4,
+  methodChipAccent: {
+    fontFamily: Fonts.bodyMedium,
+    color: Colors.text,
   },
-  phoneHint: {
+  methodHint: {
     fontFamily: Fonts.body,
     fontSize: FontSize.xs,
-    color: Colors.warning,
-    flex: 1,
+    color: Colors.textMuted,
+    lineHeight: 16,
   },
-
-  // ── Recap guarantee ──────────────────────────────────────────────────────
   recapGuarantee: {
     backgroundColor: `${Colors.success}0C`,
     borderRadius: 8,
@@ -597,14 +563,10 @@ const styles = StyleSheet.create({
     fontSize: FontSize.xs,
     color: Colors.success,
   },
-
-  // ── Confirm trust ────────────────────────────────────────────────────────
   confirmTrust: {
     gap: 8,
     marginTop: 4,
   },
-
-  // ── Footer trust / branding ──────────────────────────────────────────────
   footerTrustText: {
     fontFamily: Fonts.body,
     fontSize: FontSize.xs,
@@ -622,8 +584,6 @@ const styles = StyleSheet.create({
     fontSize: FontSize.xs,
     color: Colors.textMuted,
   },
-
-  // Urgency banner
   urgencyBanner: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -651,7 +611,6 @@ const styles = StyleSheet.create({
   urgencyTextRed: {
     color: Colors.orange,
   },
-  // Ticket rows
   ticketRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -664,9 +623,6 @@ const styles = StyleSheet.create({
   },
   ticketRowSelected: {
     borderColor: Colors.orange,
-  },
-  ticketRowDisabled: {
-    opacity: 0.5,
   },
   radio: {
     width: 22,
@@ -727,7 +683,6 @@ const styles = StyleSheet.create({
     fontSize: FontSize.xs,
     color: Colors.error,
   },
-  // Quantity
   quantityWrapper: {
     backgroundColor: Colors.surface,
     borderRadius: 14,
@@ -762,13 +717,6 @@ const styles = StyleSheet.create({
     minWidth: 32,
     textAlign: 'center',
   },
-  // Payment grid
-  paymentGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  // Recap
   recapCard: {
     backgroundColor: Colors.surface,
     borderRadius: 14,
@@ -818,23 +766,6 @@ const styles = StyleSheet.create({
     fontSize: FontSize.lg,
     color: Colors.orange,
   },
-  // Method chip
-  methodChip: {
-    backgroundColor: Colors.surface2,
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-  },
-  methodChipText: {
-    fontFamily: Fonts.body,
-    fontSize: FontSize.sm,
-    color: Colors.textMuted,
-  },
-  methodChipAccent: {
-    fontFamily: Fonts.bodyMedium,
-    color: Colors.text,
-  },
-  // Error
   paymentError: {
     fontFamily: Fonts.body,
     fontSize: FontSize.sm,
@@ -842,7 +773,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 4,
   },
-  // Footer
   footer: {
     position: 'absolute',
     bottom: 0,

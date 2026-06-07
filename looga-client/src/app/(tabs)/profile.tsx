@@ -7,16 +7,40 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Bell, ChevronRight, Heart, HelpCircle, Info, LogOut, Ticket, type LucideIcon } from 'lucide-react-native';
+import {
+  Bell,
+  BookOpen,
+  ChevronRight,
+  FileText,
+  Heart,
+  HelpCircle,
+  Info,
+  Lock,
+  LogOut,
+  ShieldCheck,
+  Ticket,
+  Users,
+  type LucideIcon,
+} from 'lucide-react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as WebBrowser from 'expo-web-browser';
 
 import { useLogout } from '@/hooks/useAuth';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useTicketStore } from '@/lib/store/ticketStore';
 import { useSavedStore } from '@/lib/store/savedStore';
 import { Colors } from '@/constants/colors';
+import { LEGAL_LINKS } from '@/constants/links';
 import { Fonts, FontSize } from '@/constants/typography';
+
+function openLegal(url: string) {
+  return WebBrowser.openBrowserAsync(url, {
+    presentationStyle: WebBrowser.WebBrowserPresentationStyle.PAGE_SHEET,
+    controlsColor: Colors.orange,
+    toolbarColor: Colors.bg,
+  });
+}
 
 export default function AccountScreen() {
   const { user, isAuthenticated } = useAuthStore();
@@ -123,8 +147,49 @@ export default function AccountScreen() {
           <View style={styles.divider} />
           <MenuItem
             Icon={HelpCircle}
-            label="Support"
-            onPress={() => Linking.openURL('mailto:support@looga.ci')}
+            label="Contacter le support"
+            sublabel="support@looga-ci.com"
+            onPress={() => Linking.openURL('mailto:support@looga-ci.com')}
+          />
+        </View>
+
+        {/* ── INFORMATIONS ── */}
+        <Text style={styles.sectionTitle}>Informations</Text>
+        <View style={styles.menuSection}>
+          <MenuItem
+            Icon={BookOpen}
+            label="Centre d'aide"
+            onPress={() => openLegal(LEGAL_LINKS.aide)}
+          />
+          <View style={styles.divider} />
+          <MenuItem
+            Icon={Info}
+            label="À propos de Looga"
+            onPress={() => openLegal(LEGAL_LINKS.aPropos)}
+          />
+          <View style={styles.divider} />
+          <MenuItem
+            Icon={ShieldCheck}
+            label="Sécurité"
+            onPress={() => openLegal(LEGAL_LINKS.securite)}
+          />
+          <View style={styles.divider} />
+          <MenuItem
+            Icon={Users}
+            label="Règles de la communauté"
+            onPress={() => openLegal(LEGAL_LINKS.communaute)}
+          />
+          <View style={styles.divider} />
+          <MenuItem
+            Icon={FileText}
+            label="Conditions d'utilisation"
+            onPress={() => openLegal(LEGAL_LINKS.cgu)}
+          />
+          <View style={styles.divider} />
+          <MenuItem
+            Icon={Lock}
+            label="Politique de confidentialité"
+            onPress={() => openLegal(LEGAL_LINKS.confidentialite)}
           />
         </View>
 
