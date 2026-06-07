@@ -8,8 +8,6 @@ import {
   Ticket,
   MapPin,
   Smartphone,
-  Apple,
-  Play,
 } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -70,15 +68,13 @@ export default function MobilePage() {
               Découvrez les meilleurs événements, réservez en quelques secondes et partagez vos sorties avec vos amis grâce à l’application Looga.
             </p>
             <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                disabled
-                aria-disabled="true"
-                className="inline-flex items-center gap-2 bg-white/30 text-white font-bold py-4 px-8 rounded-full cursor-not-allowed"
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 bg-white text-orange font-bold py-4 px-8 rounded-full hover:opacity-90 transition-opacity"
               >
                 <Smartphone className="w-5 h-5" />
-                Télécharger (bientôt)
-              </button>
+                Utiliser Looga sur le web
+              </Link>
               <Link
                 href="/"
                 className="inline-flex items-center gap-2 border border-white/40 text-white font-semibold py-4 px-8 rounded-full hover:bg-white/10 transition-colors"
@@ -118,44 +114,32 @@ export default function MobilePage() {
           </div>
         </section>
 
-        {/* Bientôt disponible */}
+        {/* Disponible sur le web */}
         <section className="bg-white py-20">
           <div className="max-w-[900px] mx-auto px-4 md:px-8 text-center">
             <span className="inline-block px-3 py-1 rounded-full bg-orange/10 text-orange text-xs font-bold tracking-wider mb-4">
-              DISPONIBLE BIENTÔT
+              DISPONIBLE MAINTENANT
             </span>
             <h2 className="font-heading font-extrabold text-ink text-3xl md:text-4xl mb-4">
-              L’expérience Looga arrive bientôt
+              Looga est disponible sur le web
             </h2>
             <p className="text-ink-muted text-lg mb-10 max-w-xl mx-auto">
-              Téléchargez bientôt l’application Looga et commencez à découvrir une nouvelle façon de sortir à Abidjan.
+              Pas besoin d’attendre — accède à tous les événements d’Abidjan, réserve tes billets et gère tes sorties directement depuis ton navigateur, sur mobile ou desktop.
             </p>
-
             <div className="flex flex-wrap gap-3 justify-center">
-              <button
-                type="button"
-                disabled
-                aria-disabled="true"
-                className="inline-flex items-center gap-3 bg-ink text-white font-semibold py-4 px-7 rounded-2xl opacity-60 cursor-not-allowed"
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 bg-orange text-white font-bold py-4 px-8 rounded-full hover:opacity-90 transition-opacity"
               >
-                <Apple className="w-7 h-7" />
-                <div className="text-left leading-tight">
-                  <div className="text-[10px] opacity-80">Bientôt sur</div>
-                  <div className="text-base">App Store</div>
-                </div>
-              </button>
-              <button
-                type="button"
-                disabled
-                aria-disabled="true"
-                className="inline-flex items-center gap-3 bg-ink text-white font-semibold py-4 px-7 rounded-2xl opacity-60 cursor-not-allowed"
+                Découvrir les événements
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+              <Link
+                href="/auth/register"
+                className="inline-flex items-center gap-2 border border-gray-300 text-ink font-semibold py-4 px-8 rounded-full hover:bg-gray-50 transition-colors"
               >
-                <Play className="w-7 h-7" />
-                <div className="text-left leading-tight">
-                  <div className="text-[10px] opacity-80">Bientôt sur</div>
-                  <div className="text-base">Google Play</div>
-                </div>
-              </button>
+                Créer un compte gratuit
+              </Link>
             </div>
           </div>
         </section>

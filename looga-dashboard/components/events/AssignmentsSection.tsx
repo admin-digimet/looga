@@ -14,6 +14,7 @@ export default function AssignmentsSection({ eventId }: Props) {
   const [allStaff, setAllStaff] = useState<StaffAccount[]>([])
   const [assigning, setAssigning] = useState(false)
   const [removing, setRemoving] = useState<string | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   const fetchAssignments = useCallback(async () => {
     setLoading(true)
@@ -39,25 +40,47 @@ export default function AssignmentsSection({ eventId }: Props) {
 
   async function assign(staffId: string) {
     setAssigning(true)
-    await fetch(`/api/events/${eventId}/assignments`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ staff_id: staffId }),
-    })
-    setShowModal(false)
-    setAssigning(false)
-    fetchAssignments()
+    setActionError(null)
+    try {
+      const res = await fetch(`/api/events/${eventId}/assignments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ staff_id: staffId }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setActionError(data.error ?? 'Impossible d\'assigner ce scanner.')
+        return
+      }
+      setShowModal(false)
+      fetchAssignments()
+    } catch {
+      setActionError('Erreur réseau. Réessaie dans un instant.')
+    } finally {
+      setAssigning(false)
+    }
   }
 
   async function remove(staffId: string) {
     setRemoving(staffId)
-    await fetch(`/api/events/${eventId}/assignments`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ staff_id: staffId }),
-    })
-    setRemoving(null)
-    fetchAssignments()
+    setActionError(null)
+    try {
+      const res = await fetch(`/api/events/${eventId}/assignments`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ staff_id: staffId }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setActionError(data.error ?? 'Impossible de retirer ce scanner.')
+        return
+      }
+      fetchAssignments()
+    } catch {
+      setActionError('Erreur réseau. Réessaie dans un instant.')
+    } finally {
+      setRemoving(null)
+    }
   }
 
   return (
@@ -73,6 +96,13 @@ export default function AssignmentsSection({ eventId }: Props) {
               Assigner
             </button>
           </div>
+
+          {actionError && (
+            <div className="alert alert-error text-sm py-2">
+              <span>{actionError}</span>
+              <button className="btn btn-ghost btn-xs ml-auto" onClick={() => setActionError(null)}>✕</button>
+            </div>
+          )}
 
           {loading ? (
             <div className="flex flex-col gap-2">

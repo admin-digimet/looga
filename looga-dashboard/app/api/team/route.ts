@@ -59,8 +59,6 @@ export async function POST(request: NextRequest) {
     name,
     role: 'staff',
   })
-  if (profileError) console.error('[POST /api/team] profil upsert:', profileError.message)
-
   // Insérer dans staff_accounts
   const { data: staffAccount, error: staffError } = await admin
     .from('staff_accounts')

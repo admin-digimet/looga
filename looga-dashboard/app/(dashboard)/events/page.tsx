@@ -14,9 +14,14 @@ function formatPrice(amount: number) {
   return new Intl.NumberFormat('fr-FR').format(amount) + ' FCFA'
 }
 
-export default async function EventsPage() {
+export default async function EventsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>
+}) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  const { status: filterStatus = 'all' } = await searchParams
 
   const { data: organizer } = await supabase
     .from('organizers')
@@ -24,11 +29,15 @@ export default async function EventsPage() {
     .eq('user_id', user!.id)
     .single()
 
-  const { data: events } = await supabase
+  const { data: allEvents } = await supabase
     .from('events')
     .select('*, ticket_types(*)')
     .eq('organizer_id', organizer?.id ?? '')
     .order('event_date', { ascending: false })
+
+  const events = filterStatus === 'all'
+    ? allEvents
+    : (allEvents ?? []).filter((e) => e.status === filterStatus)
 
   const statusFilters: { label: string; value: EventStatus | 'all' }[] = [
     { label: 'Tous', value: 'all' },
@@ -40,16 +49,20 @@ export default async function EventsPage() {
 
   return (
     <>
-      <TopNav title="Événements" subtitle={`${events?.length ?? 0} événement(s) au total`} />
+      <TopNav title="Événements" subtitle={`${events?.length ?? 0} événement(s)${filterStatus !== 'all' ? ` • ${statusFilters.find(f => f.value === filterStatus)?.label}` : ' au total'}`} />
 
       <div className="p-8 flex flex-col gap-6">
         {/* Header actions */}
         <div className="flex items-center justify-between">
           <div className="tabs tabs-box bg-base-200">
             {statusFilters.map((f) => (
-              <a key={f.value} className={`tab text-sm ${f.value === 'all' ? 'tab-active' : ''}`}>
+              <Link
+                key={f.value}
+                href={f.value === 'all' ? '/events' : `/events?status=${f.value}`}
+                className={`tab text-sm ${filterStatus === f.value ? 'tab-active' : ''}`}
+              >
                 {f.label}
-              </a>
+              </Link>
             ))}
           </div>
           <Link href="/events/new" className="btn btn-primary gap-2">

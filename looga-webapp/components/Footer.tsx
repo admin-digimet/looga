@@ -42,10 +42,8 @@ export function Footer() {
             <ul className="space-y-3 text-sm text-gray-300">
               <li><Link href="/aide" className="hover:text-white">Centre d&apos;aide</Link></li>
               <li><Link href="/contact" className="hover:text-white">Contactez-nous</Link></li>
-              <li><a href="#" className="hover:text-white">Twitter</a></li>
-              <li><a href="#" className="hover:text-white">Facebook</a></li>
-              <li><a href="#" className="hover:text-white">LinkedIn</a></li>
-              <li><a href="#" className="hover:text-white">Instagram</a></li>
+              <li><Link href="/communaute" className="hover:text-white">Communauté</Link></li>
+              <li><Link href="/a-propos" className="hover:text-white">À propos de Looga</Link></li>
             </ul>
           </div>
         </div>

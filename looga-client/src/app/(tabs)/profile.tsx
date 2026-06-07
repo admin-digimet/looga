@@ -17,6 +17,7 @@ import {
   Info,
   Lock,
   LogOut,
+  Pencil,
   ShieldCheck,
   Ticket,
   Users,
@@ -114,6 +115,13 @@ export default function AccountScreen() {
                 {user?.email ?? user?.phone ?? '—'}
               </Text>
             </View>
+            <TouchableOpacity
+              style={styles.editBtn}
+              onPress={() => router.push('/edit-profile')}
+              activeOpacity={0.7}
+            >
+              <Pencil size={16} color={Colors.orange} />
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -289,6 +297,14 @@ const styles = StyleSheet.create({
     color: Colors.surface,
   },
   userInfo: { flex: 1 },
+  editBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: `${Colors.orange}15`,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   userName: {
     fontFamily: Fonts.headingBold,
     fontSize: FontSize.md,

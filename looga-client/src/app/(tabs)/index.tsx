@@ -200,6 +200,25 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* Empty state — aucun événement publié */}
+      {allEvents.length === 0 && (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyStateEmoji}>🎭</Text>
+          <Text style={styles.emptyStateTitle}>Aucun événement pour le moment</Text>
+          <Text style={styles.emptyStateSub}>
+            Les prochains événements d'Abidjan arrivent bientôt.{'\n'}
+            Reviens dans quelques instants !
+          </Text>
+          <TouchableOpacity
+            style={styles.emptyStateBtn}
+            onPress={() => refetch()}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.emptyStateBtnText}>Actualiser</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Section 1 — À ne pas rater */}
       {mustSee.length > 0 && (
         <View>
@@ -484,6 +503,43 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     gap: 10,
     marginTop: 8,
+  },
+
+  // Empty state
+  emptyState: {
+    alignItems: 'center',
+    paddingTop: 48,
+    paddingHorizontal: 32,
+    gap: 12,
+  },
+  emptyStateEmoji: {
+    fontSize: 56,
+  },
+  emptyStateTitle: {
+    fontFamily: Fonts.headingBold,
+    fontSize: FontSize.lg,
+    color: Colors.text,
+    textAlign: 'center',
+  },
+  emptyStateSub: {
+    fontFamily: Fonts.body,
+    fontSize: FontSize.sm,
+    color: Colors.textMuted,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  emptyStateBtn: {
+    marginTop: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 28,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: Colors.orange,
+  },
+  emptyStateBtnText: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSize.sm,
+    color: Colors.orange,
   },
 
   // Error

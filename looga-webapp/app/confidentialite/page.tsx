@@ -216,7 +216,7 @@ export default function ConfidentialitePage() {
             <>
               <p className="mb-2">Pour toute question relative à la protection des données :</p>
               <p className="mb-1">📧 Email : <span className="font-medium text-ink">contact@looga.com</span></p>
-              <p>🏢 Adresse : <span className="text-ink-muted">[Adresse du siège — à compléter]</span></p>
+              <p>🏢 Adresse : <span className="font-medium text-ink">Abidjan, Côte d'Ivoire</span></p>
             </>
           ),
         },

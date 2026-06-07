@@ -84,6 +84,7 @@ export async function POST(request: NextRequest) {
       event_time: body.event_time,
       location_name: body.location_name,
       location_address: body.location_address,
+      location_url: body.location_url,
       image_url: body.image_url,
       status: body.status ?? 'published',
       min_price: minPrice,

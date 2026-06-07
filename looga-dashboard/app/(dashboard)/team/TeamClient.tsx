@@ -102,6 +102,8 @@ export default function TeamClient() {
   const [staff, setStaff] = useState<StaffAccount[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
+  const [toggleError, setToggleError] = useState<string | null>(null)
+  const [toggling, setToggling] = useState<string | null>(null)
 
   const fetchStaff = useCallback(async () => {
     setLoading(true)
@@ -114,16 +116,38 @@ export default function TeamClient() {
   useEffect(() => { fetchStaff() }, [fetchStaff])
 
   async function toggleActive(id: string, currentValue: boolean) {
-    await fetch(`/api/team/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ is_active: !currentValue }),
-    })
-    fetchStaff()
+    setToggling(id)
+    setToggleError(null)
+    try {
+      const res = await fetch(`/api/team/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_active: !currentValue }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setToggleError(data.error ?? 'Impossible de modifier le statut.')
+        return
+      }
+      fetchStaff()
+    } catch {
+      setToggleError('Erreur réseau. Réessaie dans un instant.')
+    } finally {
+      setToggling(null)
+    }
   }
 
   return (
     <div className="p-8 flex flex-col gap-6">
+      {toggleError && (
+        <div className="alert alert-error text-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+          </svg>
+          {toggleError}
+          <button className="btn btn-ghost btn-xs ml-auto" onClick={() => setToggleError(null)}>✕</button>
+        </div>
+      )}
       <div className="flex justify-end">
         <button className="btn btn-primary gap-2" onClick={() => setShowModal(true)}>
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -220,8 +244,11 @@ export default function TeamClient() {
                           <button
                             className={`btn btn-xs ${member.is_active ? 'btn-error btn-outline' : 'btn-success btn-outline'}`}
                             onClick={() => toggleActive(member.id, member.is_active)}
+                            disabled={toggling === member.id}
                           >
-                            {member.is_active ? 'Désactiver' : 'Activer'}
+                            {toggling === member.id
+                              ? <span className="loading loading-spinner loading-xs" />
+                              : member.is_active ? 'Désactiver' : 'Activer'}
                           </button>
                         </div>
                       </td>

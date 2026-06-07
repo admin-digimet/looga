@@ -23,51 +23,89 @@ export default function AidePage() {
           ),
         },
         {
-          heading: 'Utilisateurs',
+          heading: ‘Utilisateurs’,
           body: (
-            <ul className="list-disc pl-5 space-y-1.5">
-              <li>Comment trouver un événement ?</li>
-              <li>Comment réserver un ticket ?</li>
-              <li>Comment recevoir mon billet ?</li>
-              <li>Que faire en cas de problème de réservation ?</li>
-            </ul>
+            <div className="space-y-5">
+              <div>
+                <p className="font-semibold text-ink mb-1">Comment trouver un événement ?</p>
+                <p>Sur la page d’accueil, parcours les événements mis en avant. Tu peux aussi utiliser la page <Link href="/search" className="text-orange font-medium hover:underline">Recherche</Link> pour filtrer par catégorie, date ou ville.</p>
+              </div>
+              <div>
+                <p className="font-semibold text-ink mb-1">Comment réserver un ticket ?</p>
+                <p>Sur la page d’un événement, clique sur <strong>Réserver</strong>, choisis ton type de billet, puis finalise le paiement via Mobile Money (MTN, Orange, Wave) ou carte. La confirmation est instantanée.</p>
+              </div>
+              <div>
+                <p className="font-semibold text-ink mb-1">Comment recevoir mon billet ?</p>
+                <p>Ton billet (QR code) est disponible immédiatement dans la section <Link href="/tickets" className="text-orange font-medium hover:underline">Mes billets</Link> de ton compte, accessible sans connexion internet une fois chargé.</p>
+              </div>
+              <div>
+                <p className="font-semibold text-ink mb-1">Que faire en cas de problème de réservation ?</p>
+                <p>Si ton paiement a été débité mais que tu n’as pas reçu ton billet, contacte-nous via la page <Link href="/contact" className="text-orange font-medium hover:underline">Contact</Link> en indiquant ton email et le nom de l’événement. Nous traitons toutes les demandes sous 24 h.</p>
+              </div>
+            </div>
           ),
         },
         {
-          heading: 'Organisateurs',
+          heading: ‘Organisateurs’,
           body: (
-            <ul className="list-disc pl-5 space-y-1.5">
-              <li>Comment créer un événement ?</li>
-              <li>Comment modifier un événement ?</li>
-              <li>Comment voir mes réservations ?</li>
-              <li>Comment recevoir les informations des participants ?</li>
-            </ul>
+            <div className="space-y-5">
+              <div>
+                <p className="font-semibold text-ink mb-1">Comment créer un événement ?</p>
+                <p>Connecte-toi au <a href="https://dashboard.looga.ci" target="_blank" rel="noopener noreferrer" className="text-orange font-medium hover:underline">Dashboard organisateur</a>, clique sur <strong>Créer un événement</strong> et remplis les informations (titre, date, lieu, types de billets, image).</p>
+              </div>
+              <div>
+                <p className="font-semibold text-ink mb-1">Comment modifier un événement ?</p>
+                <p>Dans ton dashboard, va dans <strong>Événements</strong>, clique sur l’événement concerné puis sur <strong>Modifier</strong>. Les modifications sont appliquées immédiatement sur l’app.</p>
+              </div>
+              <div>
+                <p className="font-semibold text-ink mb-1">Comment voir mes réservations ?</p>
+                <p>La page <strong>Vue d’ensemble</strong> de ton dashboard affiche le nombre de billets vendus, le taux de remplissage et les scans en temps réel.</p>
+              </div>
+              <div>
+                <p className="font-semibold text-ink mb-1">Comment recevoir les informations des participants ?</p>
+                <p>Depuis la page détail de ton événement dans le dashboard, tu peux voir la liste des participants avec leurs noms et numéros de contact.</p>
+              </div>
+            </div>
           ),
         },
         {
-          heading: 'Application mobile',
+          heading: ‘Application mobile’,
           body: (
             <>
-              <ul className="list-disc pl-5 space-y-1.5 mb-3">
-                <li>Comment télécharger l’application ?</li>
-                <li>Comment se connecter ?</li>
-                <li>Problèmes de connexion</li>
-              </ul>
-              <p>
-                Plus d’infos sur l’app mobile :{' '}
-                <Link href="/mobile" className="text-orange font-medium hover:underline">découvrir Looga mobile</Link>.
-              </p>
+              <div className="space-y-5 mb-4">
+                <div>
+                  <p className="font-semibold text-ink mb-1">Comment télécharger l’application ?</p>
+                  <p>L’application Looga est disponible sur <Link href="/mobile" className="text-orange font-medium hover:underline">notre page mobile</Link>. En attendant la sortie sur les stores officiels, tu peux utiliser l’application directement depuis ton navigateur.</p>
+                </div>
+                <div>
+                  <p className="font-semibold text-ink mb-1">Comment se connecter ?</p>
+                  <p>Utilise ton email et mot de passe Looga sur l’écran de connexion. Si tu n’as pas encore de compte, crée-en un gratuitement en quelques secondes.</p>
+                </div>
+                <div>
+                  <p className="font-semibold text-ink mb-1">Problèmes de connexion</p>
+                  <p>Si tu ne peux pas te connecter, vérifie ton email et mot de passe. En cas d’oubli de mot de passe, utilise l’option <strong>Mot de passe oublié</strong> sur l’écran de connexion. Si le problème persiste, <Link href="/contact" className="text-orange font-medium hover:underline">contacte le support</Link>.</p>
+                </div>
+              </div>
             </>
           ),
         },
         {
-          heading: 'Réservations & paiements',
+          heading: ‘Réservations & paiements’,
           body: (
-            <ul className="list-disc pl-5 space-y-1.5">
-              <li>Comment fonctionne la réservation ?</li>
-              <li>Est-ce sécurisé ?</li>
-              <li>Peut-on annuler une réservation ?</li>
-            </ul>
+            <div className="space-y-5">
+              <div>
+                <p className="font-semibold text-ink mb-1">Comment fonctionne la réservation ?</p>
+                <p>Sélectionne un événement, choisis ton type de billet et procède au paiement. Une fois le paiement confirmé, ton billet QR code est généré et accessible immédiatement dans <strong>Mes billets</strong>.</p>
+              </div>
+              <div>
+                <p className="font-semibold text-ink mb-1">Est-ce sécurisé ?</p>
+                <p>Oui. Les paiements sont traités par <strong>GeniusPay</strong>, un prestataire de paiement sécurisé. Looga ne stocke aucune donnée bancaire ou financière. Toutes les transactions sont chiffrées.</p>
+              </div>
+              <div>
+                <p className="font-semibold text-ink mb-1">Peut-on annuler une réservation ?</p>
+                <p>La politique d’annulation dépend de chaque organisateur et est précisée sur la page de l’événement. En cas de litige, contacte-nous via la page <Link href="/contact" className="text-orange font-medium hover:underline">Contact</Link>.</p>
+              </div>
+            </div>
           ),
         },
         {
