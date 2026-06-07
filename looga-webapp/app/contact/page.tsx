@@ -12,28 +12,28 @@ const channels = [
   {
     icon: Mail,
     title: 'Email',
-    value: 'contact@looga.ci',
-    description: 'Réponse sous 24 à 48h ouvrées.',
+    value: 'contact@looga-ci.com',
+    description: 'Réponse sous 24 à 48 h ouvrées.',
   },
   {
     icon: Phone,
     title: 'Téléphone',
     value: '+225 00 00 00 00',
-    description: 'Lun–Ven · 9h–18h (GMT).',
+    description: 'Lun – Ven · 9 h – 18 h (GMT).',
   },
   {
     icon: MessageSquare,
     title: 'Réseaux sociaux',
-    value: '@looga.ci',
-    description: 'Sur Twitter, Instagram et LinkedIn.',
+    value: '@looga.exp',
+    description: 'Instagram, Twitter / X, LinkedIn, TikTok.',
   },
 ];
 
 export default function ContactPage() {
   return (
     <InfoPage
-      title="Contactez-nous"
-      intro="Une question, un partenariat, une suggestion ? Nous serons ravis d’échanger avec vous."
+      title="Une question, un partenariat ou une suggestion ?"
+      intro="Notre équipe est disponible pour répondre à vos questions et vous accompagner sur Looga."
     >
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
         {channels.map((c) => {
@@ -52,17 +52,24 @@ export default function ContactPage() {
       </div>
 
       <div className="mb-10">
+        <h2 className="font-heading font-bold text-ink text-xl mb-1">Écrivez-nous</h2>
+        <p className="text-ink-muted text-sm mb-4">
+          Remplissez le formulaire ci-dessous et notre équipe reviendra vers vous sous 24 à 48 h ouvrées.
+        </p>
         <ContactForm />
       </div>
 
       <div className="bg-white rounded-2xl p-6 md:p-8 border border-cream-2">
         <h2 className="font-heading font-bold text-ink text-xl mb-2">
-          Vous êtes organisateur·trice ?
+          Vous êtes organisateur ?
         </h2>
-        <p className="text-ink-muted text-sm mb-4">
-          Pour toute demande commerciale ou de partenariat, écrivez-nous à
-          <span className="font-medium text-ink"> partners@looga.ci</span>.
-          Notre équipe revient vers vous rapidement.
+        <p className="text-ink-muted text-sm mb-2">
+          Pour toute demande commerciale, partenariat ou accompagnement organisateur, contactez directement notre équipe dédiée.
+        </p>
+        <p className="text-ink-muted text-sm">
+          Contact :{' '}
+          <span className="font-medium text-ink">partenariat@looga-ci.com</span>
+          {' '}— notre équipe reviendra rapidement vers vous afin d’échanger sur votre projet ou vos événements.
         </p>
       </div>
     </InfoPage>

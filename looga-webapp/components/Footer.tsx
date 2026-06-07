@@ -10,9 +10,9 @@ export function Footer() {
             <h4 className="font-semibold text-lg mb-4">Utiliser Looga</h4>
             <ul className="space-y-3 text-sm text-gray-300">
               <li><Link href="/organisateur" className="hover:text-white">Créer un événement</Link></li>
-              <li><Link href="/organisateur" className="hover:text-white">Tarifs</Link></li>
-              <li><Link href="/aide" className="hover:text-white">Application mobile</Link></li>
-              <li><Link href="/organisateur" className="hover:text-white">Guides organisateurs</Link></li>
+              <li><Link href="/organisateur#tarifs" className="hover:text-white">Tarifs</Link></li>
+              <li><Link href="/mobile" className="hover:text-white">Application mobile</Link></li>
+              <li><Link href="/organisateur#guides" className="hover:text-white">Guides organisateurs</Link></li>
               <li><Link href="/securite" className="hover:text-white">Sécurité</Link></li>
               <li><Link href="/communaute" className="hover:text-white">Règles de la communauté</Link></li>
             </ul>
