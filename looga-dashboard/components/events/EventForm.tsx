@@ -301,11 +301,16 @@ export default function EventForm({ event, mode }: EventFormProps) {
                     />
                   </label>
                   <label className="form-control">
-                    <div className="label"><span className="label-text text-xs font-medium">Prix (FCFA) *</span></div>
+                    <div className="label">
+                      <span className="label-text text-xs font-medium">Prix (FCFA) *</span>
+                      {ticket.price === 0 && (
+                        <span className="badge badge-success badge-sm">Gratuit</span>
+                      )}
+                    </div>
                     <input
                       type="number"
                       min={0}
-                      placeholder="2000"
+                      placeholder="0 = gratuit, sinon montant"
                       className="input input-bordered input-sm"
                       value={ticket.price}
                       onChange={(e) => handleTicketChange(idx, 'price', Number(e.target.value))}
