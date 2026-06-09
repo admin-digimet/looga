@@ -12,13 +12,14 @@ export default async function TopNav({ title, subtitle, backHref }: TopNavProps)
   const { data: { user } } = await supabase.auth.getUser()
 
   let organizerName = 'Organisateur'
+  let logoUrl: string | null = null
   if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('name')
-      .eq('id', user.id)
-      .single()
+    const [{ data: profile }, { data: organizer }] = await Promise.all([
+      supabase.from('profiles').select('name').eq('id', user.id).single(),
+      supabase.from('organizers').select('logo_url').eq('user_id', user.id).single(),
+    ])
     if (profile?.name) organizerName = profile.name
+    if (organizer?.logo_url) logoUrl = organizer.logo_url
   }
 
   const initials = organizerName
@@ -51,11 +52,18 @@ export default async function TopNav({ title, subtitle, backHref }: TopNavProps)
       </div>
       <div className="flex items-center gap-3">
         <span className="text-sm text-base-content/70 hidden sm:block">{organizerName}</span>
-        <div className="avatar avatar-placeholder">
-          <div className="bg-primary text-primary-content rounded-full w-9 flex items-center justify-center">
-            <span className="text-sm font-bold">{initials}</span>
+        {logoUrl ? (
+          <div className="w-9 h-9 rounded-full overflow-hidden shrink-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={logoUrl} alt="logo" className="w-full h-full object-cover" />
           </div>
-        </div>
+        ) : (
+          <div className="avatar avatar-placeholder">
+            <div className="bg-primary text-primary-content rounded-full w-9 flex items-center justify-center">
+              <span className="text-sm font-bold">{initials}</span>
+            </div>
+          </div>
+        )}
       </div>
     </header>
   )

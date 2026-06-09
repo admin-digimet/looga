@@ -50,11 +50,16 @@ export function ProfileMenu() {
           aria-haspopup="menu"
           aria-expanded={open}
           aria-label={`Ouvrir le menu de ${fullName}`}
-          className={`w-10 h-10 rounded-full bg-orange flex items-center justify-center text-white font-bold text-sm cursor-pointer transition-all ring-offset-2 ring-offset-white hover:ring-4 hover:ring-orange/25 focus:outline-none focus-visible:ring-4 focus-visible:ring-orange/40 ${
+          className={`w-10 h-10 rounded-full bg-orange overflow-hidden flex items-center justify-center text-white font-bold text-sm cursor-pointer transition-all ring-offset-2 ring-offset-white hover:ring-4 hover:ring-orange/25 focus:outline-none focus-visible:ring-4 focus-visible:ring-orange/40 ${
             open ? 'ring-4 ring-orange/30' : ''
           }`}
         >
-          {initial}
+          {user?.avatar_url ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={user.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+          ) : (
+            <span>{initial}</span>
+          )}
         </button>
 
         {open && (
