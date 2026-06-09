@@ -97,7 +97,11 @@ export default function EventForm({ event, mode }: EventFormProps) {
   }
 
   function removeTicketType(index: number) {
-    setTicketTypes((prev) => prev.filter((_, i) => i !== index))
+    setTicketTypes((prev) => {
+      const next = [...prev]
+      next.splice(index, 1)
+      return next
+    })
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -337,18 +341,18 @@ export default function EventForm({ event, mode }: EventFormProps) {
 
           <div className="flex flex-col gap-4">
             {ticketTypes.map((ticket, idx) => (
-              <div key={idx} className="bg-base-100 rounded-xl p-4 border border-base-300">
+              <div key={(ticket as { id?: string }).id ?? `new-${idx}`} className="bg-base-100 rounded-xl p-4 border border-base-300">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-sm font-medium text-base-content/60">Billet #{idx + 1}</span>
-                  {ticketTypes.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeTicketType(idx)}
-                      className="btn btn-ghost btn-xs text-error"
-                    >
-                      Supprimer
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => removeTicketType(idx)}
+                    className="btn btn-ghost btn-xs text-error"
+                    disabled={ticketTypes.length <= 1}
+                    title={ticketTypes.length <= 1 ? 'Au moins 1 type de billet requis' : 'Supprimer ce type de billet'}
+                  >
+                    Supprimer
+                  </button>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <label className="form-control md:col-span-2">
