@@ -41,34 +41,46 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  if (Array.isArray(ticket_types) && ticket_types.length > 0) {
-    const toUpdate = ticket_types.filter((t: Record<string, unknown>) => t.id)
-    const toInsert = ticket_types.filter((t: Record<string, unknown>) => !t.id)
+  if (Array.isArray(ticket_types)) {
+    // Snapshot AVANT toute modification pour calculer les suppressions correctement
+    const { data: snap } = await admin
+      .from('ticket_types')
+      .select('id')
+      .eq('event_id', id)
+    const currentIds = new Set((snap ?? []).map((r: { id: string }) => r.id))
 
-    // UPDATE les types existants (change prix, nom, stock, etc.)
-    for (const t of toUpdate) {
-      const { id: ttId, ...fields } = t as Record<string, unknown>
-      await admin.from('ticket_types').update(fields).eq('id', ttId).eq('event_id', id)
+    const withId = ticket_types.filter((t: Record<string, unknown>) => t.id)
+    const withoutId = ticket_types.filter((t: Record<string, unknown>) => !t.id)
+    const keptIds = new Set(withId.map((t: Record<string, unknown>) => t.id as string))
+
+    // 1. UPDATE les types existants
+    for (const t of withId) {
+      const row = t as Record<string, unknown>
+      const typeId = row.id as string
+      const updateFields: Record<string, unknown> = {}
+      for (const k of ['name', 'description', 'price', 'stock_total', 'advantages']) {
+        if (k in row) updateFields[k] = row[k]
+      }
+      await admin.from('ticket_types').update(updateFields).eq('id', typeId).eq('event_id', id)
     }
 
-    // INSERT les nouveaux types
-    if (toInsert.length > 0) {
-      const { error: insertErr } = await admin.from('ticket_types').insert(
-        toInsert.map((t: Record<string, unknown>) => {
-          const { id: _unused, ...rest } = t  // ne pas passer id=undefined
-          return { ...rest, event_id: id }
-        })
-      )
+    // 2. INSERT les nouveaux types
+    if (withoutId.length > 0) {
+      const rows = withoutId.map((t: Record<string, unknown>) => ({
+        name: t.name,
+        description: t.description ?? '',
+        price: t.price,
+        stock_total: t.stock_total,
+        advantages: t.advantages ?? '',
+        event_id: id,
+      }))
+      const { error: insertErr } = await admin.from('ticket_types').insert(rows)
       if (insertErr) return NextResponse.json({ error: insertErr.message }, { status: 500 })
     }
 
-    // Supprimer les types retirés du formulaire (ignore FK si des billets existent)
-    const submittedIds = new Set(toUpdate.map((t: Record<string, unknown>) => t.id).filter(Boolean))
-    const { data: current } = await admin.from('ticket_types').select('id').eq('event_id', id)
-    const toDelete = (current ?? []).filter((r: { id: string }) => !submittedIds.has(r.id))
-    for (const row of toDelete) {
-      await admin.from('ticket_types').delete().eq('id', row.id)
-      // Si FK violation (billets existants), Supabase ignore silencieusement côté route
+    // 3. DELETE les types retirés — best-effort, ignore FK violations
+    for (const rid of [...currentIds].filter((rid) => !keptIds.has(rid))) {
+      await admin.from('ticket_types').delete().eq('id', rid)
     }
   }
 
