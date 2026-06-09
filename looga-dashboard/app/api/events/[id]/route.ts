@@ -78,9 +78,23 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       if (insertErr) return NextResponse.json({ error: insertErr.message }, { status: 500 })
     }
 
-    // 3. DELETE les types retirés — best-effort, ignore FK violations
+    // 3. Gérer les types retirés
+    const deactivated: string[] = []
     for (const rid of [...currentIds].filter((rid) => !keptIds.has(rid))) {
-      await admin.from('ticket_types').delete().eq('id', rid)
+      const { error: delErr } = await admin.from('ticket_types').delete().eq('id', rid)
+      if (delErr) {
+        // FK violation : des billets ont été vendus → désactiver (stock = 0) plutôt que supprimer
+        const { data: tt } = await admin.from('ticket_types').select('name').eq('id', rid).single()
+        await admin.from('ticket_types').update({ stock_total: 0 }).eq('id', rid)
+        if (tt?.name) deactivated.push(tt.name)
+      }
+    }
+
+    if (deactivated.length > 0) {
+      return NextResponse.json({
+        ...data,
+        warning: `Certains types de billets ont des ventes actives et ne peuvent pas être supprimés. Leur stock a été mis à 0 : ${deactivated.join(', ')}.`,
+      })
     }
   }
 
