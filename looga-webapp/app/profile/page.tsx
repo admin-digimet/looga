@@ -58,18 +58,24 @@ export default function ProfilePage() {
           fileType: 'image/webp',
         });
         const path = `${user.id}/avatar.webp`;
-        await axios.post(
+        const buffer = await compressed.arrayBuffer();
+        const uploadRes = await fetch(
           `${SUPABASE_URL}/storage/v1/object/avatars/${path}`,
-          compressed,
           {
+            method: 'POST',
             headers: {
               apikey: SUPABASE_ANON_KEY,
               Authorization: `Bearer ${token}`,
               'Content-Type': 'image/webp',
               'x-upsert': 'true',
             },
+            body: buffer,
           }
         );
+        if (!uploadRes.ok) {
+          const err = await uploadRes.json().catch(() => ({}));
+          throw new Error(err.message ?? 'Upload échoué');
+        }
         avatarUrl = `${SUPABASE_URL}/storage/v1/object/public/avatars/${path}`;
       }
 
