@@ -3,7 +3,10 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Pause, Play, Search, Trash2, UserCog } from 'lucide-react'
 import { getAdminUsers, updateAdminUser, deleteAdminUser } from '@/lib/api/admin'
+import Pagination from '@/components/Pagination'
 import type { Profile } from '@/types'
+
+const PAGE_SIZE = 20
 
 type ProfileWithEmail = Profile & { email?: string }
 
@@ -38,6 +41,7 @@ export function UsersTable() {
   const [roleFilter, setRoleFilter] = useState('tous')
   const [confirmDelete, setConfirmDelete] = useState<ProfileWithEmail | null>(null)
   const [editingRole, setEditingRole] = useState<ProfileWithEmail | null>(null)
+  const [page, setPage] = useState(1)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -56,6 +60,8 @@ export function UsersTable() {
     const t = setTimeout(load, 200)
     return () => clearTimeout(t)
   }, [load])
+
+  useEffect(() => { setPage(1) }, [roleFilter, search])
 
   async function handleToggleActive(u: ProfileWithEmail) {
     setActionLoading(u.id)
@@ -155,7 +161,7 @@ export function UsersTable() {
                   </td>
                 </tr>
               )}
-              {users.map((u) => {
+              {users.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((u) => {
                 const isLoading = actionLoading === u.id
                 const initials = (u.name || u.email || '?').slice(0, 2).toUpperCase()
                 return (
@@ -219,6 +225,15 @@ export function UsersTable() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      <div className="flex items-center justify-between px-1">
+        <p className="text-xs text-base-content/40">{users.length} utilisateur{users.length > 1 ? 's' : ''}</p>
+        <Pagination
+          page={page}
+          totalPages={Math.max(1, Math.ceil(users.length / PAGE_SIZE))}
+          onPageChange={setPage}
+        />
       </div>
 
       {editingRole && (

@@ -30,14 +30,25 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   const body = await request.json()
   const admin = createAdminClient()
 
+  const { ticket_types, ...eventFields } = body
+
   const { data, error } = await admin
     .from('events')
-    .update({ ...body, updated_at: new Date().toISOString() })
+    .update({ ...eventFields, updated_at: new Date().toISOString() })
     .eq('id', id)
     .select()
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  if (Array.isArray(ticket_types) && ticket_types.length > 0) {
+    await admin.from('ticket_types').delete().eq('event_id', id)
+    const { error: ttError } = await admin.from('ticket_types').insert(
+      ticket_types.map((t: Record<string, unknown>) => ({ ...t, event_id: id }))
+    )
+    if (ttError) return NextResponse.json({ error: ttError.message }, { status: 500 })
+  }
+
   return NextResponse.json(data)
 }
 

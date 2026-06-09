@@ -14,6 +14,7 @@ export function useEvents(category?: EventCategory) {
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.nextPage,
     staleTime: STALE_TIME,
+    refetchInterval: 60_000,
     refetchOnMount: true,
     retry: 2,
   });
@@ -24,6 +25,7 @@ export function useEvent(id: string) {
     queryKey: ['event', id],
     queryFn: () => eventsApi.getEventById(id),
     staleTime: STALE_TIME,
+    refetchInterval: 60_000,
     refetchOnMount: true,
     enabled: !!id,
   });

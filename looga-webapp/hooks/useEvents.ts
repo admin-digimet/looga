@@ -20,6 +20,7 @@ export function useEvents(params: UseEventsParams = {}) {
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.nextPage,
     staleTime: 30_000,
+    refetchInterval: 60_000,
   });
 }
 
@@ -28,6 +29,7 @@ export function useEvent(id: string) {
     queryKey: ['event', id],
     queryFn: () => eventsApi.getEventById(id),
     staleTime: 30_000,
+    refetchInterval: 60_000,
     enabled: !!id,
   });
 }
@@ -49,6 +51,7 @@ export function useSearchEvents(params: SearchEventsParams) {
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.nextPage,
     staleTime: 30_000,
+    refetchInterval: 60_000,
   });
 }
 
@@ -57,6 +60,7 @@ export function useSimilarEvents(params: { category?: string; excludeId: string;
     queryKey: ['events', 'similar', params.category ?? '', params.excludeId, params.limit ?? 4],
     queryFn: () => eventsApi.getSimilarEvents(params),
     staleTime: 60_000,
+    refetchInterval: 120_000,
     enabled: !!params.excludeId,
   });
 }

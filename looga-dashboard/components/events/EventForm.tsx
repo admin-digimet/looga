@@ -151,7 +151,7 @@ export default function EventForm({ event, mode }: EventFormProps) {
     const res = await fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(mode === 'create' ? payload : submitForm),
+      body: JSON.stringify(mode === 'create' ? payload : { ...submitForm, ticket_types: ticketTypes }),
     })
 
     const data = await res.json()

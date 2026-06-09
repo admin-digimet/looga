@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import TopNav from '@/components/layout/TopNav'
 import EventStatusBadge from '@/components/events/EventStatusBadge'
+import EventDeleteButton from '@/components/events/EventDeleteButton'
 import type { Event, EventStatus } from '@/types'
 
 function formatDate(dateStr: string) {
@@ -14,14 +15,17 @@ function formatPrice(amount: number) {
   return new Intl.NumberFormat('fr-FR').format(amount) + ' FCFA'
 }
 
+const PAGE_SIZE = 20
+
 export default async function EventsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>
+  searchParams: Promise<{ status?: string; page?: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  const { status: filterStatus = 'all' } = await searchParams
+  const { status: filterStatus = 'all', page: pageParam = '1' } = await searchParams
+  const page = Math.max(1, parseInt(pageParam, 10) || 1)
 
   const { data: organizer } = await supabase
     .from('organizers')
@@ -29,15 +33,28 @@ export default async function EventsPage({
     .eq('user_id', user!.id)
     .single()
 
-  const { data: allEvents } = await supabase
+  const organizerId = organizer?.id ?? ''
+
+  // Compter le total pour la pagination
+  let countQuery = supabase
+    .from('events')
+    .select('id', { count: 'exact', head: true })
+    .eq('organizer_id', organizerId)
+  if (filterStatus !== 'all') countQuery = countQuery.eq('status', filterStatus)
+  const { count: totalCount } = await countQuery
+
+  const totalPages = Math.max(1, Math.ceil((totalCount ?? 0) / PAGE_SIZE))
+  const safePage = Math.min(page, totalPages)
+
+  // Récupérer seulement la page courante
+  let eventsQuery = supabase
     .from('events')
     .select('*, ticket_types(*)')
-    .eq('organizer_id', organizer?.id ?? '')
+    .eq('organizer_id', organizerId)
     .order('event_date', { ascending: false })
-
-  const events = filterStatus === 'all'
-    ? allEvents
-    : (allEvents ?? []).filter((e) => e.status === filterStatus)
+    .range((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE - 1)
+  if (filterStatus !== 'all') eventsQuery = eventsQuery.eq('status', filterStatus)
+  const { data: events } = await eventsQuery
 
   const statusFilters: { label: string; value: EventStatus | 'all' }[] = [
     { label: 'Tous', value: 'all' },
@@ -47,19 +64,30 @@ export default async function EventsPage({
     { label: 'Annulés', value: 'cancelled' },
   ]
 
+  function pageHref(p: number) {
+    const params = new URLSearchParams()
+    if (filterStatus !== 'all') params.set('status', filterStatus)
+    if (p > 1) params.set('page', String(p))
+    return `/events${params.toString() ? `?${params.toString()}` : ''}`
+  }
+
   return (
     <>
-      <TopNav title="Événements" subtitle={`${events?.length ?? 0} événement(s)${filterStatus !== 'all' ? ` • ${statusFilters.find(f => f.value === filterStatus)?.label}` : ' au total'}`} />
+      <TopNav title="Événements" subtitle={`${totalCount ?? 0} événement(s)${filterStatus !== 'all' ? ` • ${statusFilters.find(f => f.value === filterStatus)?.label}` : ' au total'}`} />
 
       <div className="p-8 flex flex-col gap-6">
         {/* Header actions */}
         <div className="flex items-center justify-between">
-          <div className="tabs tabs-box bg-base-200">
+          <div className="flex items-center gap-1 bg-base-200 rounded-xl p-1">
             {statusFilters.map((f) => (
               <Link
                 key={f.value}
                 href={f.value === 'all' ? '/events' : `/events?status=${f.value}`}
-                className={`tab text-sm ${filterStatus === f.value ? 'tab-active' : ''}`}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all
+                  ${filterStatus === f.value
+                    ? 'bg-base-100 text-base-content shadow-sm'
+                    : 'text-base-content/60 hover:text-base-content'
+                  }`}
               >
                 {f.label}
               </Link>
@@ -147,6 +175,7 @@ export default async function EventsPage({
                           >
                             Modifier
                           </Link>
+                          <EventDeleteButton eventId={event.id} />
                         </div>
                       </td>
                     </tr>
@@ -154,6 +183,27 @@ export default async function EventsPage({
                 </tbody>
               </table>
             </div>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-1">
+            {safePage > 1 && (
+              <Link href={pageHref(safePage - 1)} className="btn btn-ghost btn-sm">‹ Précédent</Link>
+            )}
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+              <Link
+                key={p}
+                href={pageHref(p)}
+                className={`btn btn-sm ${p === safePage ? 'btn-primary' : 'btn-ghost'}`}
+              >
+                {p}
+              </Link>
+            ))}
+            {safePage < totalPages && (
+              <Link href={pageHref(safePage + 1)} className="btn btn-ghost btn-sm">Suivant ›</Link>
+            )}
           </div>
         )}
       </div>

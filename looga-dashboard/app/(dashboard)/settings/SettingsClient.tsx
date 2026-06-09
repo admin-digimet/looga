@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 interface Props {
   initialName: string
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export default function SettingsClient({ initialName, initialLogoUrl, organizerId }: Props) {
+  const router = useRouter()
   const [name, setName] = useState(initialName)
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState<string | null>(initialLogoUrl)
@@ -60,6 +62,7 @@ export default function SettingsClient({ initialName, initialLogoUrl, organizerI
 
         const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
         logoUrl = publicUrl
+        setLogoPreview(publicUrl)
       }
 
       const res = await fetch('/api/organizer', {
@@ -77,6 +80,7 @@ export default function SettingsClient({ initialName, initialLogoUrl, organizerI
       setLogoFile(null)
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)
+      router.refresh()
     } catch {
       setError('Une erreur est survenue. Réessaie.')
     } finally {

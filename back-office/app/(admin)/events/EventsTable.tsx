@@ -2,9 +2,12 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Trash2, Ban, Search } from 'lucide-react'
+import { Trash2, Ban, RefreshCw, Search } from 'lucide-react'
 import { deleteAdminEvent, updateAdminEventStatus, getAdminEvents } from '@/lib/api/admin'
+import Pagination from '@/components/Pagination'
 import type { AdminEventListItem } from '@/types'
+
+const PAGE_SIZE = 20
 
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
   published: { label: 'Publié', className: 'badge-success' },
@@ -57,6 +60,7 @@ export function EventsTable({ events: initialEvents }: { events?: AdminEventList
   const [confirmDelete, setConfirmDelete] = useState<AdminEventListItem | null>(null)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [actionError, setActionError] = useState('')
+  const [page, setPage] = useState(1)
 
   useEffect(() => {
     if (initialEvents) return
@@ -75,6 +79,8 @@ export function EventsTable({ events: initialEvents }: { events?: AdminEventList
       (e.organizer_name ?? '').toLowerCase().includes(search.toLowerCase())
     return matchStatus && matchSearch
   })
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   const handleDelete = useCallback(async (event: AdminEventListItem) => {
     setActionLoading(event.id)
@@ -92,12 +98,12 @@ export function EventsTable({ events: initialEvents }: { events?: AdminEventList
     }
   }, [router])
 
-  const handleCancel = useCallback(async (event: AdminEventListItem) => {
+  const handleStatusChange = useCallback(async (event: AdminEventListItem, newStatus: 'cancelled' | 'published') => {
     setActionLoading(event.id)
     setActionError('')
     try {
-      await updateAdminEventStatus(event.id, 'cancelled')
-      setEvents((prev) => prev.map((e) => e.id === event.id ? { ...e, status: 'cancelled' } : e))
+      await updateAdminEventStatus(event.id, newStatus)
+      setEvents((prev) => prev.map((e) => e.id === event.id ? { ...e, status: newStatus } : e))
       router.refresh()
     } catch (err: unknown) {
       const e = err as { message?: string }
@@ -118,13 +124,13 @@ export function EventsTable({ events: initialEvents }: { events?: AdminEventList
             className="input input-bordered bg-base-100 w-full pl-9 text-sm"
             placeholder="Rechercher par titre ou organisateur..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); setPage(1) }}
           />
         </div>
         <select
           className="select select-bordered bg-base-100 text-sm w-full sm:w-48"
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }}
         >
           <option value="all">Tous les statuts</option>
           <option value="published">Publiés</option>
@@ -176,7 +182,7 @@ export function EventsTable({ events: initialEvents }: { events?: AdminEventList
                   </td>
                 </tr>
               )}
-              {filtered.map((event) => {
+              {paginated.map((event) => {
                 const statusInfo = STATUS_LABELS[event.status] ?? { label: event.status, className: 'badge-ghost' }
                 const isLoading = actionLoading === event.id
                 return (
@@ -197,14 +203,23 @@ export function EventsTable({ events: initialEvents }: { events?: AdminEventList
                     <td className="text-base-content/50 whitespace-nowrap">{formatDate(event.created_at)}</td>
                     <td>
                       <div className="flex items-center justify-end gap-1">
-                        {event.status !== 'cancelled' && (
+                        {event.status === 'cancelled' ? (
+                          <button
+                            className="btn btn-ghost btn-xs text-success"
+                            title="Republier"
+                            disabled={isLoading}
+                            onClick={() => handleStatusChange(event, 'published')}
+                          >
+                            {isLoading ? <span className="loading loading-spinner loading-xs" /> : <RefreshCw size={14} />}
+                          </button>
+                        ) : (
                           <button
                             className="btn btn-ghost btn-xs text-warning"
                             title="Suspendre"
                             disabled={isLoading}
-                            onClick={() => handleCancel(event)}
+                            onClick={() => handleStatusChange(event, 'cancelled')}
                           >
-                            <Ban size={14} />
+                            {isLoading ? <span className="loading loading-spinner loading-xs" /> : <Ban size={14} />}
                           </button>
                         )}
                         <button
@@ -223,6 +238,13 @@ export function EventsTable({ events: initialEvents }: { events?: AdminEventList
             </tbody>
           </table>
         </div>
+      </div>
+
+      <div className="flex items-center justify-between px-1">
+        <p className="text-xs text-base-content/40">
+          {filtered.length} événement{filtered.length > 1 ? 's' : ''}
+        </p>
+        <Pagination page={page} totalPages={totalPages} onPageChange={(p) => setPage(p)} />
       </div>
 
       {/* Modal confirmation suppression */}

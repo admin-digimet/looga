@@ -111,6 +111,17 @@ export async function toggleOrganizerSuspension(
   }))
 }
 
+export async function toggleOrganizerApproval(
+  organizerId: string,
+  approve: boolean,
+): Promise<void> {
+  await jsonOrThrow(await fetch(`/api/admin/organizers/${organizerId}/approve`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ approve }),
+  }))
+}
+
 // ─── Payouts ─────────────────────────────────────────────────────────────────
 
 export type PayoutStatus = 'pending' | 'approved' | 'paid' | 'rejected'
