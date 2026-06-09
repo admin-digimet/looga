@@ -91,9 +91,10 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     }
 
     if (deactivated.length > 0) {
+      const names = deactivated.join(', ')
       return NextResponse.json({
         ...data,
-        warning: `Certains types de billets ont des ventes actives et ne peuvent pas être supprimés. Leur stock a été mis à 0 : ${deactivated.join(', ')}.`,
+        warning: `Des billets ont déjà été émis pour : ${names}. Ces types ne peuvent pas être supprimés. Ils ont été désactivés (0 place restante) — les billets existants restent valides mais personne ne peut en prendre de nouveaux.`,
       })
     }
   }
