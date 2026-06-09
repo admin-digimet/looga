@@ -73,10 +73,17 @@ export default function ProfilePage() {
         avatarUrl = `${SUPABASE_URL}/storage/v1/object/public/avatars/${path}`;
       }
 
-      await apiClient.patch(
-        `/rest/v1/profiles?id=eq.${user.id}`,
+      await axios.patch(
+        `${SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}`,
         { name: form.name, phone: form.phone, avatar_url: avatarUrl },
-        { headers: { Prefer: 'return=minimal' } }
+        {
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            Prefer: 'return=minimal',
+          },
+        }
       );
 
       if (token) {
