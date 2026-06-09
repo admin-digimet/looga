@@ -5,6 +5,9 @@ import { Check, CircleSlash, Search, Wallet } from 'lucide-react'
 import { getAdminPayouts, updatePayout } from '@/lib/api/admin'
 import type { PayoutRequest, PayoutStatus } from '@/lib/api/admin'
 import { PaymentMethodIcon } from '@/components/PaymentMethodIcon'
+import Pagination from '@/components/Pagination'
+
+const PAGE_SIZE = 20
 
 const STATUS_LABEL: Record<PayoutStatus, string> = {
   pending: 'En attente',
@@ -44,6 +47,7 @@ export function PayoutsTable() {
   const [search, setSearch] = useState('')
   const [actionModal, setActionModal] = useState<{ payout: PayoutRequest; action: PayoutStatus } | null>(null)
   const [note, setNote] = useState('')
+  const [page, setPage] = useState(1)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -89,13 +93,13 @@ export function PayoutsTable() {
             className="input input-bordered bg-base-100 w-full pl-9 text-sm"
             placeholder="Rechercher un organisateur..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); setPage(1) }}
           />
         </div>
         <select
           className="select select-bordered bg-base-100 text-sm w-full sm:w-48"
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }}
         >
           <option value="all">Tous les statuts</option>
           <option value="pending">En attente</option>
@@ -140,7 +144,7 @@ export function PayoutsTable() {
                   </td>
                 </tr>
               )}
-              {payouts.map((p) => {
+              {payouts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((p) => {
                 const isLoading = actionLoading === p.id
                 return (
                   <tr key={p.id} className={isLoading ? 'opacity-50' : ''}>
@@ -213,6 +217,11 @@ export function PayoutsTable() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      <div className="flex items-center justify-between px-1">
+        <p className="text-xs text-base-content/40">{payouts.length} demande{payouts.length > 1 ? 's' : ''}</p>
+        <Pagination page={page} totalPages={Math.max(1, Math.ceil(payouts.length / PAGE_SIZE))} onPageChange={setPage} />
       </div>
 
       {actionModal && (

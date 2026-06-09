@@ -8,6 +8,9 @@ import {
   type SupportMessage,
   type SupportStatus,
 } from '@/lib/api/admin'
+import Pagination from '@/components/Pagination'
+
+const PAGE_SIZE = 20
 
 const STATUS_LABEL: Record<SupportStatus, string> = {
   pending: 'En attente',
@@ -38,6 +41,7 @@ export function SupportTable() {
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<SupportMessage | null>(null)
   const [note, setNote] = useState('')
+  const [page, setPage] = useState(1)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -86,13 +90,13 @@ export function SupportTable() {
             className="input input-bordered bg-base-100 w-full pl-9 text-sm"
             placeholder="Rechercher par sujet, nom ou email..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); setPage(1) }}
           />
         </div>
         <select
           className="select select-bordered bg-base-100 text-sm w-full sm:w-48"
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }}
         >
           <option value="all">Tous les statuts</option>
           <option value="pending">En attente</option>
@@ -135,7 +139,7 @@ export function SupportTable() {
                   </td>
                 </tr>
               )}
-              {messages.map((m) => {
+              {messages.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((m) => {
                 const isLoading = actionLoading === m.id
                 return (
                   <tr key={m.id} className={isLoading ? 'opacity-50' : ''}>
@@ -178,6 +182,11 @@ export function SupportTable() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      <div className="flex items-center justify-between px-1">
+        <p className="text-xs text-base-content/40">{messages.length} message{messages.length > 1 ? 's' : ''}</p>
+        <Pagination page={page} totalPages={Math.max(1, Math.ceil(messages.length / PAGE_SIZE))} onPageChange={setPage} />
       </div>
 
       {/* Modal détail message */}

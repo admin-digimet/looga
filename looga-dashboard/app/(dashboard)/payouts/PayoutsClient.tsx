@@ -3,6 +3,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import { NewPayoutModal } from './NewPayoutModal'
 import { PaymentMethodIcon } from '@/components/PaymentMethodIcon'
+import Pagination from '@/components/Pagination'
+
+const PAGE_SIZE = 20
 
 type PayoutStatus = 'pending' | 'approved' | 'paid' | 'rejected'
 type PayoutMethod = 'mtn_momo' | 'orange_money' | 'wave' | 'bank_transfer'
@@ -71,6 +74,7 @@ export function PayoutsClient() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showModal, setShowModal] = useState(false)
+  const [page, setPage] = useState(1)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -175,7 +179,7 @@ export function PayoutsClient() {
                   </tr>
                 </thead>
                 <tbody>
-                  {requests.map((r) => (
+                  {requests.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((r) => (
                     <tr key={r.id} className="hover">
                       <td className="font-bold">{formatFCFA(r.amount)}</td>
                       <td>
@@ -207,6 +211,11 @@ export function PayoutsClient() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+          {requests.length > PAGE_SIZE && (
+            <div className="px-4 py-3 border-t border-base-300">
+              <Pagination page={page} totalPages={Math.max(1, Math.ceil(requests.length / PAGE_SIZE))} onPageChange={setPage} />
             </div>
           )}
         </div>

@@ -65,8 +65,9 @@ export default function EventForm({ event, mode }: EventFormProps) {
     status: (event?.status ?? 'published') as EventStatus,
   })
 
-  const [ticketTypes, setTicketTypes] = useState<CreateTicketTypePayload[]>(
+  const [ticketTypes, setTicketTypes] = useState<(CreateTicketTypePayload & { id?: string })[]>(
     event?.ticket_types?.map((t) => ({
+      id: t.id,
       name: t.name,
       description: t.description ?? '',
       price: t.price,

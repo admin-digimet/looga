@@ -26,7 +26,10 @@ export default function TicketsPage() {
   const router = useRouter();
   const { data: tickets, isLoading: ticketsLoading } = useTickets();
 
-  const [tab, setTab] = useState<Tab>('upcoming');
+  const [tab, setTab] = useState<Tab>('upcoming')
+  const [upcomingPage, setUpcomingPage] = useState(1)
+  const [pastPage, setPastPage] = useState(1)
+  const PAGE_SIZE = 10;
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -48,7 +51,11 @@ export default function TicketsPage() {
     return { upcoming: u, past: p };
   }, [tickets]);
 
-  const visible = tab === 'upcoming' ? upcoming : past;
+  const allVisible = tab === 'upcoming' ? upcoming : past;
+  const currentPage = tab === 'upcoming' ? upcomingPage : pastPage;
+  const setCurrentPage = tab === 'upcoming' ? setUpcomingPage : setPastPage;
+  const totalPages = Math.max(1, Math.ceil(allVisible.length / PAGE_SIZE));
+  const visible = allVisible.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   if (authLoading || (!isAuthenticated && !authLoading)) return null;
 
@@ -66,7 +73,7 @@ export default function TicketsPage() {
           <div className="flex items-center gap-1 mb-6 border-b border-black/10">
             <button
               type="button"
-              onClick={() => setTab('upcoming')}
+              onClick={() => { setTab('upcoming'); setUpcomingPage(1) }}
               className={`relative px-4 py-3 text-sm font-semibold transition-colors ${
                 tab === 'upcoming' ? 'text-orange' : 'text-ink-muted hover:text-ink'
               }`}
@@ -81,7 +88,7 @@ export default function TicketsPage() {
             </button>
             <button
               type="button"
-              onClick={() => setTab('past')}
+              onClick={() => { setTab('past'); setPastPage(1) }}
               className={`relative px-4 py-3 text-sm font-semibold transition-colors ${
                 tab === 'past' ? 'text-orange' : 'text-ink-muted hover:text-ink'
               }`}
@@ -113,11 +120,34 @@ export default function TicketsPage() {
             </div>
           )
         ) : (
-          <div className="space-y-5">
-            {visible.map((t) => (
-              <TicketCard key={t.id} ticket={t} />
-            ))}
-          </div>
+          <>
+            <div className="space-y-5">
+              {visible.map((t) => (
+                <TicketCard key={t.id} ticket={t} />
+              ))}
+            </div>
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-8">
+                <button
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 rounded-xl text-sm font-semibold border border-black/10 disabled:opacity-30 disabled:cursor-not-allowed hover:border-orange/40 transition-colors"
+                >
+                  ‹ Précédent
+                </button>
+                <span className="text-sm text-ink-muted">
+                  {currentPage} / {totalPages}
+                </span>
+                <button
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 rounded-xl text-sm font-semibold border border-black/10 disabled:opacity-30 disabled:cursor-not-allowed hover:border-orange/40 transition-colors"
+                >
+                  Suivant ›
+                </button>
+              </div>
+            )}
+          </>
         )}
       </main>
       <Footer />

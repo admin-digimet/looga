@@ -3,6 +3,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import type { StaffAccount } from '@/types'
+import Pagination from '@/components/Pagination'
+
+const PAGE_SIZE = 20
 
 function AddScannerModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
   const [form, setForm] = useState({ name: '', email: '', password: '' })
@@ -104,6 +107,7 @@ export default function TeamClient() {
   const [showModal, setShowModal] = useState(false)
   const [toggleError, setToggleError] = useState<string | null>(null)
   const [toggling, setToggling] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
 
   const fetchStaff = useCallback(async () => {
     setLoading(true)
@@ -212,7 +216,7 @@ export default function TeamClient() {
                 </tr>
               </thead>
               <tbody>
-                {staff.map((member) => {
+                {staff.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((member) => {
                   const initials = member.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
                   return (
                     <tr key={member.id} className="hover">
@@ -260,6 +264,8 @@ export default function TeamClient() {
           </div>
         </div>
       )}
+
+      <Pagination page={page} totalPages={Math.max(1, Math.ceil(staff.length / PAGE_SIZE))} onPageChange={setPage} />
 
       {showModal && (
         <AddScannerModal onClose={() => setShowModal(false)} onSuccess={fetchStaff} />

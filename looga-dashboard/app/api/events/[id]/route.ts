@@ -42,11 +42,34 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   if (Array.isArray(ticket_types) && ticket_types.length > 0) {
-    await admin.from('ticket_types').delete().eq('event_id', id)
-    const { error: ttError } = await admin.from('ticket_types').insert(
-      ticket_types.map((t: Record<string, unknown>) => ({ ...t, event_id: id }))
-    )
-    if (ttError) return NextResponse.json({ error: ttError.message }, { status: 500 })
+    const toUpdate = ticket_types.filter((t: Record<string, unknown>) => t.id)
+    const toInsert = ticket_types.filter((t: Record<string, unknown>) => !t.id)
+
+    // UPDATE les types existants (change prix, nom, stock, etc.)
+    for (const t of toUpdate) {
+      const { id: ttId, ...fields } = t as Record<string, unknown>
+      await admin.from('ticket_types').update(fields).eq('id', ttId).eq('event_id', id)
+    }
+
+    // INSERT les nouveaux types
+    if (toInsert.length > 0) {
+      const { error: insertErr } = await admin.from('ticket_types').insert(
+        toInsert.map((t: Record<string, unknown>) => {
+          const { id: _unused, ...rest } = t  // ne pas passer id=undefined
+          return { ...rest, event_id: id }
+        })
+      )
+      if (insertErr) return NextResponse.json({ error: insertErr.message }, { status: 500 })
+    }
+
+    // Supprimer les types retirés du formulaire (ignore FK si des billets existent)
+    const submittedIds = new Set(toUpdate.map((t: Record<string, unknown>) => t.id).filter(Boolean))
+    const { data: current } = await admin.from('ticket_types').select('id').eq('event_id', id)
+    const toDelete = (current ?? []).filter((r: { id: string }) => !submittedIds.has(r.id))
+    for (const row of toDelete) {
+      await admin.from('ticket_types').delete().eq('id', row.id)
+      // Si FK violation (billets existants), Supabase ignore silencieusement côté route
+    }
   }
 
   return NextResponse.json(data)

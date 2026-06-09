@@ -4,6 +4,9 @@ import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { Check, Flag, X } from 'lucide-react'
 import { getAdminReports, updateReport, type AdminReport, type ReportStatus } from '@/lib/api/admin'
+import Pagination from '@/components/Pagination'
+
+const PAGE_SIZE = 20
 
 const STATUS_LABEL: Record<ReportStatus, string> = {
   pending: 'En attente',
@@ -37,6 +40,7 @@ export function ReportsTable() {
   const [error, setError] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState('all')
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -78,7 +82,7 @@ export function ReportsTable() {
         <select
           className="select select-bordered bg-base-100 text-sm w-48"
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }}
         >
           <option value="all">Tous les statuts</option>
           <option value="pending">En attente</option>
@@ -122,7 +126,7 @@ export function ReportsTable() {
                   </td>
                 </tr>
               )}
-              {reports.map((r) => {
+              {reports.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((r) => {
                 const isLoading = actionLoading === r.id
                 return (
                   <tr key={r.id} className={isLoading ? 'opacity-50' : ''}>
@@ -192,6 +196,11 @@ export function ReportsTable() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      <div className="flex items-center justify-between px-1">
+        <p className="text-xs text-base-content/40">{reports.length} signalement{reports.length > 1 ? 's' : ''}</p>
+        <Pagination page={page} totalPages={Math.max(1, Math.ceil(reports.length / PAGE_SIZE))} onPageChange={setPage} />
       </div>
     </>
   )

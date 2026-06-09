@@ -9,6 +9,9 @@ import {
   deleteTeamMember,
   type TeamMember,
 } from '@/lib/api/admin'
+import Pagination from '@/components/Pagination'
+
+const PAGE_SIZE = 20
 
 const ROLE_LABEL: Record<string, string> = {
   admin: 'Admin',
@@ -37,6 +40,7 @@ export function TeamTable() {
   const [inviteError, setInviteError] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<TeamMember | null>(null)
   const [editingRole, setEditingRole] = useState<TeamMember | null>(null)
+  const [page, setPage] = useState(1)
 
   const isSuperAdmin = me?.role === 'super_admin'
 
@@ -170,7 +174,7 @@ export function TeamTable() {
                   </td>
                 </tr>
               )}
-              {team.map((m) => {
+              {team.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((m) => {
                 const isLoading = actionLoading === m.id
                 const isMe = m.email === me?.email
                 const initials = (m.name || m.email || '?').slice(0, 2).toUpperCase()
@@ -242,6 +246,11 @@ export function TeamTable() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      <div className="flex items-center justify-between px-1">
+        <p className="text-xs text-base-content/40">{team.length} membre{team.length > 1 ? 's' : ''}</p>
+        <Pagination page={page} totalPages={Math.max(1, Math.ceil(team.length / PAGE_SIZE))} onPageChange={setPage} />
       </div>
 
       {/* Modal invitation */}
