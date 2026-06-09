@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Image } from 'expo-image';
 import {
   Bell,
   BookOpen,
@@ -107,7 +108,15 @@ export default function AccountScreen() {
         <View style={styles.userCard}>
           <View style={styles.userRow}>
             <View style={styles.avatar}>
-              <Text style={styles.initials}>{initials}</Text>
+              {user?.avatar_url ? (
+                <Image
+                  source={{ uri: user.avatar_url }}
+                  style={styles.avatarImg}
+                  contentFit="cover"
+                />
+              ) : (
+                <Text style={styles.initials}>{initials}</Text>
+              )}
             </View>
             <View style={styles.userInfo}>
               <Text style={styles.userName} numberOfLines={1}>{user?.name ?? '—'}</Text>
@@ -290,6 +299,12 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.text,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  avatarImg: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
   },
   initials: {
     fontFamily: Fonts.headingBold,

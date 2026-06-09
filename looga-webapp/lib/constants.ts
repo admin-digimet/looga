@@ -1,7 +1,7 @@
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 export const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
 export const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
-export const DASHBOARD_URL = process.env.NEXT_PUBLIC_DASHBOARD_URL ?? '#';
+export const DASHBOARD_URL = process.env.NEXT_PUBLIC_DASHBOARD_URL ?? 'https://pro.looga.ci';
 
 export const TOKEN_KEY = 'looga_auth_token';
 export const REFRESH_KEY = 'looga_auth_refresh';

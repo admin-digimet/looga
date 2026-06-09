@@ -1,12 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Mail, Phone, User as UserIcon, Pencil, X, Check } from 'lucide-react';
+import { Mail, Phone, User as UserIcon, Pencil, X, Check, Camera } from 'lucide-react';
+import axios from 'axios';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { useAuthStore } from '@/lib/store/authStore';
 import { apiClient } from '@/lib/api/client';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/constants';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -16,6 +18,10 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -27,6 +33,13 @@ export default function ProfilePage() {
     if (user) setForm({ name: user.name ?? '', phone: user.phone ?? '' });
   }, [user]);
 
+  function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+  }
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
@@ -34,23 +47,59 @@ export default function ProfilePage() {
     setSaving(true);
 
     try {
+      let avatarUrl = user.avatar_url ?? null;
+
+      if (avatarFile && token) {
+        const imageCompression = (await import('browser-image-compression')).default;
+        const compressed = await imageCompression(avatarFile, {
+          maxSizeMB: 0.3,
+          maxWidthOrHeight: 400,
+          useWebWorker: true,
+          fileType: 'image/webp',
+        });
+        const path = `${user.id}/avatar.webp`;
+        await axios.post(
+          `${SUPABASE_URL}/storage/v1/object/avatars/${path}`,
+          compressed,
+          {
+            headers: {
+              apikey: SUPABASE_ANON_KEY,
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'image/webp',
+              'x-upsert': 'true',
+            },
+          }
+        );
+        avatarUrl = `${SUPABASE_URL}/storage/v1/object/public/avatars/${path}`;
+      }
+
       await apiClient.patch(
         `/rest/v1/profiles?id=eq.${user.id}`,
-        { name: form.name, phone: form.phone },
+        { name: form.name, phone: form.phone, avatar_url: avatarUrl },
         { headers: { Prefer: 'return=minimal' } }
       );
-      // Update local store with new name/phone
+
       if (token) {
-        await login(token, { ...user, name: form.name, phone: form.phone }, refreshToken ?? undefined);
+        await login(token, { ...user, name: form.name, phone: form.phone, avatar_url: avatarUrl }, refreshToken ?? undefined);
       }
       setSuccess(true);
       setEditing(false);
+      setAvatarFile(null);
       setTimeout(() => setSuccess(false), 3000);
     } catch {
       setError('Impossible de sauvegarder. Réessaie dans un instant.');
     } finally {
       setSaving(false);
     }
+  }
+
+  function cancelEdit() {
+    setEditing(false);
+    setError(null);
+    setAvatarFile(null);
+    setAvatarPreview(null);
+    setForm({ name: user?.name ?? '', phone: user?.phone ?? '' });
+    if (fileRef.current) fileRef.current.value = '';
   }
 
   if (isLoading || !isAuthenticated) {
@@ -66,6 +115,7 @@ export default function ProfilePage() {
   }
 
   const initial = user?.name?.charAt(0)?.toUpperCase() ?? 'U';
+  const displayAvatar = avatarPreview ?? user?.avatar_url ?? null;
 
   return (
     <div className="min-h-screen bg-cream font-sans">
@@ -84,8 +134,33 @@ export default function ProfilePage() {
         <div className="bg-white rounded-2xl border border-cream-2 p-6 md:p-8 mb-6">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-5">
-              <div className="w-20 h-20 rounded-full bg-orange flex items-center justify-center text-white font-bold text-3xl shrink-0">
-                {initial}
+              <div className="relative">
+                <div className="w-20 h-20 rounded-full overflow-hidden bg-orange flex items-center justify-center shrink-0">
+                  {displayAvatar ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={displayAvatar} alt="Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-white font-bold text-3xl">{initial}</span>
+                  )}
+                </div>
+                {editing && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => fileRef.current?.click()}
+                      className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-orange border-2 border-white flex items-center justify-center hover:opacity-90 transition-opacity"
+                    >
+                      <Camera className="w-3.5 h-3.5 text-white" />
+                    </button>
+                    <input
+                      ref={fileRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="hidden"
+                      onChange={handleAvatarChange}
+                    />
+                  </>
+                )}
               </div>
               <div>
                 <p className="font-heading font-bold text-xl text-ink">{user?.name ?? '—'}</p>
@@ -138,7 +213,7 @@ export default function ProfilePage() {
                   value={user?.email ?? ''}
                   disabled
                 />
-                <p className="text-xs text-ink-muted mt-1">L'email ne peut pas être modifié.</p>
+                <p className="text-xs text-ink-muted mt-1">L&apos;email ne peut pas être modifié.</p>
               </div>
               <div className="flex gap-3 pt-2">
                 <button
@@ -150,7 +225,7 @@ export default function ProfilePage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => { setEditing(false); setError(null); setForm({ name: user?.name ?? '', phone: user?.phone ?? '' }); }}
+                  onClick={cancelEdit}
                   className="flex items-center gap-1.5 border border-cream-2 text-ink font-semibold py-3 px-5 rounded-xl hover:bg-gray-50 transition-colors text-sm"
                 >
                   <X className="w-4 h-4" /> Annuler

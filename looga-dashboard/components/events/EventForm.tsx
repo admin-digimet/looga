@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Event, EventCategory, EventStatus, CreateEventPayload, CreateTicketTypePayload } from '@/types'
 
@@ -47,6 +47,10 @@ export default function EventForm({ event, mode }: EventFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string>(event?.image_url ?? '')
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [form, setForm] = useState({
     title: event?.title ?? '',
@@ -70,6 +74,13 @@ export default function EventForm({ event, mode }: EventFormProps) {
       advantages: t.advantages ?? '',
     })) ?? [{ ...emptyTicketType }],
   )
+
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setImageFile(file)
+    setImagePreview(URL.createObjectURL(file))
+  }
 
   function handleFieldChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     const { name, value } = e.target
@@ -99,7 +110,40 @@ export default function EventForm({ event, mode }: EventFormProps) {
 
     setLoading(true)
 
-    const payload: CreateEventPayload = { ...form, ticket_types: ticketTypes }
+    let finalImageUrl = form.image_url
+
+    if (imageFile) {
+      setUploading(true)
+      try {
+        const { createClient } = await import('@/lib/supabase/client')
+        const imageCompression = (await import('browser-image-compression')).default
+        const compressed = await imageCompression(imageFile, {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1200,
+          useWebWorker: true,
+          fileType: 'image/webp',
+        })
+        const supabase = createClient()
+        const { data: { user: sbUser } } = await supabase.auth.getUser()
+        const path = `${sbUser!.id}/${Date.now()}.webp`
+        const { error: uploadError } = await supabase.storage
+          .from('events')
+          .upload(path, compressed, { upsert: true, contentType: 'image/webp' })
+        if (uploadError) {
+          setError("Erreur lors de l'upload de l'image. Réessaie.")
+          setLoading(false)
+          setUploading(false)
+          return
+        }
+        const { data: { publicUrl } } = supabase.storage.from('events').getPublicUrl(path)
+        finalImageUrl = publicUrl
+      } finally {
+        setUploading(false)
+      }
+    }
+
+    const submitForm = { ...form, image_url: finalImageUrl }
+    const payload: CreateEventPayload = { ...submitForm, ticket_types: ticketTypes }
 
     const url = mode === 'create' ? '/api/events' : `/api/events/${event!.id}`
     const method = mode === 'create' ? 'POST' : 'PATCH'
@@ -107,7 +151,7 @@ export default function EventForm({ event, mode }: EventFormProps) {
     const res = await fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(mode === 'create' ? payload : form),
+      body: JSON.stringify(mode === 'create' ? payload : submitForm),
     })
 
     const data = await res.json()
@@ -235,15 +279,32 @@ export default function EventForm({ event, mode }: EventFormProps) {
             </label>
 
             <label className="form-control md:col-span-2">
-              <div className="label"><span className="label-text font-medium">URL de l&apos;image</span></div>
-              <input
-                name="image_url"
-                type="url"
-                placeholder="https://..."
-                className="input input-bordered w-full"
-                value={form.image_url}
-                onChange={handleFieldChange}
-              />
+              <div className="label">
+                <span className="label-text font-medium">Image de l&apos;événement</span>
+                <span className="label-text-alt text-base-content/50">JPEG, PNG ou WebP · 5 Mo max</span>
+              </div>
+              <div className="flex flex-col gap-3">
+                {imagePreview && (
+                  <div className="relative w-full h-48 rounded-xl overflow-hidden border border-base-300 bg-base-300">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={imagePreview} alt="Aperçu" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => { setImagePreview(''); setImageFile(null); if (fileInputRef.current) fileInputRef.current.value = '' }}
+                      className="absolute top-2 right-2 btn btn-xs btn-circle btn-ghost bg-black/50 text-white hover:bg-black/70"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="file-input file-input-bordered w-full"
+                  onChange={handleImageChange}
+                />
+              </div>
             </label>
 
             <label className="form-control md:col-span-2">
@@ -361,10 +422,12 @@ export default function EventForm({ event, mode }: EventFormProps) {
         <button type="button" onClick={() => router.back()} className="btn btn-ghost">
           Annuler
         </button>
-        <button type="submit" className="btn btn-primary min-w-32" disabled={loading}>
-          {loading
-            ? <span className="loading loading-spinner loading-sm" />
-            : mode === 'create' ? 'Publier l\'événement' : 'Enregistrer'
+        <button type="submit" className="btn btn-primary min-w-32" disabled={loading || uploading}>
+          {uploading
+            ? <><span className="loading loading-spinner loading-sm" /> Upload…</>
+            : loading
+              ? <span className="loading loading-spinner loading-sm" />
+              : mode === 'create' ? "Publier l'événement" : 'Enregistrer'
           }
         </button>
       </div>

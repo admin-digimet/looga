@@ -13,8 +13,11 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ChevronLeft } from 'lucide-react-native';
+import { ChevronLeft, Camera } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
+import * as ImageManipulator from 'expo-image-manipulator';
 import axios from 'axios';
 
 import { useAuthStore } from '@/lib/store/authStore';
@@ -30,6 +33,29 @@ export default function EditProfileScreen() {
   const [name, setName] = useState(user?.name ?? '');
   const [phone, setPhone] = useState(user?.phone ?? '');
   const [saving, setSaving] = useState(false);
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
+
+  async function pickImage() {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission requise', "Autorise l'accès à tes photos dans les réglages.");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    if (!result.canceled) {
+      const manipulated = await ImageManipulator.manipulateAsync(
+        result.assets[0].uri,
+        [{ resize: { width: 400, height: 400 } }],
+        { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
+      );
+      setAvatarUri(manipulated.uri);
+    }
+  }
 
   async function handleSave() {
     if (!user) return;
@@ -41,9 +67,31 @@ export default function EditProfileScreen() {
 
     setSaving(true);
     try {
+      let avatarUrl: string | null = user.avatar_url ?? null;
+
+      if (avatarUri) {
+        const path = `${user.id}/avatar.jpg`;
+        const formData = new FormData();
+        formData.append('file', { uri: avatarUri, name: 'avatar.jpg', type: 'image/jpeg' } as unknown as Blob);
+
+        await axios.post(
+          `${SUPABASE_URL}/storage/v1/object/avatars/${path}`,
+          formData,
+          {
+            headers: {
+              apikey: ANON_KEY,
+              Authorization: `Bearer ${token ?? ANON_KEY}`,
+              'Content-Type': 'multipart/form-data',
+              'x-upsert': 'true',
+            },
+          }
+        );
+        avatarUrl = `${SUPABASE_URL}/storage/v1/object/public/avatars/${path}`;
+      }
+
       await axios.patch(
         `${SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}`,
-        { name: trimmedName, phone: phone.trim() },
+        { name: trimmedName, phone: phone.trim(), avatar_url: avatarUrl },
         {
           headers: {
             apikey: ANON_KEY,
@@ -54,9 +102,8 @@ export default function EditProfileScreen() {
         }
       );
 
-      // Mettre à jour le store local avec les nouvelles valeurs
       if (token) {
-        await login(token, { ...user, name: trimmedName, phone: phone.trim() }, refreshToken ?? undefined);
+        await login(token, { ...user, name: trimmedName, phone: phone.trim(), avatar_url: avatarUrl }, refreshToken ?? undefined);
       }
 
       router.back();
@@ -66,6 +113,9 @@ export default function EditProfileScreen() {
       setSaving(false);
     }
   }
+
+  const displayAvatar = avatarUri ?? user?.avatar_url ?? null;
+  const initial = (name.trim()[0] ?? user?.name?.[0] ?? 'U').toUpperCase();
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -89,11 +139,23 @@ export default function EditProfileScreen() {
         >
           {/* Avatar */}
           <View style={styles.avatarWrap}>
-            <LinearGradient colors={Gradient.primary} style={styles.avatar}>
-              <Text style={styles.initials}>
-                {(name.trim()[0] ?? user?.name?.[0] ?? 'U').toUpperCase()}
-              </Text>
-            </LinearGradient>
+            <TouchableOpacity onPress={pickImage} activeOpacity={0.85} style={styles.avatarTouchable}>
+              {displayAvatar ? (
+                <Image
+                  source={{ uri: displayAvatar }}
+                  style={styles.avatarImg}
+                  contentFit="cover"
+                />
+              ) : (
+                <LinearGradient colors={Gradient.primary} style={styles.avatar}>
+                  <Text style={styles.initials}>{initial}</Text>
+                </LinearGradient>
+              )}
+              <View style={styles.cameraBtn}>
+                <Camera size={14} color="#fff" />
+              </View>
+            </TouchableOpacity>
+            <Text style={styles.avatarHint}>Appuie pour changer la photo</Text>
           </View>
 
           {/* Formulaire */}
@@ -132,7 +194,7 @@ export default function EditProfileScreen() {
                 editable={false}
                 placeholderTextColor={Colors.textMuted}
               />
-              <Text style={styles.hint}>L'email ne peut pas être modifié.</Text>
+              <Text style={styles.hint}>L&apos;email ne peut pas être modifié.</Text>
             </View>
           </View>
 
@@ -194,6 +256,12 @@ const styles = StyleSheet.create({
   avatarWrap: {
     alignItems: 'center',
     paddingVertical: 28,
+    gap: 8,
+  },
+  avatarTouchable: {
+    position: 'relative',
+    width: 80,
+    height: 80,
   },
   avatar: {
     width: 80,
@@ -202,10 +270,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  avatarImg: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
   initials: {
     fontFamily: Fonts.headingBold,
     fontSize: 32,
     color: '#fff',
+  },
+  cameraBtn: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: Colors.orange,
+    borderWidth: 2,
+    borderColor: Colors.bg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarHint: {
+    fontFamily: Fonts.body,
+    fontSize: FontSize.xs,
+    color: Colors.textMuted,
   },
 
   form: { gap: 16 },

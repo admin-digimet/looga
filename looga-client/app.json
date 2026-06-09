@@ -35,6 +35,12 @@
       "expo-router",
       "expo-secure-store",
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "Looga a besoin d'accéder à tes photos pour changer ta photo de profil."
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "backgroundColor": "#0D0B12",
