@@ -32,7 +32,7 @@ interface AuthState {
   getFreshToken: () => Promise<string | null>;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   token: null,
   refreshToken: null,
   user: null,
@@ -92,14 +92,14 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   getFreshToken: async () => {
-    const { token, refreshSession } = useAuthStore.getState();
+    const { token, refreshSession } = get();
     if (!token) return null;
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const isExpired = payload.exp < Math.floor(Date.now() / 1000);
       if (!isExpired) return token;
       const ok = await refreshSession();
-      return ok ? useAuthStore.getState().token : null;
+      return ok ? get().token : null;
     } catch {
       return token;
     }
