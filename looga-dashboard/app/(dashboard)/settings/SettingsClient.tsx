@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 interface Props {
   initialName: string
   initialLogoUrl: string | null
-  organizerId: string
+  organizerId: string | undefined
 }
 
 export default function SettingsClient({ initialName, initialLogoUrl, organizerId }: Props) {
@@ -30,6 +30,10 @@ export default function SettingsClient({ initialName, initialLogoUrl, organizerI
     e.preventDefault()
     if (name.trim().length < 2) {
       setError('Le nom doit contenir au moins 2 caractères.')
+      return
+    }
+    if (!organizerId) {
+      setError('Organisation introuvable. Reconnecte-toi.')
       return
     }
     setError(null)

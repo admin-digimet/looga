@@ -70,6 +70,10 @@ export default function EditProfileScreen() {
       let avatarUrl: string | null = user.avatar_url ?? null;
 
       if (avatarUri) {
+        if (!token) {
+          Alert.alert('Session expirée', 'Reconnecte-toi pour modifier ta photo.');
+          return;
+        }
         const path = `${user.id}/avatar.jpg`;
         const formData = new FormData();
         formData.append('file', { uri: avatarUri, name: 'avatar.jpg', type: 'image/jpeg' } as unknown as Blob);
@@ -80,7 +84,7 @@ export default function EditProfileScreen() {
           {
             headers: {
               apikey: ANON_KEY,
-              Authorization: `Bearer ${token ?? ANON_KEY}`,
+              Authorization: `Bearer ${token}`,
               'Content-Type': 'multipart/form-data',
               'x-upsert': 'true',
             },
@@ -95,7 +99,7 @@ export default function EditProfileScreen() {
         {
           headers: {
             apikey: ANON_KEY,
-            Authorization: `Bearer ${token ?? ANON_KEY}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             Prefer: 'return=minimal',
           },

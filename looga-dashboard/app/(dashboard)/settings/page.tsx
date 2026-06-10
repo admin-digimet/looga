@@ -18,7 +18,7 @@ export default async function SettingsPage() {
         <SettingsClient
           initialName={organizer?.name ?? profile?.name ?? ''}
           initialLogoUrl={organizer?.logo_url ?? null}
-          organizerId={organizer?.id ?? ''}
+          organizerId={organizer?.id}
         />
       </div>
     </>
