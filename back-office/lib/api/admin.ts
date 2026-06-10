@@ -311,3 +311,41 @@ export async function updateTeamMember(
 export async function deleteTeamMember(id: string): Promise<void> {
   await jsonOrThrow(await fetch(`/api/admin/team/${id}`, { method: 'DELETE' }))
 }
+
+// ─── Journal ──────────────────────────────────────────────────────────────────
+
+export interface JournalEntry {
+  id: string
+  created_at: string
+  actor_type: 'user' | 'organizer' | 'admin' | 'system'
+  actor_id: string | null
+  actor_name: string | null
+  actor_email: string | null
+  action: string
+  target_type: string | null
+  target_id: string | null
+  target_label: string | null
+  status: 'success' | 'failure' | 'warning'
+  metadata: Record<string, unknown>
+  ip_address: string | null
+}
+
+export interface JournalParams {
+  page?: number
+  search?: string
+  actor_type?: string
+  status?: string
+  period?: string
+}
+
+export async function getAdminJournal(
+  params: JournalParams = {},
+): Promise<{ data: JournalEntry[]; total: number }> {
+  const qs = new URLSearchParams()
+  if (params.page) qs.set('page', String(params.page))
+  if (params.search) qs.set('search', params.search)
+  if (params.actor_type) qs.set('actor_type', params.actor_type)
+  if (params.status) qs.set('status', params.status)
+  if (params.period) qs.set('period', params.period)
+  return jsonOrThrow(await fetch(`/api/admin/journal?${qs.toString()}`, { cache: 'no-store' }))
+}

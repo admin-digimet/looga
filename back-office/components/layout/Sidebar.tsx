@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Building2, Calendar, ChevronLeft, ChevronRight, FileText, Flag, LayoutDashboard, LogOut, MessageSquare, Shield, Users, Wallet } from 'lucide-react'
+import { Activity, Building2, Calendar, ChevronLeft, ChevronRight, FileText, Flag, LayoutDashboard, LogOut, MessageSquare, Shield, Users, Wallet } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 const NAV_ITEMS = [
@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { href: '/payouts', label: 'Payouts', icon: Wallet },
   { href: '/content', label: 'Contenu', icon: FileText },
   { href: '/team', label: 'Équipe', icon: Shield },
+  { href: '/journal', label: 'Journal', icon: Activity },
 ]
 
 export function Sidebar() {
