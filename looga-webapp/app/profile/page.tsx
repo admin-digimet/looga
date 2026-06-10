@@ -47,15 +47,17 @@ export default function ProfilePage() {
     setSaving(true);
 
     try {
+      // Rafraîchir le token une seule fois pour toute la sauvegarde
+      const freshToken = await getFreshToken();
+      if (!freshToken) {
+        setError('Session expirée. Déconnecte-toi et reconnecte-toi.');
+        setSaving(false);
+        return;
+      }
+
       let avatarUrl = user.avatar_url ?? null;
 
       if (avatarFile) {
-        const freshToken = await getFreshToken();
-        if (!freshToken) {
-          setError('Session expirée. Déconnecte-toi et reconnecte-toi.');
-          setSaving(false);
-          return;
-        }
         const imageCompression = (await import('browser-image-compression')).default;
         const compressed = await imageCompression(avatarFile, {
           maxSizeMB: 0.3,
@@ -87,16 +89,14 @@ export default function ProfilePage() {
         {
           headers: {
             apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${freshToken}`,
             'Content-Type': 'application/json',
             Prefer: 'return=minimal',
           },
         }
       );
 
-      if (token) {
-        await login(token, { ...user, name: form.name, phone: form.phone, avatar_url: avatarUrl }, refreshToken ?? undefined);
-      }
+      await login(freshToken, { ...user, name: form.name, phone: form.phone, avatar_url: avatarUrl }, refreshToken ?? undefined);
       setSuccess(true);
       setEditing(false);
       setAvatarFile(null);

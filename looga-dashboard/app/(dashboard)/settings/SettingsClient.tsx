@@ -65,8 +65,8 @@ export default function SettingsClient({ initialName, initialLogoUrl, organizerI
         }
 
         const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
-        logoUrl = publicUrl
-        setLogoPreview(publicUrl)
+        logoUrl = `${publicUrl}?t=${Date.now()}`
+        setLogoPreview(logoUrl)
       }
 
       const res = await fetch('/api/organizer', {

@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 
 // PATCH /api/organizer — met à jour logo_url et/ou name de l'organisateur
 export async function PATCH(request: NextRequest) {
@@ -18,18 +18,21 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: 'Aucun champ à mettre à jour' }, { status: 422 })
   }
 
-  const { error } = await supabase
+  // Utilise le client admin pour bypasser les RLS sur la table organizers
+  const admin = createAdminClient()
+  const { error, count } = await admin
     .from('organizers')
     .update(updates)
     .eq('user_id', user.id)
+    .select('id', { count: 'exact', head: true })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (!count || count === 0) {
+    return NextResponse.json({ error: 'Organisation introuvable pour cet utilisateur.' }, { status: 404 })
+  }
 
   if (name) {
-    await supabase
-      .from('profiles')
-      .update({ name })
-      .eq('id', user.id)
+    await admin.from('profiles').update({ name }).eq('id', user.id)
   }
 
   return NextResponse.json({ ok: true })
