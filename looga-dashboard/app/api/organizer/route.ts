@@ -20,14 +20,14 @@ export async function PATCH(request: NextRequest) {
 
   // Utilise le client admin pour bypasser les RLS sur la table organizers
   const admin = createAdminClient()
-  const { error, count } = await admin
+  const { data: updated, error } = await admin
     .from('organizers')
     .update(updates)
     .eq('user_id', user.id)
-    .select('id', { count: 'exact', head: true })
+    .select('id')
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  if (!count || count === 0) {
+  if (!updated || updated.length === 0) {
     return NextResponse.json({ error: 'Organisation introuvable pour cet utilisateur.' }, { status: 404 })
   }
 
