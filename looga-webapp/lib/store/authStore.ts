@@ -28,6 +28,8 @@ interface AuthState {
   login: (token: string, user: User, refreshToken?: string) => Promise<void>;
   logout: () => Promise<void>;
   loadToken: () => Promise<void>;
+  refreshSession: () => Promise<boolean>;
+  getFreshToken: () => Promise<string | null>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -64,6 +66,42 @@ export const useAuthStore = create<AuthState>((set) => ({
       }
     } catch {
       set({ isLoading: false });
+    }
+  },
+
+  refreshSession: async () => {
+    const refreshToken = lsGet(REFRESH_KEY);
+    if (!refreshToken) return false;
+    try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
+      const res = await fetch(`${supabaseUrl}/auth/v1/token?grant_type=refresh_token`, {
+        method: 'POST',
+        headers: { apikey: anonKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      });
+      if (!res.ok) return false;
+      const data = await res.json();
+      lsSet(TOKEN_KEY, data.access_token);
+      if (data.refresh_token) lsSet(REFRESH_KEY, data.refresh_token);
+      set({ token: data.access_token, refreshToken: data.refresh_token ?? refreshToken });
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  getFreshToken: async () => {
+    const { token, refreshSession } = useAuthStore.getState();
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const isExpired = payload.exp < Math.floor(Date.now() / 1000);
+      if (!isExpired) return token;
+      const ok = await refreshSession();
+      return ok ? useAuthStore.getState().token : null;
+    } catch {
+      return token;
     }
   },
 }));

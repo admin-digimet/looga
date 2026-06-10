@@ -12,7 +12,7 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/constants';
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading, user, login, token, refreshToken } = useAuthStore();
+  const { isAuthenticated, isLoading, user, login, token, refreshToken, getFreshToken } = useAuthStore();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ name: '', phone: '' });
   const [saving, setSaving] = useState(false);
@@ -49,7 +49,13 @@ export default function ProfilePage() {
     try {
       let avatarUrl = user.avatar_url ?? null;
 
-      if (avatarFile && token) {
+      if (avatarFile) {
+        const freshToken = await getFreshToken();
+        if (!freshToken) {
+          setError('Session expirée. Déconnecte-toi et reconnecte-toi.');
+          setSaving(false);
+          return;
+        }
         const imageCompression = (await import('browser-image-compression')).default;
         const compressed = await imageCompression(avatarFile, {
           maxSizeMB: 0.3,
@@ -58,11 +64,10 @@ export default function ProfilePage() {
           fileType: 'image/webp',
         });
         const buffer = await compressed.arrayBuffer();
-        // Upload via API route Next.js (évite CORS + RLS côté navigateur)
         const uploadRes = await fetch('/api/avatar', {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${freshToken}`,
             'Content-Type': 'image/webp',
             'x-user-id': user.id,
           },
