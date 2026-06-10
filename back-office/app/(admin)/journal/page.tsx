@@ -1,4 +1,4 @@
-import TopNav from '@/components/layout/TopNav'
+import { TopNav } from '@/components/layout/TopNav'
 import { JournalTable } from './JournalTable'
 
 export default function JournalPage() {
