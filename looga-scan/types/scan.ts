@@ -11,6 +11,9 @@ export interface ScanResult {
   firstScanAt?: string;
   /** Nom du scanner qui a validé en premier (si already_used) */
   firstScannerName?: string;
+  /** Précise pourquoi un billet est refusé (status === 'invalid').
+   *  'not_paid' = billet jamais payé (status pending/cancelled/expired). */
+  invalidReason?: 'not_paid' | 'unknown';
 }
 
 export interface ScanRecord {

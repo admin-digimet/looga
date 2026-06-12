@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
-import { Calendar, MapPin, Tag, ScanLine } from 'lucide-react';
+import { Calendar, MapPin, Tag, ScanLine, Clock, CreditCard } from 'lucide-react';
 import { formatEventDate, formatPrice } from '@/lib/utils';
 import type { Ticket, TicketStatus } from '@/types';
 import { TicketQRModal } from './TicketQRModal';
@@ -50,6 +51,10 @@ export function TicketCard({ ticket }: Props) {
   const status = STATUS_CONFIG[ticket.status];
   const isInactive = ticket.status === 'expired' || ticket.status === 'cancelled' || ticket.status === 'used';
   const qrValue = ticket.qrCode || ticket.ticketNumber;
+  // Le QR n'est présentable à l'entrée que si le paiement est confirmé.
+  // Un billet 'pending' (paiement non finalisé) ne doit jamais afficher de QR.
+  const showQr = ticket.status === 'valid' || ticket.status === 'used';
+  const isPending = ticket.status === 'pending';
 
   return (
     <>
@@ -139,36 +144,56 @@ export function TicketCard({ ticket }: Props) {
             </div>
           </div>
 
-          {/* QR */}
-          <button
-            type="button"
-            onClick={() => setQrOpen(true)}
-            disabled={!qrValue}
-            className="self-center sm:self-start shrink-0 group relative bg-white border-2 border-black/5 rounded-xl p-3 transition-all hover:border-orange/50 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label="Agrandir le QR code"
-          >
-            {qrValue ? (
-              <QRCodeSVG
-                value={qrValue}
-                size={110}
-                level="M"
-                marginSize={0}
-                className="block"
-              />
-            ) : (
-              <div className="w-[110px] h-[110px] flex items-center justify-center text-xs text-ink-muted">
-                Pas de QR
-              </div>
-            )}
-            <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-ink text-white text-[10px] font-semibold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-              <ScanLine className="w-3 h-3" />
-              Agrandir
-            </span>
-          </button>
+          {/* QR — affiché uniquement si le paiement est confirmé */}
+          {showQr ? (
+            <button
+              type="button"
+              onClick={() => setQrOpen(true)}
+              disabled={!qrValue}
+              className="self-center sm:self-start shrink-0 group relative bg-white border-2 border-black/5 rounded-xl p-3 transition-all hover:border-orange/50 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Agrandir le QR code"
+            >
+              {qrValue ? (
+                <QRCodeSVG
+                  value={qrValue}
+                  size={110}
+                  level="M"
+                  marginSize={0}
+                  className="block"
+                />
+              ) : (
+                <div className="w-[110px] h-[110px] flex items-center justify-center text-xs text-ink-muted">
+                  Pas de QR
+                </div>
+              )}
+              <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-ink text-white text-[10px] font-semibold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                <ScanLine className="w-3 h-3" />
+                Agrandir
+              </span>
+            </button>
+          ) : isPending ? (
+            <div className="self-center sm:self-start shrink-0 w-full sm:w-[136px] flex flex-col items-center justify-center gap-2.5 bg-[#FFB80012] border-2 border-dashed border-[#FFB80055] rounded-xl p-4 text-center">
+              <Clock className="w-6 h-6 text-[#9A6E00]" />
+              <span className="text-xs font-semibold text-[#9A6E00] leading-tight">
+                Paiement en attente
+              </span>
+              <Link
+                href={`/events/${ticket.eventId}`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange text-white text-[11px] font-bold hover:opacity-90 transition-opacity"
+              >
+                <CreditCard className="w-3.5 h-3.5" />
+                Finaliser
+              </Link>
+            </div>
+          ) : (
+            <div className="self-center sm:self-start shrink-0 w-full sm:w-[136px] flex items-center justify-center bg-black/[0.03] border-2 border-dashed border-black/10 rounded-xl p-4 text-center text-xs text-ink-muted">
+              Billet non valide
+            </div>
+          )}
         </div>
       </article>
 
-      {qrOpen && (
+      {qrOpen && showQr && (
         <TicketQRModal
           ticket={ticket}
           onClose={() => setQrOpen(false)}

@@ -78,6 +78,30 @@ export const scanApi = {
       }
     }
 
+    // Tout statut ≠ 'valid' → accès refusé.
+    // 'pending' = paiement jamais confirmé, 'cancelled'/'expired' = billet inutilisable.
+    // SÉCURITÉ : ne jamais laisser entrer un billet non payé.
+    if (ticketData.status !== 'valid') {
+      const { error: insertNotPaidErr } = await supabase.from('ticket_scans').insert({
+        event_id: eventId,
+        ticket_id: ticketData.id,
+        staff_id: user?.id,
+        status: 'invalid',
+        scanner_name: scannerName ?? 'Scanner',
+        scanned_at: new Date().toISOString(),
+      })
+      if (__DEV__ && insertNotPaidErr) console.log('[SCAN] insert not_paid scan error:', insertNotPaidErr.message)
+
+      return {
+        status: 'invalid',
+        invalidReason: 'not_paid',
+        ticketId: ticketData.id,
+        ticketNumber: ticketData.ticket_number,
+        attendeeName: ticketData.profiles?.name,
+        ticketType: ticketData.ticket_types?.name,
+      }
+    }
+
     // Valide → marquer comme utilisé + insérer scan
     await supabase
       .from('tickets')

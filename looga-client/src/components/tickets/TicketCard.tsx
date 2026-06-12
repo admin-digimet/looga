@@ -1,7 +1,7 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { ChevronRight, QrCode } from 'lucide-react-native';
+import { ChevronRight, Clock, QrCode } from 'lucide-react-native';
 
 import { Colors } from '@/constants/colors';
 import { Fonts, FontSize } from '@/constants/typography';
@@ -30,6 +30,8 @@ function TicketListCard({ ticket }: { ticket: LocalTicket }) {
   const status = STATUS_CONFIG[ticket.status];
   const dateLabel = parseDate(ticket.eventDate);
   const timeLabel = (ticket.eventTime ?? '').replace(':', 'h');
+  // Pas de QR tant que le paiement n'est pas confirmé.
+  const canShowQr = ticket.status === 'valid' || ticket.status === 'used';
 
   return (
     <TouchableOpacity
@@ -81,8 +83,17 @@ function TicketListCard({ ticket }: { ticket: LocalTicket }) {
         </View>
 
         <View style={styles.bottomRight}>
-          <QrCode size={20} color={Colors.textMuted} strokeWidth={1.5} />
-          <Text style={styles.tapLabel}>Voir QR</Text>
+          {canShowQr ? (
+            <>
+              <QrCode size={20} color={Colors.textMuted} strokeWidth={1.5} />
+              <Text style={styles.tapLabel}>Voir QR</Text>
+            </>
+          ) : (
+            <>
+              <Clock size={20} color={Colors.warning} strokeWidth={1.5} />
+              <Text style={[styles.tapLabel, { color: Colors.warning }]}>En attente</Text>
+            </>
+          )}
           <ChevronRight size={16} color={Colors.textMuted} />
         </View>
       </View>

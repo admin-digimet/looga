@@ -163,6 +163,9 @@ export default function TicketDetailScreen() {
 
   const holderName = user?.name ?? '—';
   const { day: startDay, time: startTime } = parseDate(ticket.eventDate, ticket.eventTime);
+  // Le QR n'est présentable qu'une fois le paiement confirmé.
+  // Un billet 'pending' (paiement non finalisé) ne doit jamais afficher de QR scannable.
+  const canShowQr = ticket.status === 'valid' || ticket.status === 'used';
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -220,15 +223,24 @@ export default function TicketDetailScreen() {
             </Text>
           </View>
 
-          {/* QR Code */}
-          <View style={styles.qrWrap}>
-            <QRCode
-              value={ticket.qrValue || 'LOOGA-PLACEHOLDER'}
-              size={220}
-              color="#000000"
-              backgroundColor="#FFFFFF"
-            />
-          </View>
+          {/* QR Code — affiché uniquement si le paiement est confirmé */}
+          {canShowQr ? (
+            <View style={styles.qrWrap}>
+              <QRCode
+                value={ticket.qrValue || 'LOOGA-PLACEHOLDER'}
+                size={220}
+                color="#000000"
+                backgroundColor="#FFFFFF"
+              />
+            </View>
+          ) : (
+            <View style={styles.qrPending}>
+              <Text style={styles.qrPendingTitle}>Paiement en attente</Text>
+              <Text style={styles.qrPendingText}>
+                Ton billet sera disponible ici une fois le paiement confirmé.
+              </Text>
+            </View>
+          )}
 
           {/* Holder */}
           <View style={styles.holderBlock}>
@@ -238,15 +250,17 @@ export default function TicketDetailScreen() {
             <Text style={styles.holderCategory}>{ticket.eventCategory}</Text>
           </View>
 
-          {/* Download button */}
-          <TouchableOpacity
-            style={styles.shareBtn}
-            onPress={handleDownload}
-            activeOpacity={0.85}
-          >
-            <Download size={18} color="#FFFFFF" />
-            <Text style={styles.shareBtnText}>Télécharger le billet</Text>
-          </TouchableOpacity>
+          {/* Download button — uniquement pour un billet payé */}
+          {canShowQr && (
+            <TouchableOpacity
+              style={styles.shareBtn}
+              onPress={handleDownload}
+              activeOpacity={0.85}
+            >
+              <Download size={18} color="#FFFFFF" />
+              <Text style={styles.shareBtnText}>Télécharger le billet</Text>
+            </TouchableOpacity>
+          )}
         </View>
         </ViewShot>
 
@@ -435,6 +449,32 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 2,
+  },
+  qrPending: {
+    alignSelf: 'center',
+    width: 252,
+    paddingVertical: 32,
+    paddingHorizontal: 20,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderStyle: 'dashed',
+    borderColor: 'rgba(255,184,0,0.4)',
+    backgroundColor: 'rgba(255,184,0,0.08)',
+    alignItems: 'center',
+    gap: 8,
+  },
+  qrPendingTitle: {
+    fontFamily: Fonts.heading,
+    fontSize: FontSize.base,
+    color: Colors.warning,
+    textAlign: 'center',
+  },
+  qrPendingText: {
+    fontFamily: Fonts.body,
+    fontSize: FontSize.sm,
+    color: Colors.textMuted,
+    textAlign: 'center',
+    lineHeight: 18,
   },
 
   // Holder

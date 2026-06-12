@@ -82,6 +82,11 @@ function AnimatedIcon({ Icon, color }: { Icon: typeof CheckCircle; color: string
 export function ScanResultOverlay({ result, onDismiss }: ScanResultOverlayProps) {
   const cfg = STATUS_CONFIG[result.status];
 
+  // Refus pour billet non payé → libellé dédié (sinon « QR falsifié » serait trompeur)
+  const isNotPaid = result.status === 'invalid' && result.invalidReason === 'not_paid';
+  const title = isNotPaid ? 'BILLET NON PAYÉ' : cfg.title;
+  const subtitle = isNotPaid ? 'Paiement non confirmé — Accès refusé' : cfg.subtitle;
+
   // Auto-dismiss après 2.5s
   useEffect(() => {
     const timer = setTimeout(onDismiss, 2500);
@@ -105,8 +110,8 @@ export function ScanResultOverlay({ result, onDismiss }: ScanResultOverlayProps)
       {/* Contenu avec fade-in */}
       <Animated.View style={[styles.content, contentStyle]}>
         {/* Titre principal */}
-        <Text style={styles.title}>{cfg.title}</Text>
-        <Text style={styles.subtitle}>{cfg.subtitle}</Text>
+        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.subtitle}>{subtitle}</Text>
 
         {/* Carte infos */}
         {(result.attendeeName || result.ticketType || result.ticketNumber) && (
@@ -144,7 +149,11 @@ export function ScanResultOverlay({ result, onDismiss }: ScanResultOverlayProps)
         {/* Infos spécifiques "invalide" */}
         {result.status === 'invalid' && (
           <View style={styles.infoCard}>
-            <InfoRow label="Code scanné" value="Non reconnu" />
+            {isNotPaid ? (
+              <InfoRow label="Paiement" value="Non confirmé" />
+            ) : (
+              <InfoRow label="Code scanné" value="Non reconnu" />
+            )}
             <InfoRow label="Statut" value="🚫 Accès refusé" />
           </View>
         )}
