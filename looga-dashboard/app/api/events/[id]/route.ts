@@ -71,11 +71,18 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         description: t.description ?? '',
         price: t.price,
         stock_total: t.stock_total,
+        stock_remaining: t.stock_total, // nouveau type → tout le stock est dispo (colonne NOT NULL)
         advantages: t.advantages ?? '',
         event_id: id,
       }))
       const { error: insertErr } = await admin.from('ticket_types').insert(rows)
-      if (insertErr) return NextResponse.json({ error: insertErr.message }, { status: 500 })
+      if (insertErr) {
+        console.error('[events:update] ticket_types insert error:', insertErr)
+        return NextResponse.json(
+          { error: "Impossible d'ajouter les nouveaux types de billets. Vérifie les montants et les quantités, puis réessaie." },
+          { status: 500 },
+        )
+      }
     }
 
     // 3. Gérer les types retirés

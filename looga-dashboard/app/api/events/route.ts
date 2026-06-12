@@ -107,7 +107,13 @@ export async function POST(request: NextRequest) {
     }))
 
     const { error: ttError } = await admin.from('ticket_types').insert(ticketTypesData)
-    if (ttError) return NextResponse.json({ error: ttError.message }, { status: 500 })
+    if (ttError) {
+      console.error('[events:create] ticket_types insert error:', ttError)
+      return NextResponse.json(
+        { error: "Impossible d'enregistrer les types de billets. Vérifie les montants et les quantités, puis réessaie." },
+        { status: 500 },
+      )
+    }
   }
 
   return NextResponse.json(event, { status: 201 })
