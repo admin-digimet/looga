@@ -200,6 +200,9 @@ export function TicketCard({ ticket }: Props) {
               <span className="text-xs font-semibold text-[#9A6E00] leading-tight">
                 Paiement en attente
               </span>
+              <span className="text-[10px] text-[#9A6E00]/80 leading-snug">
+                Sans paiement, ce billet sera annulé sous ~30 min.
+              </span>
               <button
                 type="button"
                 onClick={handleResumePayment}
