@@ -17,6 +17,7 @@ export const ENDPOINTS = {
   tickets: '/tickets',
   ticketById: (id: string) => `/tickets/${id}`,
   paymentInit: '/payment/init',
+  paymentStatus: (reference: string) => `/payment/status/${reference}`,
 } as const;
 
 export const SITE_URL = (() => {

@@ -141,6 +141,8 @@ export interface Ticket {
   qrCode: string;
   status: TicketStatus;
   purchasedAt: string;
+  /** Référence GeniusPay (présente sur un billet en attente de paiement) */
+  paymentRef?: string;
 }
 
 export interface PurchasePayload {

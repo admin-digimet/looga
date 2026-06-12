@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
-import { Calendar, MapPin, Tag, ScanLine, Clock, CreditCard } from 'lucide-react';
+import { Calendar, MapPin, Tag, ScanLine, Clock, CreditCard, Loader2 } from 'lucide-react';
 import { formatEventDate, formatPrice } from '@/lib/utils';
+import { getPaymentStatus } from '@/lib/api/payment';
 import type { Ticket, TicketStatus } from '@/types';
 import { TicketQRModal } from './TicketQRModal';
 
@@ -48,6 +48,7 @@ const CATEGORY_LABEL: Record<string, string> = {
 
 export function TicketCard({ ticket }: Props) {
   const [qrOpen, setQrOpen] = useState(false);
+  const [resuming, setResuming] = useState(false);
   const status = STATUS_CONFIG[ticket.status];
   const isInactive = ticket.status === 'expired' || ticket.status === 'cancelled' || ticket.status === 'used';
   const qrValue = ticket.qrCode || ticket.ticketNumber;
@@ -55,6 +56,28 @@ export function TicketCard({ ticket }: Props) {
   // Un billet 'pending' (paiement non finalisé) ne doit jamais afficher de QR.
   const showQr = ticket.status === 'valid' || ticket.status === 'used';
   const isPending = ticket.status === 'pending';
+
+  // Reprend le paiement : redirige directement vers le checkout GeniusPay
+  // existant (stocké à l'init) plutôt que de relancer le choix du billet.
+  async function handleResumePayment() {
+    if (resuming) return;
+    setResuming(true);
+    try {
+      if (ticket.paymentRef) {
+        const payment = await getPaymentStatus(ticket.paymentRef);
+        if (payment?.checkoutUrl) {
+          window.location.href = payment.checkoutUrl;
+          return;
+        }
+      }
+      // Pas de checkout récupérable (expiré/introuvable) → relance depuis l'événement
+      window.location.href = `/events/${ticket.eventId}`;
+    } catch {
+      window.location.href = `/events/${ticket.eventId}`;
+    } finally {
+      setResuming(false);
+    }
+  }
 
   return (
     <>
@@ -177,13 +200,19 @@ export function TicketCard({ ticket }: Props) {
               <span className="text-xs font-semibold text-[#9A6E00] leading-tight">
                 Paiement en attente
               </span>
-              <Link
-                href={`/events/${ticket.eventId}`}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange text-white text-[11px] font-bold hover:opacity-90 transition-opacity"
+              <button
+                type="button"
+                onClick={handleResumePayment}
+                disabled={resuming}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange text-white text-[11px] font-bold hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-wait"
               >
-                <CreditCard className="w-3.5 h-3.5" />
-                Finaliser
-              </Link>
+                {resuming ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <CreditCard className="w-3.5 h-3.5" />
+                )}
+                {resuming ? 'Redirection…' : 'Finaliser'}
+              </button>
             </div>
           ) : (
             <div className="self-center sm:self-start shrink-0 w-full sm:w-[136px] flex items-center justify-center bg-black/[0.03] border-2 border-dashed border-black/10 rounded-xl p-4 text-center text-xs text-ink-muted">

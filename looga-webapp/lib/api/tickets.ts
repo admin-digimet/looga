@@ -42,6 +42,7 @@ function transformTicket(raw: RawTicketRow): Ticket {
     qrCode: raw.qr_code ?? '',
     status: (raw.status as Ticket['status']) ?? 'valid',
     purchasedAt: raw.purchased_at ?? raw.created_at ?? '',
+    paymentRef: raw.payment_ref ?? '',
   };
 }
 

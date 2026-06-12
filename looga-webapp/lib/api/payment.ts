@@ -136,6 +136,34 @@ function rowToTicket(row: RawTicketRow): Ticket {
   };
 }
 
+export interface PaymentStatusResult {
+  status: string;
+  checkoutUrl: string | null;
+}
+
+interface RawPaymentStatusResponse {
+  status?: string;
+  checkout_url?: string | null;
+  payment_url?: string | null;
+}
+
+/**
+ * Récupère l'état d'un paiement (et son checkout_url GeniusPay) à partir de
+ * sa référence. Sert à reprendre un paiement en attente sans tout relancer.
+ */
+export async function getPaymentStatus(reference: string): Promise<PaymentStatusResult | null> {
+  if (!reference) return null;
+  try {
+    const { data } = await apiClient.get<RawPaymentStatusResponse>(ENDPOINTS.paymentStatus(reference));
+    return {
+      status: data.status ?? 'pending',
+      checkoutUrl: data.checkout_url ?? data.payment_url ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function getTicketByReference(reference: string): Promise<Ticket | null> {
   if (!reference) return null;
   const token = typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null;
