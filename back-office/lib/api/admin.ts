@@ -318,6 +318,8 @@ export interface JournalEntry {
   id: string
   created_at: string
   actor_type: 'user' | 'organizer' | 'admin' | 'system'
+  /** Rôle actuel de l'acteur résolu via profiles.role (plus fiable que actor_type figé) */
+  actor_role: 'user' | 'organizer' | 'staff' | 'admin' | 'super_admin' | null
   actor_id: string | null
   actor_name: string | null
   actor_email: string | null

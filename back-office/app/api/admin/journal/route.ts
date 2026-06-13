@@ -45,7 +45,27 @@ export async function GET(req: Request) {
     const { data, count, error } = await query
     if (error) throw error
 
-    return NextResponse.json({ data: data ?? [], total: count ?? 0 })
+    const rows = data ?? []
+
+    // Résout le rôle ACTUEL de chaque acteur (profiles.role) pour que la colonne
+    // "Acteur" reflète qui est la personne aujourd'hui (ex: un scanner = 'staff'),
+    // pas seulement le actor_type figé au moment du log.
+    const actorIds = [...new Set(rows.map((r) => r.actor_id).filter(Boolean))] as string[]
+    let roleById: Record<string, string> = {}
+    if (actorIds.length > 0) {
+      const { data: profiles } = await admin
+        .from('profiles')
+        .select('id, role')
+        .in('id', actorIds)
+      roleById = Object.fromEntries((profiles ?? []).map((p) => [p.id, p.role]))
+    }
+
+    const enriched = rows.map((r) => ({
+      ...r,
+      actor_role: r.actor_id ? roleById[r.actor_id] ?? null : null,
+    }))
+
+    return NextResponse.json({ data: enriched, total: count ?? 0 })
   } catch (err) {
     return handleAdminError(err)
   }

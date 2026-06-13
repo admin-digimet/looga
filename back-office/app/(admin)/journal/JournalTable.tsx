@@ -45,6 +45,33 @@ const ACTOR_LABEL: Record<string, string> = {
   system:     'Système',
 }
 
+// Rôle ACTUEL (profiles.role) — prioritaire sur actor_type figé.
+const ROLE_BADGE: Record<string, string> = {
+  user:        'badge-success',
+  organizer:   'badge-secondary',
+  staff:       'badge-info',
+  admin:       'badge-warning',
+  super_admin: 'badge-warning',
+}
+
+const ROLE_LABEL: Record<string, string> = {
+  user:        'Utilisateur',
+  organizer:   'Organisateur',
+  staff:       'Scanner',
+  admin:       'Admin',
+  super_admin: 'Admin',
+}
+
+function actorBadge(e: JournalEntry): string {
+  if (e.actor_role && ROLE_BADGE[e.actor_role]) return ROLE_BADGE[e.actor_role]
+  return ACTOR_BADGE[e.actor_type] ?? 'badge-ghost'
+}
+
+function actorLabel(e: JournalEntry): string {
+  if (e.actor_role && ROLE_LABEL[e.actor_role]) return ROLE_LABEL[e.actor_role]
+  return ACTOR_LABEL[e.actor_type] ?? e.actor_type
+}
+
 const STATUS_BADGE: Record<string, string> = {
   success: 'badge-success',
   failure: 'badge-error',
@@ -180,8 +207,8 @@ export function JournalTable() {
                   </td>
                   <td>
                     <div className="flex flex-col gap-0.5">
-                      <span className={`badge badge-sm ${ACTOR_BADGE[e.actor_type] ?? 'badge-ghost'}`}>
-                        {ACTOR_LABEL[e.actor_type] ?? e.actor_type}
+                      <span className={`badge badge-sm ${actorBadge(e)}`}>
+                        {actorLabel(e)}
                       </span>
                       {e.actor_name && (
                         <span className="text-xs text-base-content/60 truncate max-w-32">{e.actor_name}</span>
