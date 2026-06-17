@@ -5,7 +5,10 @@ import Link from 'next/link'
 import {
   Building2,
   Calendar,
+  Coins,
+  Landmark,
   LayoutDashboard,
+  PiggyBank,
   Ticket,
   TrendingUp,
   Users,
@@ -95,9 +98,44 @@ export default function OverviewPage() {
                 icon={<Wallet size={20} />}
                 label="Revenus circulés"
                 value={formatFCFA(stats.total_revenue)}
-                sub="cumul des paiements réussis"
+                sub="cumul des paiements réussis (frais inclus)"
                 color="neutral"
               />
+            </div>
+
+            {/* Finances Looga — commission 8% au reversement */}
+            <div>
+              <h2 className="font-heading font-bold text-lg mb-3">Finances Looga</h2>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <StatCard
+                  icon={<TrendingUp size={20} />}
+                  label="Total plateforme"
+                  value={formatFCFA(stats.total_plateforme)}
+                  sub="Σ ventes de billets (valeur faciale)"
+                  color="primary"
+                />
+                <StatCard
+                  icon={<Coins size={20} />}
+                  label="Commission Looga (8%)"
+                  value={formatFCFA(stats.looga_commission)}
+                  sub="8% du total plateforme"
+                  color="accent"
+                />
+                <StatCard
+                  icon={<PiggyBank size={20} />}
+                  label="Commission encaissée"
+                  value={formatFCFA(stats.looga_commission_realized)}
+                  sub="8% des reversements déjà payés"
+                  color="secondary"
+                />
+                <StatCard
+                  icon={<Landmark size={20} />}
+                  label="Reversements en attente"
+                  value={formatFCFA(stats.payouts_pending_amount)}
+                  sub="demandes à traiter (montant brut)"
+                  color="neutral"
+                />
+              </div>
             </div>
 
             {/* Graphique revenu 30 jours + répartition events */}

@@ -1,5 +1,18 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
+/** Commission Looga prélevée sur chaque reversement organisateur (8%). */
+export const COMMISSION_RATE = 0.08
+
+/** Commission Looga pour un montant de retrait donné (arrondi entier XOF). */
+export function commissionFor(amount: number): number {
+  return Math.round(amount * COMMISSION_RATE)
+}
+
+/** Montant net réellement reçu par l'organisateur après commission Looga. */
+export function netAfterCommission(amount: number): number {
+  return amount - commissionFor(amount)
+}
+
 export interface OrganizerBalance {
   revenue_total: number   // Total brut des ventes (tickets valid/used)
   paid_out: number        // Total déjà versé

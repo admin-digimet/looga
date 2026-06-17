@@ -120,29 +120,29 @@ export function PayoutsClient() {
       {/* 3 cards stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatCard
-          label="Solde disponible"
-          value={formatFCFA(balance.available)}
-          subtitle="Montant que tu peux retirer"
+          label="Solde"
+          value={formatFCFA(balance.revenue_total)}
+          subtitle="Total de tes ventes"
           accent="primary"
         />
         <StatCard
-          label="En attente"
-          value={formatFCFA(balance.locked)}
-          subtitle="Demandes en cours de traitement"
-          accent="warning"
+          label="Retirable"
+          value={formatFCFA(balance.available)}
+          subtitle="Disponible au retrait (commission 8% au versement)"
+          accent="success"
         />
         <StatCard
           label="Total versé"
           value={formatFCFA(balance.paid_out)}
-          subtitle="Cumul des virements effectués"
-          accent="success"
+          subtitle="Cumul des reversements effectués"
+          accent="neutral"
         />
       </div>
 
       {/* Bouton + info */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-2">
         <p className="text-sm text-base-content/60">
-          Revenu brut total : <span className="font-semibold text-base-content">{formatFCFA(balance.revenue_total)}</span>
+          En attente de traitement : <span className="font-semibold text-base-content">{formatFCFA(balance.locked)}</span>
         </p>
         <button
           className="btn btn-primary"
@@ -241,12 +241,13 @@ function StatCard({
   label: string
   value: string
   subtitle: string
-  accent: 'primary' | 'warning' | 'success'
+  accent: 'primary' | 'warning' | 'success' | 'neutral'
 }) {
   const colorMap = {
     primary: 'text-primary',
     warning: 'text-warning',
     success: 'text-success',
+    neutral: 'text-base-content',
   }
   return (
     <div className="card bg-base-200 shadow-sm">

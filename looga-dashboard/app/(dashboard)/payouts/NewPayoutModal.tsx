@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { PaymentMethodIcon } from '@/components/PaymentMethodIcon'
+import { COMMISSION_RATE, commissionFor, netAfterCommission } from '@/lib/payouts'
 
 type Method = 'mtn_momo' | 'orange_money' | 'wave' | 'bank_transfer'
 
@@ -89,6 +90,18 @@ export function NewPayoutModal({ available, onClose, onCreated }: NewPayoutModal
               <p className="text-xs text-error mt-1">
                 Le montant doit être &gt; 0 et ≤ {available.toLocaleString('fr-FR')} FCFA
               </p>
+            )}
+            {amountValid && (
+              <div className="mt-2 rounded-lg bg-base-200 p-3 text-sm space-y-1">
+                <div className="flex justify-between text-base-content/70">
+                  <span>Commission Looga ({Math.round(COMMISSION_RATE * 100)} %)</span>
+                  <span>− {commissionFor(amountNum).toLocaleString('fr-FR')} FCFA</span>
+                </div>
+                <div className="flex justify-between font-semibold">
+                  <span>Tu recevras</span>
+                  <span className="text-success">{netAfterCommission(amountNum).toLocaleString('fr-FR')} FCFA</span>
+                </div>
+              </div>
             )}
           </div>
 

@@ -38,12 +38,18 @@ export default async function EventDetailPage({ params }: Params) {
   // Stats
   const { data: tickets } = await supabase
     .from('tickets')
-    .select('quantity, total_price, status')
+    .select('quantity, total_price, status, ticket_type_id')
     .eq('event_id', id)
     .in('status', ['valid', 'used'])
 
   const ticketsSold = tickets?.reduce((s, t) => s + t.quantity, 0) ?? 0
   const revenue = tickets?.reduce((s, t) => s + t.total_price, 0) ?? 0
+
+  // Montant des ventes ventilé par type de billet
+  const revenueByType = new Map<string, number>()
+  for (const t of tickets ?? []) {
+    revenueByType.set(t.ticket_type_id, (revenueByType.get(t.ticket_type_id) ?? 0) + t.total_price)
+  }
 
   const { count: scanCount } = await supabase
     .from('ticket_scans')
@@ -123,11 +129,14 @@ export default async function EventDetailPage({ params }: Params) {
                   <div>
                     <div className="text-sm font-medium">{tt.name}</div>
                     <div className="text-xs text-base-content/50">
-                      {tt.stock_total - tt.stock_remaining} / {tt.stock_total} vendus
+                      {tt.stock_total - tt.stock_remaining} / {tt.stock_total} vendus · {new Intl.NumberFormat('fr-FR').format(tt.price)} F l&apos;unité
                     </div>
                   </div>
-                  <div className="text-sm font-bold text-primary">
-                    {new Intl.NumberFormat('fr-FR').format(tt.price)} F
+                  <div className="text-right">
+                    <div className="text-sm font-bold text-success">
+                      {formatPrice(revenueByType.get(tt.id) ?? 0)}
+                    </div>
+                    <div className="text-xs text-base-content/40">montant</div>
                   </div>
                 </div>
               ))}

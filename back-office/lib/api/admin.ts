@@ -122,6 +122,28 @@ export async function toggleOrganizerApproval(
   }))
 }
 
+export interface OrganizerFinanceTicketType {
+  name: string
+  price: number
+  sold: number
+  revenue: number
+}
+export interface OrganizerFinanceEvent {
+  id: string
+  title: string
+  revenue: number
+  tickets_sold: number
+  ticket_types: OrganizerFinanceTicketType[]
+}
+export interface OrganizerFinanceResponse {
+  total: number
+  events: OrganizerFinanceEvent[]
+}
+
+export async function getOrganizerFinance(organizerId: string): Promise<OrganizerFinanceResponse> {
+  return jsonOrThrow(await fetch(`/api/admin/organizers/${organizerId}/finance`, { cache: 'no-store' }))
+}
+
 // ─── Payouts ─────────────────────────────────────────────────────────────────
 
 export type PayoutStatus = 'pending' | 'approved' | 'paid' | 'rejected'

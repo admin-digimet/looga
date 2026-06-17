@@ -6,6 +6,7 @@ import { getAdminPayouts, updatePayout } from '@/lib/api/admin'
 import type { PayoutRequest, PayoutStatus } from '@/lib/api/admin'
 import { PaymentMethodIcon } from '@/components/PaymentMethodIcon'
 import Pagination from '@/components/Pagination'
+import { COMMISSION_RATE, commissionFor, netAfterCommission } from '@/lib/finance'
 
 const PAGE_SIZE = 20
 
@@ -122,6 +123,8 @@ export function PayoutsTable() {
               <tr className="text-base-content/60 text-xs uppercase">
                 <th>Organisateur</th>
                 <th>Montant</th>
+                <th>Commission (8%)</th>
+                <th>Net à verser</th>
                 <th>Méthode</th>
                 <th>Coordonnées</th>
                 <th>Statut</th>
@@ -132,14 +135,14 @@ export function PayoutsTable() {
             <tbody>
               {loading && (
                 <tr>
-                  <td colSpan={7} className="text-center py-10">
+                  <td colSpan={9} className="text-center py-10">
                     <span className="loading loading-spinner loading-md" />
                   </td>
                 </tr>
               )}
               {!loading && payouts.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="text-center py-10 text-base-content/40">
+                  <td colSpan={9} className="text-center py-10 text-base-content/40">
                     Aucune demande de payout
                   </td>
                 </tr>
@@ -157,6 +160,8 @@ export function PayoutsTable() {
                       </div>
                     </td>
                     <td className="font-bold">{formatFCFA(p.amount)}</td>
+                    <td className="text-warning whitespace-nowrap">− {formatFCFA(commissionFor(p.amount))}</td>
+                    <td className="font-bold text-success whitespace-nowrap">{formatFCFA(netAfterCommission(p.amount))}</td>
                     <td>
                       <div className="flex items-center gap-2">
                         <PaymentMethodIcon method={p.method} size="sm" />
@@ -238,9 +243,16 @@ export function PayoutsTable() {
                 {formatFCFA(actionModal.payout.amount)} via {METHOD_LABEL[actionModal.payout.method]}
               </p>
               {actionModal.action === 'paid' && (
-                <p className="text-warning text-xs">
-                  ⚠️ Confirmer après avoir effectué le virement réel.
-                </p>
+                <>
+                  <div className="rounded-lg bg-base-200 p-3 space-y-1">
+                    <div className="flex justify-between"><span>Montant demandé</span><span>{formatFCFA(actionModal.payout.amount)}</span></div>
+                    <div className="flex justify-between text-warning"><span>Commission Looga ({Math.round(COMMISSION_RATE * 100)} %)</span><span>− {formatFCFA(commissionFor(actionModal.payout.amount))}</span></div>
+                    <div className="flex justify-between font-bold text-success border-t border-base-300 pt-1"><span>Net à verser</span><span>{formatFCFA(netAfterCommission(actionModal.payout.amount))}</span></div>
+                  </div>
+                  <p className="text-warning text-xs">
+                    ⚠️ Verse le <strong>net</strong> ci-dessus à l&apos;organisateur, puis confirme.
+                  </p>
+                </>
               )}
             </div>
             <textarea

@@ -1,12 +1,22 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Building2, CheckCircle, Pause, Play, ShieldCheck, ShieldOff, XCircle } from 'lucide-react'
-import { getAdminOrganizers, toggleOrganizerSuspension, toggleOrganizerApproval } from '@/lib/api/admin'
+import { BarChart3, Building2, CheckCircle, Pause, Play, ShieldCheck, ShieldOff, XCircle } from 'lucide-react'
+import {
+  getAdminOrganizers,
+  toggleOrganizerSuspension,
+  toggleOrganizerApproval,
+  getOrganizerFinance,
+  type OrganizerFinanceResponse,
+} from '@/lib/api/admin'
 import Pagination from '@/components/Pagination'
 import type { Organizer } from '@/types'
 
 const PAGE_SIZE = 20
+
+function formatFCFA(amount: number) {
+  return new Intl.NumberFormat('fr-FR').format(amount) + ' FCFA'
+}
 
 type OrganizerWithOwner = Organizer & {
   owner_name?: string | null
@@ -29,6 +39,18 @@ export function OrganizersTable() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'suspended'>('all')
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [page, setPage] = useState(1)
+  const [finance, setFinance] = useState<{ org: OrganizerWithOwner; data: OrganizerFinanceResponse | null } | null>(null)
+
+  async function openFinance(org: OrganizerWithOwner) {
+    setFinance({ org, data: null })
+    try {
+      const data = await getOrganizerFinance(org.id)
+      setFinance({ org, data })
+    } catch (e) {
+      setError((e as Error).message ?? 'Erreur')
+      setFinance(null)
+    }
+  }
 
   async function load() {
     setLoading(true)
@@ -177,6 +199,13 @@ export function OrganizersTable() {
                     <td>
                       <div className="flex items-center justify-end gap-1">
                         <button
+                          className="btn btn-ghost btn-xs text-primary"
+                          title="Détail financier"
+                          onClick={() => openFinance(org)}
+                        >
+                          <BarChart3 size={14} />
+                        </button>
+                        <button
                           className={`btn btn-ghost btn-xs ${org.is_approved ? 'text-error' : 'text-success'}`}
                           title={org.is_approved ? 'Révoquer l\'approbation' : 'Approuver'}
                           disabled={actionLoading === `approve-${org.id}`}
@@ -224,6 +253,62 @@ export function OrganizersTable() {
           onPageChange={setPage}
         />
       </div>
+
+      {/* Modal détail financier */}
+      {finance && (
+        <div className="modal modal-open">
+          <div className="modal-box max-w-2xl">
+            <h3 className="font-bold text-lg font-heading flex items-center gap-2">
+              <BarChart3 size={18} /> Finances — {finance.org.name}
+            </h3>
+
+            {!finance.data ? (
+              <div className="py-10 text-center">
+                <span className="loading loading-spinner loading-md" />
+              </div>
+            ) : (
+              <div className="py-4 space-y-4">
+                <div className="rounded-lg bg-base-200 p-4">
+                  <p className="text-xs text-base-content/60 uppercase tracking-wide font-semibold">Montant total généré</p>
+                  <p className="text-2xl font-bold font-heading text-primary mt-1">{formatFCFA(finance.data.total)}</p>
+                  <p className="text-xs text-base-content/40 mt-1">Σ ventes de billets (valeur faciale, hors commission)</p>
+                </div>
+
+                {finance.data.events.length === 0 ? (
+                  <p className="text-sm text-base-content/50 text-center py-6">Aucun événement.</p>
+                ) : (
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {finance.data.events.map((ev) => (
+                      <div key={ev.id} className="border border-base-300 rounded-lg p-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="font-medium text-sm">{ev.title}</p>
+                          <p className="font-bold text-success text-sm whitespace-nowrap">{formatFCFA(ev.revenue)}</p>
+                        </div>
+                        <p className="text-xs text-base-content/50">{ev.tickets_sold} billet{ev.tickets_sold > 1 ? 's' : ''} vendu{ev.tickets_sold > 1 ? 's' : ''}</p>
+                        {ev.ticket_types.length > 0 && (
+                          <div className="mt-2 space-y-1">
+                            {ev.ticket_types.map((tt, i) => (
+                              <div key={i} className="flex items-center justify-between text-xs text-base-content/60">
+                                <span>{tt.name} · {formatFCFA(tt.price)} × {tt.sold}</span>
+                                <span>{formatFCFA(tt.revenue)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="modal-action">
+              <button className="btn btn-sm" onClick={() => setFinance(null)}>Fermer</button>
+            </div>
+          </div>
+          <div className="modal-backdrop bg-black/40" onClick={() => setFinance(null)} />
+        </div>
+      )}
     </>
   )
 }
