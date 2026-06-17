@@ -186,7 +186,7 @@ export function NewPayoutModal({ available, onClose, onCreated }: NewPayoutModal
                 <strong>{METHODS.find((m) => m.value === method)?.label}</strong>.
                 <br />
                 <span className="text-xs text-base-content/60">
-                  Délai habituel : 48 h à 7 j ouvrés. Tu seras notifié quand le virement est effectué.
+                  Délai habituel : 24 à 48 h. Tu seras notifié quand le virement est effectué.
                 </span>
               </span>
             </div>
