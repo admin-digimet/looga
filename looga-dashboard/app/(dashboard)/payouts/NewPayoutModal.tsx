@@ -48,7 +48,7 @@ export function NewPayoutModal({ available, onClose, onCreated }: NewPayoutModal
           bank_details: method === 'bank_transfer' ? bank : undefined,
         }),
       })
-      const data = await res.json()
+      const data = await res.json().catch(() => ({}))
       if (!res.ok) {
         setError(data.error ?? 'Erreur lors de la demande')
         return

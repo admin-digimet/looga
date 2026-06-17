@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { validateTicketTypes } from '@/lib/api/validateEvent'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -32,6 +33,9 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
   const { ticket_types, ...eventFields } = body
 
+  const validationError = validateTicketTypes(ticket_types, false)
+  if (validationError) return NextResponse.json({ error: validationError }, { status: 422 })
+
   const { data, error } = await admin
     .from('events')
     .update({ ...eventFields, updated_at: new Date().toISOString() })
@@ -39,7 +43,13 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     .select()
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[events:update] event update error:', error)
+    return NextResponse.json(
+      { error: "Impossible de mettre à jour l'événement. Vérifie les informations saisies et réessaie." },
+      { status: 500 },
+    )
+  }
 
   if (Array.isArray(ticket_types)) {
     // Snapshot AVANT toute modification pour calculer les suppressions correctement
@@ -61,7 +71,18 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       for (const k of ['name', 'description', 'price', 'stock_total', 'advantages']) {
         if (k in row) updateFields[k] = row[k]
       }
-      await admin.from('ticket_types').update(updateFields).eq('id', typeId).eq('event_id', id)
+      const { error: updErr } = await admin
+        .from('ticket_types')
+        .update(updateFields)
+        .eq('id', typeId)
+        .eq('event_id', id)
+      if (updErr) {
+        console.error('[events:update] ticket_types update error:', updErr)
+        return NextResponse.json(
+          { error: "Impossible de mettre à jour un type de billet. Vérifie les montants et les quantités, puis réessaie." },
+          { status: 500 },
+        )
+      }
     }
 
     // 2. INSERT les nouveaux types

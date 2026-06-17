@@ -78,19 +78,30 @@ export default function EditProfileScreen() {
         const formData = new FormData();
         formData.append('file', { uri: avatarUri, name: 'avatar.jpg', type: 'image/jpeg' } as unknown as Blob);
 
-        await axios.post(
+        // fetch + FormData SANS Content-Type manuel : RN ajoute lui-même le
+        // boundary multipart (sinon l'upload échoue silencieusement).
+        const uploadRes = await fetch(
           `${SUPABASE_URL}/storage/v1/object/avatars/${path}`,
-          formData,
           {
+            method: 'POST',
             headers: {
               apikey: ANON_KEY,
               Authorization: `Bearer ${token}`,
-              'Content-Type': 'multipart/form-data',
               'x-upsert': 'true',
             },
+            body: formData,
           }
         );
-        avatarUrl = `${SUPABASE_URL}/storage/v1/object/public/avatars/${path}`;
+        if (!uploadRes.ok) {
+          const detail = await uploadRes.text().catch(() => '');
+          if (uploadRes.status === 401) {
+            Alert.alert('Session expirée', 'Reconnecte-toi pour modifier ta photo.');
+            return;
+          }
+          throw new Error(`avatar upload ${uploadRes.status}: ${detail}`);
+        }
+        // cache-busting : force l'app à recharger la nouvelle image
+        avatarUrl = `${SUPABASE_URL}/storage/v1/object/public/avatars/${path}?t=${Date.now()}`;
       }
 
       await axios.patch(
@@ -110,8 +121,11 @@ export default function EditProfileScreen() {
         await login(token, { ...user, name: trimmedName, phone: phone.trim(), avatar_url: avatarUrl }, refreshToken ?? undefined);
       }
 
-      router.back();
-    } catch {
+      Alert.alert('Profil mis à jour', 'Tes modifications ont été enregistrées.', [
+        { text: 'OK', onPress: () => router.back() },
+      ]);
+    } catch (err) {
+      if (__DEV__) console.warn('[edit-profile] save error:', err);
       Alert.alert('Erreur', 'Impossible de sauvegarder. Réessaie dans un instant.');
     } finally {
       setSaving(false);

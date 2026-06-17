@@ -53,12 +53,22 @@ export async function POST(request: NextRequest) {
 
   if (createError) return NextResponse.json({ error: createError.message }, { status: 500 })
 
-  // Insérer le profil staff
+  // Insérer le profil staff. Si ça échoue, on annule le compte auth créé
+  // pour ne pas laisser un scanner orphelin (compte sans profil → login cassé).
   const { error: profileError } = await admin.from('profiles').upsert({
     id: newUser.user.id,
     name,
     role: 'staff',
   })
+  if (profileError) {
+    console.error('[team:create] profile upsert error:', profileError)
+    await admin.auth.admin.deleteUser(newUser.user.id).catch(() => {})
+    return NextResponse.json(
+      { error: "Impossible de créer le compte scanner. Réessaie dans un instant." },
+      { status: 500 },
+    )
+  }
+
   // Insérer dans staff_accounts
   const { data: staffAccount, error: staffError } = await admin
     .from('staff_accounts')
@@ -70,6 +80,12 @@ export async function POST(request: NextRequest) {
     .select()
     .single()
 
-  if (staffError) return NextResponse.json({ error: staffError.message }, { status: 500 })
+  if (staffError) {
+    console.error('[team:create] staff_accounts insert error:', staffError)
+    return NextResponse.json(
+      { error: "Impossible d'enregistrer le scanner. Réessaie dans un instant." },
+      { status: 500 },
+    )
+  }
   return NextResponse.json(staffAccount, { status: 201 })
 }

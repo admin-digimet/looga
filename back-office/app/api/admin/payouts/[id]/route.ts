@@ -24,7 +24,10 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
     if (status === 'paid') patch.paid_at = now
 
     const { error } = await admin.from('payout_requests').update(patch).eq('id', id)
-    if (error) throw error
+    if (error) {
+      console.error('[admin:payout] update error:', error)
+      throw new AdminAuthError(500, 'Impossible de mettre à jour la demande de reversement. Réessaie.')
+    }
 
     await logAdminAction(admin, userId, `payout_${status}`, 'payout', id, admin_note)
     return NextResponse.json({ ok: true })

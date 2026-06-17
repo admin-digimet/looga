@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { validateEventCreate } from '@/lib/api/validateEvent'
 import type { CreateEventPayload } from '@/types'
 
 // GET /api/events — liste des événements de l'organisateur
@@ -50,6 +51,9 @@ export async function POST(request: NextRequest) {
 
   const body: CreateEventPayload = await request.json()
 
+  const validationError = validateEventCreate(body)
+  if (validationError) return NextResponse.json({ error: validationError }, { status: 422 })
+
   const admin = createAdminClient()
 
   let { data: organizer } = await admin
@@ -92,7 +96,13 @@ export async function POST(request: NextRequest) {
     .select()
     .single()
 
-  if (eventError) return NextResponse.json({ error: eventError.message }, { status: 500 })
+  if (eventError) {
+    console.error('[events:create] insert error:', eventError)
+    return NextResponse.json(
+      { error: "Impossible de créer l'événement. Vérifie les informations saisies et réessaie." },
+      { status: 500 },
+    )
+  }
 
   // Insérer les types de billets
   if (body.ticket_types.length > 0) {

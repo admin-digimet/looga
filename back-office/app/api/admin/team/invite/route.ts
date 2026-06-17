@@ -20,7 +20,13 @@ export async function POST(req: Request) {
       redirectTo: 'https://backoffice.looga-ci.com/auth/callback',
       data: { name: name ?? email.split('@')[0], role },
     })
-    if (error) throw error
+    if (error) {
+      // Message clair si le compte existe déjà (sinon "User already exists" brut)
+      if (/already.*(registered|exists)/i.test(error.message)) {
+        throw new AdminAuthError(409, 'Cet email a déjà un compte sur le back-office.')
+      }
+      throw error
+    }
     if (!data?.user) throw new AdminAuthError(500, 'Invitation échouée')
 
     // Le trigger handle_new_user crée le profile, on s'assure du rôle correct
