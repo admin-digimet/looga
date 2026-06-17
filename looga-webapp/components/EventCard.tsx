@@ -59,7 +59,7 @@ export function EventCard({ event }: { event: Event }) {
         </span>
       )}
 
-      <h3 className="font-bold text-lg leading-tight mb-1 group-hover:text-orange line-clamp-2">
+      <h3 className="font-bold text-lg leading-tight mb-1 group-hover:text-orange line-clamp-2 wrap-break-word">
         {event.name}
       </h3>
       <p className="text-orange font-semibold text-sm mb-1">

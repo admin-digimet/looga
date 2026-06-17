@@ -120,7 +120,7 @@ export default function AccountScreen() {
             </View>
             <View style={styles.userInfo}>
               <Text style={styles.userName} numberOfLines={1}>{user?.name ?? '—'}</Text>
-              <Text style={styles.userSub}>
+              <Text style={styles.userSub} numberOfLines={1}>
                 {user?.email ?? user?.phone ?? '—'}
               </Text>
             </View>

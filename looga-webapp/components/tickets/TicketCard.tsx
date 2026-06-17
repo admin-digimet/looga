@@ -110,7 +110,7 @@ export function TicketCard({ ticket }: Props) {
           </span>
 
           {/* Nom event */}
-          <h3 className="absolute bottom-3 left-4 right-4 font-heading font-extrabold text-white text-lg leading-tight line-clamp-2">
+          <h3 className="absolute bottom-3 left-4 right-4 font-heading font-extrabold text-white text-lg leading-tight line-clamp-2 wrap-break-word">
             {ticket.eventName || 'Événement'}
           </h3>
         </div>

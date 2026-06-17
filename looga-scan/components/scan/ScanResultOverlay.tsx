@@ -110,7 +110,7 @@ export function ScanResultOverlay({ result, onDismiss }: ScanResultOverlayProps)
       {/* Contenu avec fade-in */}
       <Animated.View style={[styles.content, contentStyle]}>
         {/* Titre principal */}
-        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit>{title}</Text>
         <Text style={styles.subtitle}>{subtitle}</Text>
 
         {/* Carte infos */}
@@ -239,6 +239,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.body,
     fontSize: FontSize.sm,
     color: 'rgba(255,255,255,0.65)',
+    flexShrink: 1,
   },
   infoValue: {
     fontFamily: Fonts.bodySemiBold,

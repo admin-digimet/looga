@@ -95,7 +95,7 @@ export default function ParametresPage() {
               <p className="font-semibold text-ink text-sm">Langue</p>
               <p className="text-sm text-ink-muted mt-0.5">Langue d'affichage de l'application.</p>
             </div>
-            <span className="text-xs font-semibold text-ink bg-cream-2 px-2 py-1 rounded-lg whitespace-nowrap">Français</span>
+            <span className="shrink-0 text-xs font-semibold text-ink bg-cream-2 px-2 py-1 rounded-lg whitespace-nowrap">Français</span>
           </div>
 
           {/* Confidentialité */}
@@ -109,7 +109,7 @@ export default function ParametresPage() {
             </div>
             <Link
               href="/confidentialite"
-              className="text-xs font-semibold text-orange whitespace-nowrap hover:underline"
+              className="shrink-0 text-xs font-semibold text-orange whitespace-nowrap hover:underline"
             >
               Voir la politique →
             </Link>

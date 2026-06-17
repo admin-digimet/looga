@@ -175,7 +175,7 @@ export default function ScanScreen() {
           {isOffline && (
             <View style={styles.offlineBanner}>
               <Zap size={12} color={Colors.warning} />
-              <Text style={styles.offlineText}>
+              <Text style={styles.offlineText} numberOfLines={1} adjustsFontSizeToFit>
                 Mode hors-ligne{pendingSyncCount > 0
                   ? ` · ${pendingSyncCount} scan${pendingSyncCount > 1 ? 's' : ''} en attente`
                   : ''}

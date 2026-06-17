@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.body,
     fontSize: FontSize.xs,
     color: 'rgba(255,255,255,0.6)',
-    maxWidth: 240,
+    maxWidth: '85%',
     textAlign: 'center',
   },
 });

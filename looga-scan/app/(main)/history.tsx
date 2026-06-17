@@ -61,10 +61,10 @@ function ScanRecordItem({ record }: { record: ScanRecord }) {
 
       {/* Infos */}
       <View style={styles.itemContent}>
-        <Text style={styles.itemName}>
+        <Text style={styles.itemName} numberOfLines={1}>
           {record.attendeeName || 'Participant inconnu'}
         </Text>
-        <Text style={styles.itemType}>
+        <Text style={styles.itemType} numberOfLines={1}>
           {record.ticketType || record.ticketId || '—'}
         </Text>
       </View>

@@ -40,8 +40,8 @@ function AttendeeItem({
     <View style={styles.item}>
       {/* Infos */}
       <View style={styles.itemInfo}>
-        <Text style={styles.itemName}>{attendee.name}</Text>
-        <Text style={styles.itemEmail}>{attendee.email}</Text>
+        <Text style={styles.itemName} numberOfLines={1}>{attendee.name}</Text>
+        <Text style={styles.itemEmail} numberOfLines={1}>{attendee.email}</Text>
         <View style={styles.ticketBadge}>
           <Text style={styles.ticketBadgeText}>{attendee.ticketType}</Text>
         </View>
