@@ -97,7 +97,7 @@ const faq = [
   },
   {
     q: 'Quel est le tarif Looga ?',
-    a: 'La plateforme applique une commission de 8,5 % par billet vendu. Aucun frais caché.',
+    a: 'La plateforme applique une commission de 8 % par billet vendu. Aucun frais caché.',
   },
   {
     q: 'Puis-je suivre mes ventes ?',
@@ -257,7 +257,7 @@ export default function OrganisateurPage() {
                   Une commission claire et transparente
                 </h2>
                 <div className="flex items-baseline gap-3 mb-6">
-                  <span className="font-heading font-extrabold text-orange text-6xl">8,5 %</span>
+                  <span className="font-heading font-extrabold text-orange text-6xl">8 %</span>
                   <span className="text-ink-muted text-lg">par billet vendu</span>
                 </div>
                 <ul className="space-y-2.5 text-ink-muted mb-8">

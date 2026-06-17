@@ -34,7 +34,9 @@ const STEP_TITLES: Record<Step, string> = {
   2: 'Vérifie et confirme',
 };
 
-const SERVICE_FEE_RATE = 0.05;
+// Frais de service 2% (spec) — doit correspondre EXACTEMENT au montant débité
+// par l'Edge Function /payment/init (base + Math.round(base * 0.02)).
+const SERVICE_FEE_RATE = 0.02;
 const POLL_INTERVAL_MS = 2000;
 const POLL_TIMEOUT_MS = 60_000;
 const PAYMENT_REF_STORAGE_KEY = 'looga_last_payment_ref';
@@ -330,7 +332,7 @@ export default function PaymentScreen() {
                 value={isFree ? 'Gratuit' : formatPrice(subtotal)}
               />
               {!isFree && (
-                <RecapLine label="Frais de service (5%)" value={formatPrice(serviceFee)} muted />
+                <RecapLine label="Frais de service (2%)" value={formatPrice(serviceFee)} muted />
               )}
 
               <View style={styles.recapDivider} />

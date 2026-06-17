@@ -31,7 +31,9 @@ export function TicketModal({ event, onClose }: Props) {
   const [quantity, setQuantity] = useState(1);
 
   const total = selectedType ? selectedType.price * quantity : 0;
-  const serviceFee = total > 0 ? Math.round(total * 0.05) : 0;
+  // Frais de service 2% (spec) — doit correspondre EXACTEMENT au montant débité
+  // par l'Edge Function /payment/init (base + Math.round(base * 0.02)).
+  const serviceFee = total > 0 ? Math.round(total * 0.02) : 0;
   const grandTotal = total + serviceFee;
   const isFree = total === 0;
 
@@ -218,7 +220,7 @@ export function TicketModal({ event, onClose }: Props) {
                     <span className="font-semibold text-gray-900">{formatPrice(total)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Frais de service (5%)</span>
+                    <span className="text-gray-500">Frais de service (2%)</span>
                     <span className="font-semibold text-gray-900">{formatPrice(serviceFee)}</span>
                   </div>
                   <div className="flex justify-between border-t border-gray-200 pt-2 mt-2">
