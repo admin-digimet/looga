@@ -16,7 +16,7 @@ function EventDetailSkeleton() {
   return (
     <div className="max-w-[1200px] mx-auto px-4 md:px-8 py-8 animate-pulse">
       <div className="w-24 h-4 bg-gray-200 rounded mb-6" />
-      <div className="w-full aspect-[21/9] bg-gray-200 rounded-xl mb-8" />
+      <div className="w-full aspect-[4/3] sm:aspect-[16/9] lg:aspect-[21/9] bg-gray-200 rounded-xl mb-8" />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
         <div className="lg:col-span-2 space-y-4">
           <div className="h-8 bg-gray-200 rounded w-3/4" />
@@ -106,8 +106,8 @@ export default function EventDetailPage() {
             <ChevronLeft className="w-4 h-4 mr-1" /> Retour aux événements
           </button>
 
-          {/* Hero image */}
-          <div className="w-full aspect-[21/9] bg-gray-900 rounded-xl overflow-hidden relative mb-8">
+          {/* Hero image — plus haute sur mobile (affiches portrait lisibles), large sur desktop */}
+          <div className="w-full aspect-[4/3] sm:aspect-[16/9] lg:aspect-[21/9] bg-gray-900 rounded-xl overflow-hidden relative mb-8">
             {event.image ? (
               <>
                 <img
@@ -161,7 +161,7 @@ export default function EventDetailPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {/* ---- Main content ---- */}
             <div className="lg:col-span-2">
-              <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight mb-8">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight mb-6 md:mb-8 wrap-break-word">
                 {event.name}
               </h1>
 
