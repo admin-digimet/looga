@@ -1,6 +1,5 @@
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Flame, Search, SlidersHorizontal, Star } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo } from 'react';
 import {
@@ -18,7 +17,7 @@ import { FeaturedCard } from '@/components/events/FeaturedCard';
 import { EventCard } from '@/components/events/EventCard';
 import { EventCardSkeleton } from '@/components/events/EventCardSkeleton';
 import { FeaturedCardSkeleton } from '@/components/events/FeaturedCardSkeleton';
-import { Colors, Gradient } from '@/constants/colors';
+import { Colors } from '@/constants/colors';
 import { Fonts, FontSize } from '@/constants/typography';
 import { useEvents } from '@/hooks/useEvents';
 import { useAuthStore } from '@/lib/store/authStore';
@@ -165,20 +164,8 @@ export default function HomeScreen() {
   // ── ListHeaderComponent — sections horizontales curatoriales ─────────────
   const listHeader = (
     <View>
-      {/* Top nav */}
-      <View style={styles.topNav}>
-        <LinearGradient
-          colors={Gradient.primary}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.logoGradient}
-        >
-          <Text style={styles.logoText}>looga</Text>
-        </LinearGradient>
-      </View>
-
       {/* Greeting */}
-      <View style={styles.greetingWrapper}>
+      <View style={[styles.greetingWrapper, styles.greetingFirst]}>
         <Text style={styles.greeting}>
           {getGreeting()}{firstName ? `, ${firstName}` : ''} 👋
         </Text>
@@ -359,6 +346,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 8,
     gap: 1,
+  },
+  greetingFirst: {
+    paddingTop: 14,
   },
   greeting: {
     fontFamily: Fonts.headingBold,

@@ -3,6 +3,7 @@ import { ChevronLeft } from 'lucide-react-native';
 import { useState } from 'react';
 import {
   KeyboardAvoidingView,
+  Linking,
   Platform,
   ScrollView,
   StatusBar,
@@ -16,6 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Input } from '@/components/ui/Input';
 import { Colors } from '@/constants/colors';
 import { Fonts, FontSize } from '@/constants/typography';
+import { LOOGA_WEBSITE_URL } from '@/constants/links';
 import { useRegister } from '@/hooks/useAuth';
 
 export default function RegisterScreen() {
@@ -156,9 +158,19 @@ export default function RegisterScreen() {
           {/* Mention légale */}
           <Text style={styles.terms}>
             En créant un compte, j'accepte les{' '}
-            <Text style={styles.termsLink}>Conditions d'utilisation</Text>
+            <Text
+              style={styles.termsLink}
+              onPress={() => Linking.openURL(`${LOOGA_WEBSITE_URL}/cgu`)}
+            >
+              Conditions d'utilisation
+            </Text>
             {' '}et la{' '}
-            <Text style={styles.termsLink}>Politique de confidentialité</Text>
+            <Text
+              style={styles.termsLink}
+              onPress={() => Linking.openURL(`${LOOGA_WEBSITE_URL}/confidentialite`)}
+            >
+              Politique de confidentialité
+            </Text>
             {' '}de Looga.
           </Text>
 
