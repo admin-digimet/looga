@@ -4,12 +4,11 @@ import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { ChevronDown, History, Search, Zap } from 'lucide-react-native';
+import { ChevronDown, Zap } from 'lucide-react-native';
 
 import { ScanFrame } from '@/components/scan/ScanFrame';
 import { CounterRow } from '@/components/scan/CounterRow';
 import { ScanResultOverlay } from '@/components/scan/ScanResultOverlay';
-import { SearchModal } from '@/components/scan/SearchModal';
 import { Colors } from '@/constants/colors';
 import { Fonts, FontSize } from '@/constants/typography';
 import { useScanStore } from '@/lib/store/scanStore';
@@ -27,7 +26,6 @@ export default function ScanScreen() {
   const insets = useSafeAreaInsets();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
-  const [searchVisible, setSearchVisible] = useState(false);
   const isScanning = useRef(false);
 
   const {
@@ -198,36 +196,12 @@ export default function ScanScreen() {
           totalTickets={activeEvent.ticketsSold}
           refusedCount={refusedCount}
         />
-
-        <View style={styles.quickActions}>
-          <TouchableOpacity
-            style={styles.quickBtn}
-            onPress={() => setSearchVisible(true)}
-          >
-            <Search size={16} color="rgba(255,255,255,0.8)" />
-            <Text style={styles.quickBtnText}>Recherche</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.quickBtn}
-            onPress={() => router.navigate('/(main)/history')}
-          >
-            <History size={16} color="rgba(255,255,255,0.8)" />
-            <Text style={styles.quickBtnText}>Historique</Text>
-          </TouchableOpacity>
-        </View>
       </View>
 
       {/* Résultat du scan */}
       {scanResult && (
         <ScanResultOverlay result={scanResult} onDismiss={handleDismiss} />
       )}
-
-      {/* Modal recherche manuelle */}
-      <SearchModal
-        visible={searchVisible}
-        onClose={() => setSearchVisible(false)}
-        eventId={activeEvent.id}
-      />
     </View>
   );
 }

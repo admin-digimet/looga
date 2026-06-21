@@ -1,92 +1,70 @@
 import * as Haptics from 'expo-haptics';
-import { Audio } from 'expo-av';
-import type { AVPlaybackSource } from 'expo-av';
+import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio';
 
 import { storage } from '@/lib/store/mmkv';
 
 const SOUND_ENABLED_KEY = 'sound_enabled';
 
-// Pré-chargement des sons
-let validSound: Audio.Sound | null = null;
-let usedSound: Audio.Sound | null = null;
-let invalidSound: Audio.Sound | null = null;
+// Lecteurs audio préchargés (expo-audio — remplace expo-av déprécié)
+let validPlayer: AudioPlayer | null = null;
+let usedPlayer: AudioPlayer | null = null;
+let invalidPlayer: AudioPlayer | null = null;
 let soundsLoaded = false;
 
 /**
- * Précharger les sons au démarrage de l'app.
- * Appeler dans app/_layout.tsx une seule fois.
+ * Précharge les 3 sons au démarrage de l'app.
+ * Appelé une seule fois dans app/_layout.tsx.
  */
 export async function preloadSounds() {
   if (soundsLoaded) return;
-
   try {
-    // Configuration audio pour ne pas interrompre la musique en arrière-plan
-    await Audio.setAudioModeAsync({
-      playsInSilentModeIOS: true,
-      staysActiveInBackground: false,
-      shouldDuckAndroid: true,
-    });
+    // Jouer même quand le téléphone est en mode silencieux (iOS)
+    await setAudioModeAsync({ playsInSilentMode: true });
 
-    const validAsset = require('@/assets/sounds/valid.mp3') as AVPlaybackSource;
-    const usedAsset = require('@/assets/sounds/used.mp3') as AVPlaybackSource;
-    const invalidAsset = require('@/assets/sounds/invalid.mp3') as AVPlaybackSource;
+    validPlayer = createAudioPlayer(require('@/assets/sounds/valid.mp3'));
+    usedPlayer = createAudioPlayer(require('@/assets/sounds/used.mp3'));
+    invalidPlayer = createAudioPlayer(require('@/assets/sounds/invalid.wav'));
 
-    const [v, u, i] = await Promise.all([
-      Audio.Sound.createAsync(validAsset, { shouldPlay: false, volume: 0.7 }),
-      Audio.Sound.createAsync(usedAsset, { shouldPlay: false, volume: 0.7 }),
-      Audio.Sound.createAsync(invalidAsset, { shouldPlay: false, volume: 0.7 }),
-    ]);
-
-    validSound = v.sound;
-    usedSound = u.sound;
-    invalidSound = i.sound;
+    for (const p of [validPlayer, usedPlayer, invalidPlayer]) {
+      p.volume = 0.8;
+    }
     soundsLoaded = true;
   } catch {
-    // Sons non disponibles — le feedback haptique reste actif
+    // Sons indisponibles → le feedback haptique reste actif.
   }
 }
 
 function isSoundEnabled(): boolean {
-  const val = storage.getString(SOUND_ENABLED_KEY);
-  return val !== 'false'; // par défaut activé
+  return storage.getString(SOUND_ENABLED_KEY) !== 'false'; // activé par défaut
 }
 
-async function playSound(sound: Audio.Sound | null) {
-  if (!sound || !isSoundEnabled()) return;
+async function play(player: AudioPlayer | null) {
+  if (!player || !isSoundEnabled()) return;
   try {
-    await sound.setPositionAsync(0);
-    await sound.playAsync();
+    await player.seekTo(0); // rejoue depuis le début à chaque scan
+    player.play();
   } catch {
-    // Ignorer les erreurs de lecture
+    // Ignore les erreurs de lecture.
   }
 }
 
 /**
- * Déclencher le feedback multi-canal après un scan.
- * Visuel = géré par ScanResultOverlay.
- * Son + vibration = gérés ici.
+ * Feedback multi-canal après un scan — 3 états, chacun son son + sa vibration.
+ * Le visuel est géré par ScanResultOverlay.
  */
-export async function triggerFeedback(status: 'valid' | 'used' | 'invalid') {
+export function triggerFeedback(status: 'valid' | 'used' | 'invalid') {
   switch (status) {
     case 'valid':
-      await Promise.all([
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success),
-        playSound(validSound),
-      ]);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      void play(validPlayer);
       break;
-
     case 'used':
-      await Promise.all([
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning),
-        playSound(usedSound),
-      ]);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      void play(usedPlayer);
       break;
-
     case 'invalid':
-      await Promise.all([
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error),
-        playSound(invalidSound),
-      ]);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      void play(invalidPlayer);
       break;
   }
 }

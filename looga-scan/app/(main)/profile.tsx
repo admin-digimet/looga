@@ -1,4 +1,3 @@
-import { router } from 'expo-router';
 import {
   CalendarDays,
   ChevronRight,
@@ -41,7 +40,7 @@ function readScannerName(): string {
 }
 
 export default function SettingsScreen() {
-  const { activeEvent, scanCount, clearHistory, clearEvent } = useScanStore();
+  const { activeEvent, scanCount, clearHistory } = useScanStore();
   const { user, isAuthenticated } = useAuthStore();
   const logoutMutation = useLogout();
 
@@ -60,11 +59,6 @@ export default function SettingsScreen() {
     setSoundEnabled(val);
     storage.set(SOUND_ENABLED_KEY, val ? 'true' : 'false');
   }, []);
-
-  function handleChangeEvent() {
-    clearEvent();
-    router.replace('/events');
-  }
 
   function handleResetCounter() {
     Alert.alert(
@@ -145,18 +139,6 @@ export default function SettingsScreen() {
           <Text style={styles.sectionTitle}>Actions</Text>
 
           <View style={styles.card}>
-            <TouchableOpacity style={styles.actionRow} onPress={handleChangeEvent}>
-              <View style={styles.settingLeft}>
-                <View style={[styles.settingIcon, { backgroundColor: 'rgba(0,200,100,0.1)' }]}>
-                  <CalendarDays size={16} color={Colors.success} />
-                </View>
-                <Text style={styles.settingLabel}>Changer d'événement</Text>
-              </View>
-              <ChevronRight size={18} color={Colors.textMuted} />
-            </TouchableOpacity>
-
-            <View style={styles.divider} />
-
             <TouchableOpacity style={styles.actionRow} onPress={handleResetCounter}>
               <View style={styles.settingLeft}>
                 <View style={[styles.settingIcon, { backgroundColor: 'rgba(255,184,0,0.1)' }]}>
@@ -207,7 +189,7 @@ export default function SettingsScreen() {
                   <View style={[styles.settingIcon, { backgroundColor: 'rgba(255,59,59,0.1)' }]}>
                     <LogOut size={16} color={Colors.error} />
                   </View>
-                  <Text style={[styles.settingLabel, { color: Colors.error }]}>
+                  <Text style={[styles.settingLabel, { color: Colors.error }]} numberOfLines={1}>
                     {logoutMutation.isPending ? 'Déconnexion…' : 'Se déconnecter'}
                   </Text>
                 </View>
