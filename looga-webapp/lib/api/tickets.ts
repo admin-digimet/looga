@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { SUPABASE_URL, SUPABASE_ANON_KEY, TOKEN_KEY } from '@/lib/constants';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/constants';
+import { useAuthStore } from '@/lib/store/authStore';
 import type { Ticket } from '@/types';
 
 interface RawTicketRow {
@@ -46,8 +47,10 @@ function transformTicket(raw: RawTicketRow): Ticket {
   };
 }
 
-function authHeaders() {
-  const token = typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null;
+async function authHeaders() {
+  // Refresh silencieux si l'access token a expiré (sinon 401 sur des listes
+  // alors que la session est encore récupérable via le refresh token).
+  const token = await useAuthStore.getState().getFreshToken();
   return {
     apikey: SUPABASE_ANON_KEY,
     Authorization: `Bearer ${token ?? SUPABASE_ANON_KEY}`,
@@ -59,13 +62,13 @@ const TICKETS_SELECT =
 
 export async function getTickets(): Promise<Ticket[]> {
   const url = `${SUPABASE_URL}/rest/v1/tickets?select=${encodeURIComponent(TICKETS_SELECT)}&order=created_at.desc`;
-  const { data } = await axios.get<RawTicketRow[]>(url, { headers: authHeaders() });
+  const { data } = await axios.get<RawTicketRow[]>(url, { headers: await authHeaders() });
   return Array.isArray(data) ? data.map(transformTicket) : [];
 }
 
 export async function getTicketById(id: string): Promise<Ticket | null> {
   const url = `${SUPABASE_URL}/rest/v1/tickets?id=eq.${encodeURIComponent(id)}&select=${encodeURIComponent(TICKETS_SELECT)}&limit=1`;
-  const { data } = await axios.get<RawTicketRow[]>(url, { headers: authHeaders() });
+  const { data } = await axios.get<RawTicketRow[]>(url, { headers: await authHeaders() });
   if (!Array.isArray(data) || data.length === 0) return null;
   return transformTicket(data[0]);
 }

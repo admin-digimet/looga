@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { AlertTriangle, X } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
-import { SUPABASE_URL, SUPABASE_ANON_KEY, TOKEN_KEY } from '@/lib/constants';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/constants';
 
 interface ReportEventModalProps {
   eventId: string;
@@ -23,7 +23,7 @@ const REASONS = [
 ];
 
 export function ReportEventModal({ eventId, eventTitle, open, onClose }: ReportEventModalProps) {
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, getFreshToken } = useAuthStore();
   const [reason, setReason] = useState(REASONS[0].value);
   const [description, setDescription] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -38,7 +38,7 @@ export function ReportEventModal({ eventId, eventTitle, open, onClose }: ReportE
     setError(null);
     setSubmitting(true);
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null;
+      const token = await getFreshToken();
       const reasonLabel = REASONS.find((r) => r.value === reason)?.label ?? reason;
       const finalReason = description.trim()
         ? `${reasonLabel} — ${description.trim()}`

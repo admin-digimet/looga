@@ -18,9 +18,21 @@ type Step = 'select' | 'redirecting';
 
 export function TicketModal({ event, onClose }: Props) {
   const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, logout } = useAuthStore();
   const initPaymentMutation = useInitPayment();
   const initFreeTicketMutation = useInitFreeTicket();
+
+  // Session vraiment expirée (refresh impossible) → déconnexion propre +
+  // redirection login. Renvoie true si c'était bien un cas 401.
+  const handleSessionMaybeExpired = (err: unknown): boolean => {
+    const status = (err as AxiosError)?.response?.status;
+    if (status === 401) {
+      void logout();
+      router.push(`/auth/login?redirect=/events/${event.id}`);
+      return true;
+    }
+    return false;
+  };
 
   const availableTypes = event.ticketTypes.filter((t) => !t.soldOut);
 
@@ -75,7 +87,10 @@ export function TicketModal({ event, onClose }: Props) {
           onClose();
           router.push('/tickets');
         },
-        onError: () => setStep('select'),
+        onError: (err) => {
+          setStep('select');
+          handleSessionMaybeExpired(err);
+        },
       });
     } else {
       initPaymentMutation.mutate(payload, {
@@ -83,7 +98,10 @@ export function TicketModal({ event, onClose }: Props) {
           if (reference) sessionStorage.setItem('looga_last_payment_ref', reference);
           window.location.href = checkoutUrl;
         },
-        onError: () => setStep('select'),
+        onError: (err) => {
+          setStep('select');
+          handleSessionMaybeExpired(err);
+        },
       });
     }
   };

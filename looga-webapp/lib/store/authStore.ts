@@ -56,14 +56,41 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   loadToken: async () => {
     try {
       const token = lsGet(TOKEN_KEY);
-      const refreshToken = lsGet(REFRESH_KEY);
-      if (token) {
-        const userRaw = lsGet(USER_KEY);
-        const restoredUser = userRaw ? (JSON.parse(userRaw) as User) : null;
-        set({ token, refreshToken, user: restoredUser, isAuthenticated: true, isLoading: false });
-      } else {
+      if (!token) {
         set({ isLoading: false });
+        return;
       }
+
+      const userRaw = lsGet(USER_KEY);
+      const restoredUser = userRaw ? (JSON.parse(userRaw) as User) : null;
+
+      // Vérifie l'expiration de l'access token. Si expiré → refresh silencieux ;
+      // si le refresh échoue (session vraiment morte) → déconnexion propre
+      // (sinon l'avatar reste affiché alors que la session n'existe plus).
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const isExpired = payload.exp < Math.floor(Date.now() / 1000);
+        if (isExpired) {
+          const ok = await get().refreshSession();
+          if (!ok) {
+            lsDel(TOKEN_KEY);
+            lsDel(REFRESH_KEY);
+            lsDel(USER_KEY);
+            set({ token: null, refreshToken: null, user: null, isAuthenticated: false, isLoading: false });
+            return;
+          }
+        }
+      } catch {
+        // token non décodable → on laisse getFreshToken gérer à la 1re action
+      }
+
+      set({
+        token: lsGet(TOKEN_KEY),
+        refreshToken: lsGet(REFRESH_KEY),
+        user: restoredUser,
+        isAuthenticated: true,
+        isLoading: false,
+      });
     } catch {
       set({ isLoading: false });
     }

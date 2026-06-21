@@ -1,7 +1,15 @@
 import axios from 'axios';
 import { apiClient } from '@/lib/api/client';
-import { ENDPOINTS, SITE_URL, SUPABASE_URL, SUPABASE_ANON_KEY, TOKEN_KEY } from '@/lib/constants';
+import { ENDPOINTS, SITE_URL, SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/constants';
+import { useAuthStore } from '@/lib/store/authStore';
 import type { Ticket } from '@/types';
+
+/** Erreur 401 standardisée → la modale la traite comme « session expirée ». */
+function sessionExpiredError(): Error {
+  const e = new Error('SESSION_EXPIRED') as Error & { response?: { status: number } };
+  e.response = { status: 401 };
+  return e;
+}
 
 export interface InitPaymentPayload {
   eventId: string;
@@ -62,7 +70,9 @@ interface RawFreeTicketRpcRow {
 }
 
 export async function initFreeTicket(payload: InitPaymentPayload): Promise<InitFreeTicketResult> {
-  const token = typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null;
+  // Token rafraîchi en silence si l'access token a expiré. null = session morte.
+  const token = await useAuthStore.getState().getFreshToken();
+  if (!token) throw sessionExpiredError();
   const url = `${SUPABASE_URL}/rest/v1/rpc/create_free_ticket`;
 
   const { data } = await axios.post<RawFreeTicketRpcRow[] | RawFreeTicketRpcRow>(
@@ -166,7 +176,7 @@ export async function getPaymentStatus(reference: string): Promise<PaymentStatus
 
 export async function getTicketByReference(reference: string): Promise<Ticket | null> {
   if (!reference) return null;
-  const token = typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null;
+  const token = await useAuthStore.getState().getFreshToken();
   const select = '*,event:events(*),ticket_type:ticket_types(name)';
   const url = `${SUPABASE_URL}/rest/v1/tickets?payment_ref=eq.${encodeURIComponent(reference)}&select=${encodeURIComponent(select)}&limit=1`;
 
