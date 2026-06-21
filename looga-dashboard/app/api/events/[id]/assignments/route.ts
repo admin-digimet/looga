@@ -16,7 +16,10 @@ export async function GET(_req: NextRequest, { params }: Params) {
     .eq('event_id', id)
     .order('assigned_at', { ascending: true })
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[assignments:get] error:', error)
+    return NextResponse.json({ error: 'Impossible de charger les affectations.' }, { status: 500 })
+  }
   return NextResponse.json(data ?? [])
 }
 
@@ -36,7 +39,10 @@ export async function POST(request: NextRequest, { params }: Params) {
     .select('*, staff_accounts(id, name, is_active)')
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[assignments:create] error:', error)
+    return NextResponse.json({ error: "Impossible d'affecter ce scanner." }, { status: 500 })
+  }
   return NextResponse.json(data, { status: 201 })
 }
 
@@ -56,6 +62,9 @@ export async function DELETE(request: NextRequest, { params }: Params) {
     .eq('event_id', id)
     .eq('staff_id', staff_id)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[assignments:delete] error:', error)
+    return NextResponse.json({ error: 'Impossible de retirer ce scanner.' }, { status: 500 })
+  }
   return NextResponse.json({ ok: true })
 }

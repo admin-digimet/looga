@@ -27,6 +27,9 @@ export async function GET(_request: NextRequest, { params }: Params) {
     .order('scanned_at', { ascending: false })
     .limit(100)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[events:scans] error:', error)
+    return NextResponse.json({ error: 'Impossible de charger les scans.' }, { status: 500 })
+  }
   return NextResponse.json(scans ?? [])
 }

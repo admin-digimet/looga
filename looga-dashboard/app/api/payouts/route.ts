@@ -41,7 +41,10 @@ export async function GET() {
     computeOrganizerBalance(admin, organizer.id),
   ])
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[payouts:get] error:', error)
+    return NextResponse.json({ error: 'Impossible de charger les reversements.' }, { status: 500 })
+  }
 
   return NextResponse.json({
     requests: requests ?? [],
@@ -106,6 +109,9 @@ export async function POST(request: NextRequest) {
     .select()
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[payouts:create] error:', error)
+    return NextResponse.json({ error: 'Impossible de créer la demande de reversement.' }, { status: 500 })
+  }
   return NextResponse.json(data, { status: 201 })
 }

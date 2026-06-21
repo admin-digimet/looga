@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { validateTicketTypes } from '@/lib/api/validateEvent'
+import { userOwnsEvent } from '@/lib/api/ownership'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -28,8 +29,14 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
-  const body = await request.json()
   const admin = createAdminClient()
+
+  // Anti-IDOR : l'event doit appartenir à l'organisateur du user.
+  if (!(await userOwnsEvent(admin, user.id, id))) {
+    return NextResponse.json({ error: 'Accès refusé à cet événement' }, { status: 403 })
+  }
+
+  const body = await request.json()
 
   const { ticket_types, ...eventFields } = body
 
@@ -138,8 +145,17 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
   if (!user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
   const admin = createAdminClient()
+
+  // Anti-IDOR : l'event doit appartenir à l'organisateur du user.
+  if (!(await userOwnsEvent(admin, user.id, id))) {
+    return NextResponse.json({ error: 'Accès refusé à cet événement' }, { status: 403 })
+  }
+
   const { error } = await admin.from('events').update({ status: 'cancelled' }).eq('id', id)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[events:delete] error:', error)
+    return NextResponse.json({ error: "Impossible d'annuler l'événement." }, { status: 500 })
+  }
   return NextResponse.json({ success: true })
 }
