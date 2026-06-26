@@ -10,6 +10,8 @@ import {
   type OrganizerFinanceResponse,
 } from '@/lib/api/admin'
 import Pagination from '@/components/Pagination'
+import { ExportCsvButton } from '@/components/ExportCsvButton'
+import { csvDate, type CsvColumn } from '@/lib/csv'
 import type { Organizer } from '@/types'
 
 const PAGE_SIZE = 20
@@ -31,6 +33,17 @@ function formatDate(dateStr: string) {
     year: 'numeric',
   })
 }
+
+const ORGANIZER_COLUMNS: CsvColumn<OrganizerWithOwner>[] = [
+  { header: 'Organisation', value: (o) => o.name },
+  { header: 'Référent', value: (o) => o.owner_name ?? '' },
+  { header: 'Email', value: (o) => o.owner_email ?? '' },
+  { header: 'Téléphone', value: (o) => o.owner_phone ?? '' },
+  { header: 'Description', value: (o) => o.description ?? '' },
+  { header: 'Statut', value: (o) => (o.is_suspended ? 'Suspendu' : 'Actif') },
+  { header: 'Approbation', value: (o) => (o.is_approved ? 'Approuvé' : 'En attente') },
+  { header: 'Membre depuis', value: (o) => csvDate(o.created_at) },
+]
 
 export function OrganizersTable() {
   const [organizers, setOrganizers] = useState<OrganizerWithOwner[]>([])
@@ -104,15 +117,22 @@ export function OrganizersTable() {
         <p className="text-sm text-base-content/60">
           {organizers.length} organisateur{organizers.length > 1 ? 's' : ''}
         </p>
-        <select
-          className="select select-bordered bg-base-100 text-sm w-48"
-          value={statusFilter}
-          onChange={(e) => { setStatusFilter(e.target.value as 'all' | 'active' | 'suspended'); setPage(1) }}
-        >
-          <option value="all">Tous</option>
-          <option value="active">Actifs</option>
-          <option value="suspended">Suspendus</option>
-        </select>
+        <div className="flex gap-2">
+          <select
+            className="select select-bordered bg-base-100 text-sm w-48"
+            value={statusFilter}
+            onChange={(e) => { setStatusFilter(e.target.value as 'all' | 'active' | 'suspended'); setPage(1) }}
+          >
+            <option value="all">Tous</option>
+            <option value="active">Actifs</option>
+            <option value="suspended">Suspendus</option>
+          </select>
+          <ExportCsvButton<OrganizerWithOwner>
+            filename="organisateurs"
+            columns={ORGANIZER_COLUMNS}
+            getRows={() => getAdminOrganizers({ status: statusFilter }) as Promise<OrganizerWithOwner[]>}
+          />
+        </div>
       </div>
 
       {error && (

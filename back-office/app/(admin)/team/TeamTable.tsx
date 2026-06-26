@@ -10,6 +10,8 @@ import {
   type TeamMember,
 } from '@/lib/api/admin'
 import Pagination from '@/components/Pagination'
+import { ExportCsvButton } from '@/components/ExportCsvButton'
+import { csvDate, type CsvColumn } from '@/lib/csv'
 
 const PAGE_SIZE = 20
 
@@ -22,6 +24,15 @@ function formatDate(dateStr: string | null) {
   if (!dateStr) return '—'
   return new Date(dateStr).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })
 }
+
+const TEAM_COLUMNS: CsvColumn<TeamMember>[] = [
+  { header: 'Nom', value: (m) => m.name || '' },
+  { header: 'Email', value: (m) => m.email || '' },
+  { header: 'Rôle', value: (m) => ROLE_LABEL[m.role] ?? m.role },
+  { header: 'Statut', value: (m) => (m.is_active ? 'Actif' : 'Désactivé') },
+  { header: 'Dernière connexion', value: (m) => csvDate(m.last_sign_in_at) },
+  { header: 'Membre depuis', value: (m) => csvDate(m.created_at) },
+]
 
 interface MeRole {
   role: string
@@ -132,11 +143,18 @@ export function TeamTable() {
         <p className="text-sm text-base-content/60">
           {team.length} membre{team.length > 1 ? 's' : ''} de l&apos;équipe
         </p>
-        {isSuperAdmin && (
-          <button className="btn btn-primary btn-sm" onClick={() => setShowInvite(true)}>
-            <Plus size={14} /> Inviter un admin
-          </button>
-        )}
+        <div className="flex gap-2">
+          <ExportCsvButton<TeamMember>
+            filename="equipe"
+            columns={TEAM_COLUMNS}
+            getRows={() => getAdminTeam()}
+          />
+          {isSuperAdmin && (
+            <button className="btn btn-primary btn-sm" onClick={() => setShowInvite(true)}>
+              <Plus size={14} /> Inviter un admin
+            </button>
+          )}
+        </div>
       </div>
 
       {error && (

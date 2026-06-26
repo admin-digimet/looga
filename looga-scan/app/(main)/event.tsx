@@ -2,7 +2,6 @@ import { FlashList } from '@shopify/flash-list';
 import { useCallback } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   RefreshControl,
   ScrollView,
   StatusBar,
@@ -24,7 +23,7 @@ import type { AxiosError } from 'axios';
 
 export default function EventTabScreen() {
   const { data: events, isLoading, isError, error, refetch, isRefetching } = useEvents();
-  const { activeEvent, setActiveEvent, scanCount, clearHistory } = useScanStore();
+  const { activeEvent, setActiveEvent, scanCount } = useScanStore();
 
   const handleSelect = useCallback(
     (event: ScanEvent) => {
@@ -34,21 +33,6 @@ export default function EventTabScreen() {
     },
     [setActiveEvent]
   );
-
-  function handleResetCounter() {
-    Alert.alert(
-      'Réinitialiser le compteur ?',
-      "L'historique local des scans sera effacé. Cette action est irréversible.",
-      [
-        { text: 'Annuler', style: 'cancel' },
-        {
-          text: 'Réinitialiser',
-          style: 'destructive',
-          onPress: () => clearHistory(),
-        },
-      ]
-    );
-  }
 
   const ListHeader = (
     <View>
@@ -65,9 +49,6 @@ export default function EventTabScreen() {
               {scanCount !== 1 ? 's' : ''}
             </Text>
           </View>
-          <TouchableOpacity style={styles.resetBtn} onPress={handleResetCounter}>
-            <Text style={styles.resetBtnText}>Réinitialiser</Text>
-          </TouchableOpacity>
         </View>
       )}
 

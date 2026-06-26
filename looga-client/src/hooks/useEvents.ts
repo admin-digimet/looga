@@ -20,6 +20,30 @@ export function useEvents(category?: EventCategory) {
   });
 }
 
+// « Autres événements » (page détail) — même catégorie en priorité, exclut l'event courant.
+export function useSimilarEvents(excludeId: string, category?: EventCategory) {
+  return useQuery({
+    queryKey: ['similarEvents', excludeId, category],
+    queryFn: () => eventsApi.getSimilarEvents({ excludeId, category, limit: 6 }),
+    staleTime: STALE_TIME,
+    enabled: !!excludeId,
+  });
+}
+
+// Recherche serveur hybride (explore) — q déjà debouncé côté écran.
+export function useSearchEvents(params: eventsApi.SearchEventsParams) {
+  return useInfiniteQuery({
+    queryKey: ['searchEvents', params.q ?? '', params.category ?? 'tout', params.price ?? 'all', params.period ?? 'all'],
+    queryFn: ({ pageParam = 1 }) =>
+      eventsApi.searchEvents({ ...params, page: pageParam as number }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    staleTime: STALE_TIME,
+    refetchOnMount: true,
+    retry: 1,
+  });
+}
+
 export function useEvent(id: string) {
   return useQuery({
     queryKey: ['event', id],

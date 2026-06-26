@@ -3,15 +3,16 @@ import { create } from 'zustand';
 import { storage } from './mmkv';
 import type { ScanEvent, ScanRecord } from '@/types/scan';
 
-const HISTORY_KEY = 'looga_scan_history';
 const EVENT_KEY = 'looga_scan_active_event';
+// Historique PAR événement → pas de mélange des compteurs entre events.
+const historyKey = (eventId: string) => `looga_scan_history_${eventId}`;
 
-function persistHistory(records: ScanRecord[]) {
-  storage.set(HISTORY_KEY, JSON.stringify(records));
+function persistHistory(eventId: string, records: ScanRecord[]) {
+  storage.set(historyKey(eventId), JSON.stringify(records));
 }
 
-function readHistory(): ScanRecord[] {
-  const raw = storage.getString(HISTORY_KEY);
+function readHistory(eventId: string): ScanRecord[] {
+  const raw = storage.getString(historyKey(eventId));
   if (!raw) return [];
   try { return JSON.parse(raw) as ScanRecord[]; } catch { return []; }
 }
@@ -51,7 +52,6 @@ interface ScanState {
   addScanRecord: (record: ScanRecord) => void;
   loadFromStorage: () => void;
   clearEvent: () => void;
-  clearHistory: () => void;
   setOffline: (offline: boolean) => void;
   setPendingSyncCount: (count: number) => void;
 }
@@ -66,7 +66,7 @@ export const useScanStore = create<ScanState>((set, get) => ({
 
   loadFromStorage: () => {
     const event = readEvent();
-    const history = readHistory();
+    const history = event ? readHistory(event.id) : [];
     const { validCount, refusedCount } = computeCounts(history);
     set({
       activeEvent: event,
@@ -78,24 +78,29 @@ export const useScanStore = create<ScanState>((set, get) => ({
 
   setActiveEvent: (event) => {
     persistEvent(event);
-    set({ activeEvent: event });
+    // Charge l'historique propre à CET événement (compteurs non mélangés).
+    const history = event ? readHistory(event.id) : [];
+    const { validCount, refusedCount } = computeCounts(history);
+    set({
+      activeEvent: event,
+      scanHistory: history,
+      scanCount: validCount,
+      refusedCount,
+    });
   },
 
   addScanRecord: (record) => {
-    const updated = [record, ...get().scanHistory];
-    persistHistory(updated);
+    const { activeEvent, scanHistory } = get();
+    if (!activeEvent) return; // pas d'event actif → on ne scanne pas
+    const updated = [record, ...scanHistory];
+    persistHistory(activeEvent.id, updated);
     const { validCount, refusedCount } = computeCounts(updated);
     set({ scanHistory: updated, scanCount: validCount, refusedCount });
   },
 
   clearEvent: () => {
     persistEvent(null);
-    set({ activeEvent: null });
-  },
-
-  clearHistory: () => {
-    persistHistory([]);
-    set({ scanHistory: [], scanCount: 0, refusedCount: 0 });
+    set({ activeEvent: null, scanHistory: [], scanCount: 0, refusedCount: 0 });
   },
 
   setOffline: (offline) => set({ isOffline: offline }),

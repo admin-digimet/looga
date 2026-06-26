@@ -373,3 +373,37 @@ export async function getAdminJournal(
   if (params.period) qs.set('period', params.period)
   return jsonOrThrow(await fetch(`/api/admin/journal?${qs.toString()}`, { cache: 'no-store' }))
 }
+
+// ─── Export : récupération de TOUTES les pages ─────────────────────────────────
+// Les listes users / events / journal sont paginées côté serveur. Pour l'export
+// CSV, on boucle sur toutes les pages afin d'obtenir l'intégralité des données
+// (en respectant les filtres en cours).
+
+async function fetchAllPages<T>(
+  fetchPage: (page: number) => Promise<{ data: T[]; total: number }>,
+): Promise<T[]> {
+  const out: T[] = []
+  let page = 1
+  let total = Infinity
+  while (out.length < total) {
+    const res = await fetchPage(page)
+    total = res.total
+    if (res.data.length === 0) break
+    out.push(...res.data)
+    page += 1
+    if (page > 2000) break // garde-fou anti-boucle infinie
+  }
+  return out
+}
+
+export function getAllAdminUsers(params: AdminUsersParams = {}): Promise<Profile[]> {
+  return fetchAllPages((page) => getAdminUsers({ ...params, page }))
+}
+
+export function getAllAdminEvents(params: AdminEventsParams = {}): Promise<AdminEventListItem[]> {
+  return fetchAllPages((page) => getAdminEvents({ ...params, page }))
+}
+
+export function getAllAdminJournal(params: JournalParams = {}): Promise<JournalEntry[]> {
+  return fetchAllPages((page) => getAdminJournal({ ...params, page }))
+}

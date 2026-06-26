@@ -9,6 +9,8 @@ import {
   type SupportStatus,
 } from '@/lib/api/admin'
 import Pagination from '@/components/Pagination'
+import { ExportCsvButton } from '@/components/ExportCsvButton'
+import { csvDate, type CsvColumn } from '@/lib/csv'
 
 const PAGE_SIZE = 20
 
@@ -31,6 +33,16 @@ function formatDate(dateStr: string) {
     year: 'numeric',
   })
 }
+
+const SUPPORT_COLUMNS: CsvColumn<SupportMessage>[] = [
+  { header: 'Nom', value: (m) => m.name },
+  { header: 'Email', value: (m) => m.email },
+  { header: 'Sujet', value: (m) => m.subject },
+  { header: 'Message', value: (m) => m.message },
+  { header: 'Statut', value: (m) => STATUS_LABEL[m.status] ?? m.status },
+  { header: 'Note admin', value: (m) => m.admin_note ?? '' },
+  { header: 'Date', value: (m) => csvDate(m.created_at) },
+]
 
 export function SupportTable() {
   const [messages, setMessages] = useState<SupportMessage[]>([])
@@ -103,6 +115,11 @@ export function SupportTable() {
           <option value="responded">Répondus</option>
           <option value="closed">Fermés</option>
         </select>
+        <ExportCsvButton<SupportMessage>
+          filename="support"
+          columns={SUPPORT_COLUMNS}
+          getRows={() => getAdminSupport({ status: statusFilter, search: search.trim() || undefined })}
+        />
       </div>
 
       {error && (

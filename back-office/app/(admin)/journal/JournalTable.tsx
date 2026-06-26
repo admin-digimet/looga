@@ -2,8 +2,10 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { Search } from 'lucide-react'
-import { getAdminJournal, type JournalEntry } from '@/lib/api/admin'
+import { getAdminJournal, getAllAdminJournal, type JournalEntry } from '@/lib/api/admin'
 import Pagination from '@/components/Pagination'
+import { ExportCsvButton } from '@/components/ExportCsvButton'
+import { csvDate, type CsvColumn } from '@/lib/csv'
 
 const PAGE_SIZE = 20
 
@@ -90,6 +92,16 @@ function formatDate(dateStr: string) {
     ' ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
 }
 
+const JOURNAL_COLUMNS: CsvColumn<JournalEntry>[] = [
+  { header: 'Date', value: (e) => csvDate(e.created_at) },
+  { header: 'Acteur', value: (e) => actorLabel(e) },
+  { header: 'Nom', value: (e) => e.actor_name ?? '' },
+  { header: 'Email', value: (e) => e.actor_email ?? '' },
+  { header: 'Action', value: (e) => ACTION_LABELS[e.action] ?? e.action },
+  { header: 'Cible', value: (e) => e.target_label ?? e.target_id ?? '' },
+  { header: 'Statut', value: (e) => STATUS_LABEL[e.status] ?? e.status },
+]
+
 export function JournalTable() {
   const [entries, setEntries] = useState<JournalEntry[]>([])
   const [total, setTotal]     = useState(0)
@@ -166,6 +178,11 @@ export function JournalTable() {
           <option value="week">7 derniers jours</option>
           <option value="month">30 derniers jours</option>
         </select>
+        <ExportCsvButton<JournalEntry>
+          filename="journal"
+          columns={JOURNAL_COLUMNS}
+          getRows={() => getAllAdminJournal({ search, actor_type: actorType, status, period })}
+        />
       </div>
 
       {error && (

@@ -2,7 +2,6 @@ import {
   CalendarDays,
   ChevronRight,
   LogOut,
-  RefreshCw,
   User,
   Volume2
 } from 'lucide-react-native';
@@ -40,7 +39,7 @@ function readScannerName(): string {
 }
 
 export default function SettingsScreen() {
-  const { activeEvent, scanCount, clearHistory } = useScanStore();
+  const { activeEvent, scanCount } = useScanStore();
   const { user, isAuthenticated } = useAuthStore();
   const logoutMutation = useLogout();
 
@@ -59,21 +58,6 @@ export default function SettingsScreen() {
     setSoundEnabled(val);
     storage.set(SOUND_ENABLED_KEY, val ? 'true' : 'false');
   }, []);
-
-  function handleResetCounter() {
-    Alert.alert(
-      'Réinitialiser le compteur ?',
-      'L\'historique local des scans sera effacé. Cette action est irréversible.',
-      [
-        { text: 'Annuler', style: 'cancel' },
-        {
-          text: 'Réinitialiser',
-          style: 'destructive',
-          onPress: () => clearHistory(),
-        },
-      ]
-    );
-  }
 
   function handleLogout() {
     Alert.alert(
@@ -139,21 +123,6 @@ export default function SettingsScreen() {
           <Text style={styles.sectionTitle}>Actions</Text>
 
           <View style={styles.card}>
-            <TouchableOpacity style={styles.actionRow} onPress={handleResetCounter}>
-              <View style={styles.settingLeft}>
-                <View style={[styles.settingIcon, { backgroundColor: 'rgba(255,184,0,0.1)' }]}>
-                  <RefreshCw size={16} color={Colors.warning} />
-                </View>
-                <View>
-                  <Text style={styles.settingLabel}>Réinitialiser le compteur</Text>
-                  <Text style={styles.settingDesc}>Efface l'historique local</Text>
-                </View>
-              </View>
-              <ChevronRight size={18} color={Colors.textMuted} />
-            </TouchableOpacity>
-
-            <View style={styles.divider} />
-
             <View style={styles.settingRow}>
               <View style={styles.settingLeft}>
                 <View style={[styles.settingIcon, { backgroundColor: 'rgba(255,92,26,0.1)' }]}>

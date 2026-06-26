@@ -3,8 +3,10 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Trash2, Ban, RefreshCw, Search } from 'lucide-react'
-import { deleteAdminEvent, updateAdminEventStatus, getAdminEvents } from '@/lib/api/admin'
+import { deleteAdminEvent, updateAdminEventStatus, getAdminEvents, getAllAdminEvents } from '@/lib/api/admin'
 import Pagination from '@/components/Pagination'
+import { ExportCsvButton } from '@/components/ExportCsvButton'
+import { csvDate, type CsvColumn } from '@/lib/csv'
 import type { AdminEventListItem } from '@/types'
 
 const PAGE_SIZE = 20
@@ -49,6 +51,17 @@ function formatDate(dateStr: string) {
 function formatFCFA(amount: number) {
   return new Intl.NumberFormat('fr-FR').format(amount) + ' F'
 }
+
+const EVENT_COLUMNS: CsvColumn<AdminEventListItem>[] = [
+  { header: 'Titre', value: (e) => e.title },
+  { header: 'Organisateur', value: (e) => e.organizer_name ?? '' },
+  { header: 'Date', value: (e) => e.event_date },
+  { header: 'Lieu', value: (e) => e.location_name ?? '' },
+  { header: 'Catégorie', value: (e) => CATEGORY_LABELS[e.category] ?? e.category },
+  { header: 'Statut', value: (e) => STATUS_LABELS[e.status]?.label ?? e.status },
+  { header: 'Billets vendus', value: (e) => e.tickets_sold ?? 0 },
+  { header: 'Créé le', value: (e) => csvDate(e.created_at) },
+]
 
 export function EventsTable({ events: initialEvents }: { events?: AdminEventListItem[] } = {}) {
   const router = useRouter()
@@ -138,6 +151,16 @@ export function EventsTable({ events: initialEvents }: { events?: AdminEventList
           <option value="cancelled">Annulés</option>
           <option value="past">Passés</option>
         </select>
+        <ExportCsvButton<AdminEventListItem>
+          filename="evenements"
+          columns={EVENT_COLUMNS}
+          getRows={() =>
+            getAllAdminEvents({
+              status: statusFilter !== 'all' ? statusFilter : undefined,
+              search: search.trim() || undefined,
+            })
+          }
+        />
       </div>
 
       {actionError && (

@@ -16,7 +16,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import {
   AlertTriangle,
   ArrowLeft,
@@ -33,9 +33,10 @@ import {
 } from 'lucide-react-native';
 
 import { ArtistCard } from '@/components/events/ArtistCard';
+import { FeaturedCard } from '@/components/events/FeaturedCard';
 import { Button } from '@/components/ui/Button';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import { useEvent } from '@/hooks/useEvents';
+import { useEvent, useSimilarEvents } from '@/hooks/useEvents';
 import { useAuthStore } from '@/lib/store/authStore';
 import { Colors } from '@/constants/colors';
 import { Fonts, FontSize } from '@/constants/typography';
@@ -81,11 +82,16 @@ const CATEGORY_LABELS: Record<string, string> = {
 export default function EventDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: event, isLoading, isError } = useEvent(id);
+  const { data: similarEvents } = useSimilarEvents(event?.id ?? '', event?.category);
   const { isAuthenticated } = useAuthStore();
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
 
   const [descExpanded, setDescExpanded] = useState(false);
+  // Provider carte : Google sur Android, Apple Maps (défaut) sur iOS.
+  // NB : on passe le littéral 'google' (et non PROVIDER_GOOGLE de react-native-maps,
+  // dont le .d.ts est corrompu dans node_modules — type = clé API au lieu de 'google').
+  const mapProvider = Platform.OS === 'android' ? ('google' as const) : undefined;
   // Coords depuis l'URL organisateur, fallback Abidjan centre
   const coords = parseCoords(event?.locationUrl) ?? { latitude: 5.3364, longitude: -4.0266 };
 
@@ -296,7 +302,7 @@ export default function EventDetailScreen() {
           <View style={styles.mapContainer}>
             <MapView
               style={styles.mapWebView}
-              provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : process.env.GOOGLE_MAPS_API_KEY}
+              provider={mapProvider}
               initialRegion={{
                 latitude: coords.latitude,
                 longitude: coords.longitude,
@@ -348,6 +354,24 @@ export default function EventDetailScreen() {
             <View style={styles.soldOutBanner}>
               <Text style={styles.soldOutText}>COMPLET — Plus de billets disponibles</Text>
             </View>
+          )}
+
+          {/* ── AUTRES ÉVÉNEMENTS ──────────────────────────────────────────
+              Recommandations sous la carte (exclut l'event courant)         */}
+          {similarEvents && similarEvents.length > 0 && (
+            <>
+              <View style={styles.divider} />
+              <SectionHeader title="Autres événements" />
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.similarScroll}
+              >
+                {similarEvents.map((ev) => (
+                  <FeaturedCard key={ev.id} event={ev} />
+                ))}
+              </ScrollView>
+            </>
           )}
         </View>
       </ScrollView>
@@ -680,6 +704,12 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSize.sm,
     color: Colors.error,
+  },
+
+  similarScroll: {
+    paddingTop: 4,
+    paddingBottom: 8,
+    paddingRight: 8,
   },
 
   // ── Urgency banner ───────────────────────────────────────────────────────

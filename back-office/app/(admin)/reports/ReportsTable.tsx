@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { Check, Flag, X } from 'lucide-react'
 import { getAdminReports, updateReport, type AdminReport, type ReportStatus } from '@/lib/api/admin'
 import Pagination from '@/components/Pagination'
+import { ExportCsvButton } from '@/components/ExportCsvButton'
+import { csvDate, type CsvColumn } from '@/lib/csv'
 
 const PAGE_SIZE = 20
 
@@ -33,6 +35,15 @@ function formatDate(dateStr: string) {
     year: 'numeric',
   })
 }
+
+const REPORT_COLUMNS: CsvColumn<AdminReport>[] = [
+  { header: 'Cible', value: (r) => r.target_label ?? r.target_id },
+  { header: 'Type', value: (r) => TARGET_LABEL[r.target_type] ?? r.target_type },
+  { header: 'Motif', value: (r) => r.reason },
+  { header: 'Reporter', value: (r) => r.reporter_name ?? '' },
+  { header: 'Statut', value: (r) => STATUS_LABEL[r.status] ?? r.status },
+  { header: 'Date', value: (r) => csvDate(r.created_at) },
+]
 
 export function ReportsTable() {
   const [reports, setReports] = useState<AdminReport[]>([])
@@ -79,16 +90,23 @@ export function ReportsTable() {
         <p className="text-sm text-base-content/60">
           {reports.length} signalement{reports.length > 1 ? 's' : ''}
         </p>
-        <select
-          className="select select-bordered bg-base-100 text-sm w-48"
-          value={statusFilter}
-          onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }}
-        >
-          <option value="all">Tous les statuts</option>
-          <option value="pending">En attente</option>
-          <option value="reviewed">Traités</option>
-          <option value="dismissed">Ignorés</option>
-        </select>
+        <div className="flex gap-2">
+          <select
+            className="select select-bordered bg-base-100 text-sm w-48"
+            value={statusFilter}
+            onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }}
+          >
+            <option value="all">Tous les statuts</option>
+            <option value="pending">En attente</option>
+            <option value="reviewed">Traités</option>
+            <option value="dismissed">Ignorés</option>
+          </select>
+          <ExportCsvButton<AdminReport>
+            filename="signalements"
+            columns={REPORT_COLUMNS}
+            getRows={() => getAdminReports({ status: statusFilter })}
+          />
+        </div>
       </div>
 
       {error && (

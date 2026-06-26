@@ -52,6 +52,124 @@ export async function getEvents(params: GetEventsParams = {}): Promise<Paginated
   };
 }
 
+const EVENT_SELECT =
+  'id,organizer_id,title,description,category,event_date,event_time,location_name,image_url,status,is_sold_out,min_price,views_count,created_at,organizer:organizers(id,name,description,logo_url,website),ticket_types(id,name,price,stock_remaining,is_active)';
+
+function pgrstHeaders(extra?: Record<string, string>) {
+  return {
+    apikey: ANON_KEY,
+    Authorization: `Bearer ${ANON_KEY}`,
+    ...extra,
+  };
+}
+
+// « Autres événements » sous la carte de la page détail.
+export async function getSimilarEvents(params: {
+  category?: string;
+  excludeId: string;
+  limit?: number;
+}): Promise<Event[]> {
+  const { category, excludeId, limit = 6 } = params;
+  let url = `${SUPABASE_URL}/rest/v1/events?status=eq.published&id=neq.${excludeId}&select=${encodeURIComponent(EVENT_SELECT)}&order=event_date.asc&limit=${limit}`;
+  if (category) url += `&category=eq.${category}`;
+
+  const res = await fetch(url, { headers: pgrstHeaders() });
+  if (!res.ok) return [];
+  const raw = await res.json();
+  return Array.isArray(raw) ? raw.map(transformEvent) : [];
+}
+
+export type PricePreset = 'all' | 'free' | 'paid';
+export type PeriodPreset = 'all' | 'today' | 'weekend' | 'week' | 'month';
+
+export interface SearchEventsParams {
+  q?: string;
+  category?: EventCategory;
+  price?: PricePreset;
+  period?: PeriodPreset;
+  page?: number;
+  pageSize?: number;
+}
+
+function periodRange(preset: PeriodPreset | undefined): { gte?: string; lt?: string } {
+  if (!preset || preset === 'all') return {};
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const isoDate = (d: Date) => d.toISOString().slice(0, 10);
+  switch (preset) {
+    case 'today': {
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+      return { gte: isoDate(today), lt: isoDate(tomorrow) };
+    }
+    case 'weekend': {
+      const friday = new Date(today);
+      const day = today.getDay();
+      const offset = day <= 5 ? 5 - day : 5 + (7 - day);
+      friday.setDate(today.getDate() + offset);
+      const monday = new Date(friday);
+      monday.setDate(friday.getDate() + 3);
+      return { gte: isoDate(friday), lt: isoDate(monday) };
+    }
+    case 'week': {
+      const inAWeek = new Date(today);
+      inAWeek.setDate(today.getDate() + 7);
+      return { gte: isoDate(today), lt: isoDate(inAWeek) };
+    }
+    case 'month': {
+      const inAMonth = new Date(today);
+      inAMonth.setMonth(today.getMonth() + 1);
+      return { gte: isoDate(today), lt: isoDate(inAMonth) };
+    }
+  }
+}
+
+// Recherche serveur hybride (parité avec le web) : ilike titre/description/lieu
+// + filtres catégorie / prix / période, pagination via header Range.
+export async function searchEvents(params: SearchEventsParams): Promise<PaginatedEvents> {
+  const { q, category, price, period, page = 1, pageSize = 20 } = params;
+
+  const search = new URLSearchParams();
+  search.set('status', 'eq.published');
+  search.set('select', EVENT_SELECT);
+
+  if (category && category !== 'tout') {
+    search.set('category', `eq.${category}`);
+  }
+
+  if (q && q.trim()) {
+    const safe = q.trim().replace(/[*,()]/g, '');
+    search.set('or', `(title.ilike.*${safe}*,description.ilike.*${safe}*,location_name.ilike.*${safe}*)`);
+  }
+
+  if (price === 'free') search.set('min_price', 'eq.0');
+  if (price === 'paid') search.set('min_price', 'gt.0');
+
+  const range = periodRange(period);
+  if (range.gte) search.append('event_date', `gte.${range.gte}`);
+  if (range.lt) search.append('event_date', `lt.${range.lt}`);
+
+  search.set('order', 'event_date.asc');
+
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  const url = `${SUPABASE_URL}/rest/v1/events?${search.toString()}`;
+  const res = await fetch(url, {
+    headers: pgrstHeaders({ Range: `${from}-${to}`, Prefer: 'count=exact' }),
+  });
+
+  if (!res.ok) return { data: [], nextPage: null, total: 0 };
+
+  const contentRange = res.headers.get('Content-Range') ?? '';
+  const total = Number(contentRange.split('/')[1] ?? 0) || 0;
+  const raw = await res.json();
+  const data: Event[] = Array.isArray(raw) ? raw.map(transformEvent) : [];
+  const nextPage = to + 1 < total ? page + 1 : null;
+
+  return { data, nextPage, total };
+}
+
 export async function getEventById(id: string): Promise<Event> {
   // PostgREST direct : event + organizer + ticket_types en un round-trip.
   // Lecture publique → on n'utilise QUE l'anon key (le user token peut être expiré → 401).

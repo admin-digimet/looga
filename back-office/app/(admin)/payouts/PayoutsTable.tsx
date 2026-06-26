@@ -6,6 +6,8 @@ import { getAdminPayouts, updatePayout } from '@/lib/api/admin'
 import type { PayoutRequest, PayoutStatus } from '@/lib/api/admin'
 import { PaymentMethodIcon } from '@/components/PaymentMethodIcon'
 import Pagination from '@/components/Pagination'
+import { ExportCsvButton } from '@/components/ExportCsvButton'
+import { csvDate, type CsvColumn } from '@/lib/csv'
 import { COMMISSION_RATE, commissionFor, netAfterCommission } from '@/lib/finance'
 
 const PAGE_SIZE = 20
@@ -38,6 +40,20 @@ function formatFCFA(amount: number) {
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })
 }
+
+const PAYOUT_COLUMNS: CsvColumn<PayoutRequest>[] = [
+  { header: 'Organisateur', value: (p) => p.organizer_name ?? '' },
+  { header: 'Montant (FCFA)', value: (p) => p.amount },
+  { header: 'Commission (FCFA)', value: (p) => commissionFor(p.amount) },
+  { header: 'Net à verser (FCFA)', value: (p) => netAfterCommission(p.amount) },
+  { header: 'Méthode', value: (p) => METHOD_LABEL[p.method] ?? p.method },
+  { header: 'Téléphone', value: (p) => p.phone_number ?? '' },
+  { header: 'Coordonnées bancaires', value: (p) => (p.bank_details ? Object.values(p.bank_details).join(' / ') : '') },
+  { header: 'Statut', value: (p) => STATUS_LABEL[p.status] ?? p.status },
+  { header: 'Note admin', value: (p) => p.admin_note ?? '' },
+  { header: 'Demandé le', value: (p) => csvDate(p.created_at) },
+  { header: 'Payé le', value: (p) => csvDate(p.paid_at) },
+]
 
 export function PayoutsTable() {
   const [payouts, setPayouts] = useState<PayoutRequest[]>([])
@@ -108,6 +124,11 @@ export function PayoutsTable() {
           <option value="paid">Payées</option>
           <option value="rejected">Rejetées</option>
         </select>
+        <ExportCsvButton<PayoutRequest>
+          filename="reversements"
+          columns={PAYOUT_COLUMNS}
+          getRows={() => getAdminPayouts({ status: statusFilter, search: search.trim() || undefined })}
+        />
       </div>
 
       {error && (

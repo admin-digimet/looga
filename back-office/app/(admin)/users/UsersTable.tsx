@@ -2,8 +2,10 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { Pause, Play, Search, Trash2, UserCog } from 'lucide-react'
-import { getAdminUsers, updateAdminUser, deleteAdminUser } from '@/lib/api/admin'
+import { getAdminUsers, getAllAdminUsers, updateAdminUser, deleteAdminUser } from '@/lib/api/admin'
 import Pagination from '@/components/Pagination'
+import { ExportCsvButton } from '@/components/ExportCsvButton'
+import { csvDate, type CsvColumn } from '@/lib/csv'
 import type { Profile } from '@/types'
 
 const PAGE_SIZE = 20
@@ -27,6 +29,15 @@ const ROLE_LABEL: Record<string, string> = {
 }
 
 const ALL_ROLES = ['user', 'organizer', 'staff', 'admin', 'super_admin']
+
+const USER_COLUMNS: CsvColumn<ProfileWithEmail>[] = [
+  { header: 'Nom', value: (u) => u.name || '' },
+  { header: 'Email', value: (u) => u.email || '' },
+  { header: 'Téléphone', value: (u) => u.phone || '' },
+  { header: 'Rôle', value: (u) => ROLE_LABEL[u.role] ?? u.role },
+  { header: 'Statut', value: (u) => (u.is_active ? 'Actif' : 'Désactivé') },
+  { header: 'Membre depuis', value: (u) => csvDate(u.created_at) },
+]
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })
@@ -124,6 +135,16 @@ export function UsersTable() {
             <option key={r} value={r}>{ROLE_LABEL[r]}</option>
           ))}
         </select>
+        <ExportCsvButton<ProfileWithEmail>
+          filename="utilisateurs"
+          columns={USER_COLUMNS}
+          getRows={() =>
+            getAllAdminUsers({
+              role: roleFilter !== 'tous' ? roleFilter : undefined,
+              search: search.trim() || undefined,
+            }) as Promise<ProfileWithEmail[]>
+          }
+        />
       </div>
 
       {error && (

@@ -1,6 +1,6 @@
 import { FlashList } from '@shopify/flash-list';
 import { CalendarDays, Flame, Search, Tag, X } from 'lucide-react-native';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   ScrollView,
@@ -15,7 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { EventCard } from '@/components/events/EventCard';
 import { Colors } from '@/constants/colors';
 import { Fonts, FontSize } from '@/constants/typography';
-import { useEvents } from '@/hooks/useEvents';
+import { useSearchEvents } from '@/hooks/useEvents';
 import type { Event, EventCategory } from '@/types/event';
 
 type QuickFilter = 'all' | 'weekend' | 'free';
@@ -57,46 +57,27 @@ const QUICK_FILTERS: {
   { key: 'free',    label: 'Gratuit',      Icon: Tag },
 ];
 
-function isThisWeekend(dateStr: string): boolean {
-  const eventDate = new Date(dateStr);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const dayOfWeek = eventDate.getDay();
-  const isWeekendDay = dayOfWeek === 0 || dayOfWeek === 6;
-  const diffDays = Math.round(
-    (eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-  );
-  return isWeekendDay && diffDays >= 0 && diffDays <= 7;
-}
-
 export default function ExploreScreen() {
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [category, setCategory] = useState<EventCategory>('tout');
   const [quickFilter, setQuickFilter] = useState<QuickFilter>('all');
 
+  // Debounce : on n'interroge le serveur qu'après 350 ms de pause de frappe.
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search.trim()), 350);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  // Quick filters → filtres serveur (parité web).
+  const price = quickFilter === 'free' ? 'free' : 'all';
+  const period = quickFilter === 'weekend' ? 'weekend' : 'all';
+
   const { data, isLoading, isError, fetchNextPage, isFetchingNextPage, hasNextPage, refetch } =
-    useEvents(category);
+    useSearchEvents({ q: debouncedSearch, category, price, period });
 
-  const allEvents: Event[] = data?.pages.flatMap((page) => page.data) ?? [];
-
-  const filtered = useMemo(() => {
-    let result = allEvents;
-
-    if (quickFilter === 'weekend') {
-      result = result.filter((e) => isThisWeekend(e.date));
-    } else if (quickFilter === 'free') {
-      result = result.filter((e) => e.minPrice === 0);
-    }
-
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter(
-        (e) => e.name.toLowerCase().includes(q) || e.location.toLowerCase().includes(q)
-      );
-    }
-
-    return result;
-  }, [allEvents, search, quickFilter]);
+  const events: Event[] = data?.pages.flatMap((page) => page.data) ?? [];
+  const total = data?.pages[0]?.total ?? events.length;
 
   const handleEndReached = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) fetchNextPage();
@@ -182,9 +163,9 @@ export default function ExploreScreen() {
       </ScrollView>
 
       {/* Compteur résultats */}
-      {!isLoading && filtered.length > 0 && (
+      {!isLoading && events.length > 0 && (
         <Text style={styles.resultsCount}>
-          {filtered.length} événement{filtered.length !== 1 ? 's' : ''} trouvé{filtered.length !== 1 ? 's' : ''}
+          {total} événement{total !== 1 ? 's' : ''} trouvé{total !== 1 ? 's' : ''}
         </Text>
       )}
     </View>
@@ -209,7 +190,7 @@ export default function ExploreScreen() {
         </View>
       ) : (
         <FlashList
-          data={filtered}
+          data={events}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           ListHeaderComponent={ListHeader}
