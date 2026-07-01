@@ -70,7 +70,7 @@ function NavbarContent() {
               autoFocus
               type="text"
               placeholder="Rechercher des événements..."
-              className="bg-transparent border-none outline-none w-full text-sm text-gray-700"
+              className="bg-transparent border-none outline-none w-full text-base text-gray-700"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
