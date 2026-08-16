@@ -52,6 +52,21 @@ export async function GET(req: Request) {
     if (error) throw error
 
     const rows = (data ?? []) as unknown as EventRow[]
+
+    // Billets vendus par event (même source que la stat globale : tickets valid/used)
+    const soldByEvent = new Map<string, number>()
+    if (rows.length > 0) {
+      const { data: tickets, error: ticketsError } = await admin
+        .from('tickets')
+        .select('event_id, quantity')
+        .in('event_id', rows.map((e) => e.id))
+        .in('status', ['valid', 'used'])
+      if (ticketsError) throw ticketsError
+      for (const t of tickets ?? []) {
+        soldByEvent.set(t.event_id, (soldByEvent.get(t.event_id) ?? 0) + (t.quantity ?? 1))
+      }
+    }
+
     const events = rows.map((e) => ({
       id: e.id,
       organizer_id: e.organizer_id,
@@ -70,6 +85,7 @@ export async function GET(req: Request) {
       created_at: e.created_at,
       updated_at: e.updated_at,
       organizer_name: e.organizers?.name ?? null,
+      tickets_sold: soldByEvent.get(e.id) ?? 0,
     }))
 
     return NextResponse.json({ data: events, total: count ?? events.length })
