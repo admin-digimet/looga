@@ -6,7 +6,7 @@ import { Loader2, Search, SlidersHorizontal, UserRound, Menu } from 'lucide-reac
 import Link from 'next/link';
 import { ProfileMenu } from '@/components/ProfileMenu';
 import { useAuthStore } from '@/lib/store/authStore';
-import { SearchFilters } from '@/components/search/SearchFilters';
+import { SearchFilters, CATEGORY_GROUPS } from '@/components/search/SearchFilters';
 import { SearchResults } from '@/components/search/SearchResults';
 import { useSearchEvents } from '@/hooks/useEvents';
 import type { EventCategory } from '@/types';
@@ -95,13 +95,17 @@ function SearchPageContent() {
   const activeFiltersCount =
     categories.length + cities.length + (period !== 'all' ? 1 : 0) + (price !== 'all' ? 1 : 0);
 
+  const concertKeys = CATEGORY_GROUPS[1].keys;
+  const partyKeys = CATEGORY_GROUPS[0].keys;
+  const matchesGroup = (keys: EventCategory[]) =>
+    categories.length === keys.length && keys.every((key) => categories.includes(key));
   const quickFilters = [
-    { label: 'Tous', active: period === 'all' && price === 'all' && categories.length === 0, action: () => updateUrl({ period: 'all', price: 'all', categories: [] }) },
+    { label: 'Tous', active: period === 'all' && price === 'all' && categories.length === 0 && cities.length === 0 && !q, action: handleReset },
     { label: 'Ce soir', active: period === 'today', action: () => updateUrl({ period: period === 'today' ? 'all' : 'today' }) },
     { label: 'Ce week-end', active: period === 'weekend', action: () => updateUrl({ period: period === 'weekend' ? 'all' : 'weekend' }) },
     { label: 'Gratuit', active: price === 'free', action: () => updateUrl({ price: price === 'free' ? 'all' : 'free' }) },
-    { label: 'Concerts', active: categories.length === 1 && categories[0] === 'concerts', action: () => updateUrl({ categories: categories.length === 1 && categories[0] === 'concerts' ? [] : ['concerts'] }) },
-    { label: 'Soirées', active: categories.length === 1 && categories[0] === 'soirees', action: () => updateUrl({ categories: categories.length === 1 && categories[0] === 'soirees' ? [] : ['soirees'] }) },
+    { label: 'Concerts', active: matchesGroup(concertKeys), action: () => updateUrl({ categories: matchesGroup(concertKeys) ? [] : concertKeys }) },
+    { label: 'Soirées', active: matchesGroup(partyKeys), action: () => updateUrl({ categories: matchesGroup(partyKeys) ? [] : partyKeys }) },
   ];
 
   return (
@@ -159,9 +163,9 @@ function SearchPageContent() {
               <ul className="space-y-2 sm:space-y-3 text-sm text-[#c6c1c9]">
                 <li><Link href="/search" className="hover:text-[#ff791f]">Tous les événements</Link></li>
                 <li><Link href="/search?categories=soirees" className="hover:text-[#ff791f]">Soirées &amp; Clubs</Link></li>
-                <li><Link href="/search?categories=concerts" className="hover:text-[#ff791f]">Concerts &amp; Live</Link></li>
-                <li><Link href="/search?categories=festival" className="hover:text-[#ff791f]">Festivals &amp; Open Air</Link></li>
-                <li><Link href="/search?categories=gastronomie,bien_etre,mode,workshops" className="hover:text-[#ff791f]">Lifestyle &amp; Expériences</Link></li>
+                <li><Link href={`/search?categories=${CATEGORY_GROUPS[1].keys.join(',')}`} className="hover:text-[#ff791f]">Concerts &amp; Live</Link></li>
+                <li><Link href={`/search?categories=${CATEGORY_GROUPS[2].keys.join(',')}`} className="hover:text-[#ff791f]">Festivals &amp; Open Air</Link></li>
+                <li><Link href={`/search?categories=${CATEGORY_GROUPS[3].keys.join(',')}`} className="hover:text-[#ff791f]">Lifestyle &amp; Expériences</Link></li>
               </ul>
             </div>
             <div>
