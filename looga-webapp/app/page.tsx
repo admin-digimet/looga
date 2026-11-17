@@ -83,22 +83,22 @@ export default function HomePage() {
         {mobileMenuOpen && <nav className="md:hidden flex flex-col gap-4 border-t border-white/10 px-6 py-5 text-sm"><Link href="/search">Explorer</Link><Link href="#events-section" onClick={() => setMobileMenuOpen(false)}>Événements</Link><Link href="/organisateur">Organisateurs</Link></nav>}
       </header>
       <main>
-        <section className="relative isolate overflow-hidden min-h-[500px] md:min-h-[610px]">
+        <section className="relative isolate overflow-hidden min-h-[430px] md:min-h-[610px]">
           <div className="absolute inset-0 bg-cover bg-center scale-[1.02]" style={{backgroundImage: "url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1800&q=85')"}} />
           <div className="absolute inset-0 bg-gradient-to-r from-[#13091e]/95 via-[#13091e]/70 to-[#13091e]/15" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#13091e] via-transparent to-transparent" />
-          <div className="relative mx-auto max-w-[1400px] px-5 md:px-9 pt-14 sm:pt-20 md:pt-28 pb-14 md:pb-20">
+          <div className="relative mx-auto max-w-[1400px] px-5 md:px-9 pt-9 sm:pt-16 md:pt-28 pb-9 sm:pb-14 md:pb-20">
             <p className="inline-flex items-center gap-2 rounded-full border border-[#ff791f]/40 bg-[#1a0b26]/65 px-4 py-2 font-extrabold tracking-[0.18em] text-[#ff791f] text-xs md:text-sm"><Sparkles size={15}/> ABIDJAN, CÔTE D’IVOIRE</p>
-            <h1 className="mt-2 font-heading text-[clamp(2.85rem,11vw,4.75rem)] leading-[0.98] sm:text-[76px] md:text-[96px] font-black italic tracking-tight">LA VILLE<br/><span className="text-[#ff791f]">EST À TOI.</span></h1>
-            <p className="mt-7 max-w-[490px] text-base md:text-xl leading-relaxed text-white/85">Les soirées, concerts et expériences<br className="hidden sm:block"/> à ne pas manquer à Abidjan.</p>
-            <form onSubmit={submitSearch} className="mt-9 flex items-center gap-3 max-w-[550px] h-[56px] sm:h-[60px] rounded-2xl bg-[#fff]/95 text-[#23152c] border border-white/50 px-5 shadow-[0_12px_40px_rgba(0,0,0,0.25)] focus-within:ring-2 focus-within:ring-[#ff791f]">
+            <h1 className="mt-2 font-heading text-[clamp(2.55rem,10.3vw,4.75rem)] leading-[0.98] sm:text-[76px] md:text-[96px] font-black italic tracking-tight">LA VILLE<br/><span className="text-[#ff791f]">EST À TOI.</span></h1>
+            <p className="mt-5 md:mt-7 max-w-[490px] text-base md:text-xl leading-relaxed text-white/85">Les soirées, concerts et expériences<br className="hidden sm:block"/> à ne pas manquer à Abidjan.</p>
+            <form onSubmit={submitSearch} className="mt-6 md:mt-9 flex items-center gap-3 max-w-[550px] h-[56px] sm:h-[60px] rounded-2xl bg-[#fff]/95 text-[#23152c] border border-white/50 px-5 shadow-[0_12px_40px_rgba(0,0,0,0.25)] focus-within:ring-2 focus-within:ring-[#ff791f]">
               <Search size={21} className="shrink-0"/><input aria-label="Rechercher un événement" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher une soirée, un artiste, un lieu..." className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-[#776d7e]"/><button type="submit" aria-label="Lancer la recherche" className="rounded-xl bg-[#ff791f] p-2.5 text-[#180c21] hover:bg-[#ff944b]"><ArrowRight size={20}/></button>
             </form>
-            <div className="mt-6 flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none]">
-              <Link href="/search?period=today" className="shrink-0 inline-flex items-center gap-2 rounded-full bg-[#ff791f] px-5 py-3 text-sm font-bold text-[#180c21]"><CalendarDays size={17}/> Ce soir</Link>
-              <Link href="/search?period=weekend" className="shrink-0 inline-flex items-center gap-2 rounded-full bg-[#3b2149]/95 px-5 py-3 text-sm font-bold"><CalendarDays size={17}/> Ce week-end</Link>
-              <Link href="/search?price=free" className="shrink-0 inline-flex items-center gap-2 rounded-full bg-[#3b2149]/95 px-5 py-3 text-sm font-bold"><Tag size={17}/> Gratuit</Link>
-              <Link href="/search?cities=Abidjan" className="shrink-0 inline-flex items-center gap-2 rounded-full bg-[#3b2149]/95 px-5 py-3 text-sm font-bold"><MapPin size={17}/> À Abidjan</Link>
+            <div className="relative mt-4 md:mt-6 flex gap-2 md:gap-3 overflow-x-auto pb-3 snap-x snap-mandatory [scrollbar-width:none] [&>a]:snap-start">
+              <Link href="/search?period=today" className="shrink-0 inline-flex items-center gap-2 rounded-full bg-[#ff791f] px-3.5 py-2.5 md:px-5 md:py-3 text-xs sm:text-sm font-bold text-[#180c21]"><CalendarDays size={17}/> Ce soir</Link>
+              <Link href="/search?period=weekend" className="shrink-0 inline-flex items-center gap-2 rounded-full bg-[#3b2149]/95 px-3.5 py-2.5 md:px-5 md:py-3 text-xs sm:text-sm font-bold"><CalendarDays size={17}/> Ce week-end</Link>
+              <Link href="/search?price=free" className="shrink-0 inline-flex items-center gap-2 rounded-full bg-[#3b2149]/95 px-3.5 py-2.5 md:px-5 md:py-3 text-xs sm:text-sm font-bold"><Tag size={17}/> Gratuit</Link>
+              <Link href="/search?cities=Abidjan" className="shrink-0 inline-flex items-center gap-2 rounded-full bg-[#3b2149]/95 px-3.5 py-2.5 md:px-5 md:py-3 text-xs sm:text-sm font-bold"><MapPin size={17}/> À Abidjan</Link>
             </div>
           </div>
         </section>
@@ -121,7 +121,7 @@ export default function HomePage() {
           </div>
           {isError ? <div className="rounded-2xl border border-white/15 bg-white/5 py-14 text-center"><p className="mb-4">Impossible de charger les événements.</p><button onClick={() => refetch()} className="rounded-full bg-[#ff791f] px-6 py-3 font-bold text-[#180c21]">Réessayer</button></div> : <>
             <div className="grid grid-cols-1 min-[520px]:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-              {isLoading ? Array.from({length: 8}).map((_,i)=><EventCardSkeleton key={i}/>) : events.length === 0 ? <div className="col-span-full rounded-[22px] border border-white/10 bg-[#251331]/70 px-5 py-12 text-center sm:py-16"><div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#ff791f]/15 text-[#ff791f]"><Ticket size={27}/></div><h3 className="text-xl font-extrabold">Aucun événement pour le moment</h3><p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-white/65">Aucun événement ne correspond à cette sélection. Explore les autres catégories ou retrouve tous les événements.</p><button type="button" onClick={() => { if (activeTab === 'Tous') router.push('/search'); else changeTab('Tous'); }} className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#ff791f] px-5 py-3 text-sm font-bold text-[#180c21] hover:bg-[#ff944b]"><RotateCcw size={16}/> Voir tous les événements</button></div> : events.map(event => <article key={event.id} className="group flex h-full flex-col rounded-[22px] border border-white/10 bg-[#251331] p-3 shadow-[0_12px_32px_rgba(0,0,0,0.2)] transition-all duration-300 hover:-translate-y-1 hover:border-[#ff791f]/45 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)] [&_h3]:text-white [&_h3]:font-bold [&_h3]:text-[18px] [&_h3]:leading-snug [&_p]:text-white/70 [&_a:hover_h3]:text-[#ff791f] [&_img]:rounded-xl [&_p.text-orange]:text-[#ff791f] [&_p.text-gray-700]:text-white [&_a>div:first-child]:aspect-[16/10] [&_a>div:first-child]:bg-[#392349] [&_a>div:first-child>div]:bg-[#392349] [&_a>div:first-child>button]:opacity-100 [&_a>div:first-child>button]:shadow-md"><div className="flex-1"><EventCard event={event}/></div><Link href={`/events/${event.id}`} className="mt-4 flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#ff791f] px-4 py-3 text-sm font-extrabold text-[#180c21] transition-colors hover:bg-[#ff944b]" aria-label={`Voir les billets pour ${event.name}`}><Ticket size={17}/> {event.isSoldOut ? 'Voir l’événement' : 'Réserver'} <ArrowRight size={16}/></Link></article>)}
+              {isLoading ? Array.from({length: 8}).map((_,i)=><EventCardSkeleton key={i}/>) : events.length === 0 ? <div className="col-span-full rounded-[22px] border border-white/10 bg-[#251331]/70 px-5 py-12 text-center sm:py-16"><div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#ff791f]/15 text-[#ff791f]"><Ticket size={27}/></div><h3 className="text-xl font-extrabold">Aucun événement pour le moment</h3><p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-white/65">Aucun événement ne correspond à cette sélection. Explore les autres catégories ou retrouve tous les événements.</p><button type="button" onClick={() => { if (activeTab === 'Tous') router.push('/search'); else changeTab('Tous'); }} className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#ff791f] px-3.5 py-2.5 md:px-5 md:py-3 text-xs sm:text-sm font-bold text-[#180c21] hover:bg-[#ff944b]"><RotateCcw size={16}/> Voir tous les événements</button></div> : events.map(event => <article key={event.id} className="group flex h-full flex-col rounded-[22px] border border-white/10 bg-[#251331] p-3 shadow-[0_12px_32px_rgba(0,0,0,0.2)] transition-all duration-300 hover:-translate-y-1 hover:border-[#ff791f]/45 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)] [&_h3]:text-white [&_h3]:font-bold [&_h3]:text-[18px] [&_h3]:leading-snug [&_p]:text-white/70 [&_p]:mb-0.5 [&_h3]:mb-1 [&_a:hover_h3]:text-[#ff791f] [&_img]:rounded-xl [&_p.text-orange]:text-[#ff791f] [&_p.text-gray-700]:text-white [&_a>div:first-child]:aspect-[16/10] [&_a>div:first-child]:bg-[#392349] [&_a>div:first-child>div]:bg-[#392349] [&_a>div:first-child>button]:opacity-100 [&_a>div:first-child>button]:shadow-md"><div className="flex-1"><EventCard event={event} compactTime/></div><Link href={`/events/${event.id}`} className="mt-3 flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[#ff791f] px-4 py-2.5 text-sm font-extrabold text-[#180c21] transition-colors hover:bg-[#ff944b]" aria-label={`Voir les billets pour ${event.name}`}><Ticket size={17}/> {event.isSoldOut ? 'Voir l’événement' : 'Réserver'} <ArrowRight size={16}/></Link></article>)}
             </div>
             {!isLoading && total > 0 && <div className="mt-12 flex flex-col items-center gap-4">{totalPages > 1 && <div className="rounded-xl bg-white p-2 text-[#180c21]"><Pagination page={page} totalPages={totalPages} onPageChange={goToPage}/></div>}<p className="text-sm text-white/60">Affichage de {from} à {to} sur {total} résultat{total > 1 ? 's' : ''}.</p></div>}
           </>}
@@ -133,10 +133,10 @@ export default function HomePage() {
             <Link href="/" className="font-heading text-[30px] font-extrabold tracking-[-1px] text-[#ff791f]">looga.</Link>
             <span className="text-sm text-[#bcb8c0]">La ville est à toi.</span>
           </div>
-          <div className="grid grid-cols-1 gap-9 py-8 sm:grid-cols-3 md:gap-12">
+          <div className="grid grid-cols-1 gap-6 py-6 sm:grid-cols-3 sm:gap-9 sm:py-8 md:gap-12">
             <div>
               <h2 className="mb-3 text-base font-bold">Découvrir</h2>
-              <ul className="space-y-3 text-sm text-[#c6c1c9]">
+              <ul className="space-y-2 sm:space-y-3 text-sm text-[#c6c1c9]">
                 <li><Link href="/search" className="hover:text-[#ff791f]">Tous les événements</Link></li>
                 <li><Link href="/search?categories=soirees" className="hover:text-[#ff791f]">Soirées &amp; Clubs</Link></li>
                 <li><Link href="/search?categories=concerts" className="hover:text-[#ff791f]">Concerts &amp; Live</Link></li>
@@ -146,7 +146,7 @@ export default function HomePage() {
             </div>
             <div>
               <h2 className="mb-3 text-base font-bold">Looga</h2>
-              <ul className="space-y-3 text-sm text-[#c6c1c9]">
+              <ul className="space-y-2 sm:space-y-3 text-sm text-[#c6c1c9]">
                 <li><Link href="/a-propos" className="hover:text-[#ff791f]">À propos</Link></li>
                 <li><Link href="/organisateur" className="hover:text-[#ff791f]">Créer un événement</Link></li>
                 <li><Link href="/aide" className="hover:text-[#ff791f]">Centre d&apos;aide</Link></li>
@@ -156,7 +156,7 @@ export default function HomePage() {
             </div>
             <div>
               <h2 className="mb-3 text-base font-bold">Informations</h2>
-              <ul className="space-y-3 text-sm text-[#c6c1c9]">
+              <ul className="space-y-2 sm:space-y-3 text-sm text-[#c6c1c9]">
                 <li><Link href="/cgu" className="hover:text-[#ff791f]">Conditions générales d&apos;utilisation</Link></li>
                 <li><Link href="/confidentialite" className="hover:text-[#ff791f]">Politique de confidentialité</Link></li>
                 <li><Link href="/securite" className="hover:text-[#ff791f]">Sécurité</Link></li>
@@ -164,7 +164,7 @@ export default function HomePage() {
               </ul>
             </div>
           </div>
-          <div className="flex flex-col gap-4 border-t border-[#39363e] pt-7 text-sm text-[#a8a3ad] sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 border-t border-[#39363e] pt-5 sm:pt-7 text-sm text-[#a8a3ad] sm:flex-row sm:items-center sm:justify-between">
             <span>© 2026 Looga</span>
             <div className="flex items-center gap-5">
               <span aria-label="Instagram" title="Instagram"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="18" cy="6" r="1" fill="currentColor" stroke="none"/></svg></span>
