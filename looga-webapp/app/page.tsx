@@ -4,7 +4,7 @@ import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
-import { Search, MapPin, CalendarDays, Tag, ArrowRight, UserRound, Menu, Instagram, Facebook } from 'lucide-react';
+import { Search, MapPin, CalendarDays, Tag, ArrowRight, UserRound, Menu } from 'lucide-react';
 import { EventCard } from '@/components/EventCard';
 import { EventCardSkeleton } from '@/components/EventCardSkeleton';
 import { Pagination } from '@/components/Pagination';
@@ -167,8 +167,8 @@ export default function HomePage() {
           <div className="flex flex-col gap-4 border-t border-[#39363e] pt-7 text-sm text-[#a8a3ad] sm:flex-row sm:items-center sm:justify-between">
             <span>© 2026 Looga</span>
             <div className="flex items-center gap-5">
-              <span aria-label="Instagram" title="Instagram"><Instagram size={20}/></span>
-              <span aria-label="Facebook" title="Facebook"><Facebook size={20}/></span>
+              <span aria-label="Instagram" title="Instagram"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="18" cy="6" r="1" fill="currentColor" stroke="none"/></svg></span>
+              <span aria-label="Facebook" title="Facebook"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 22v-9h3l.5-4h-3.5V6.5c0-1.1.4-1.5 1.5-1.5H17V1.4A23 23 0 0 0 14.2 1C11.3 1 9.5 2.8 9.5 6v3H7v4h2.5v9z"/></svg></span>
               <span>Côte d&apos;Ivoire</span>
             </div>
           </div>
