@@ -1,6 +1,7 @@
 'use client';
 
-import { SearchX, Loader2 } from 'lucide-react';
+import { SearchX, Loader2, Ticket, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 import { EventCard } from '@/components/EventCard';
 import { EventCardSkeleton } from '@/components/EventCardSkeleton';
 import type { Event } from '@/types';
@@ -120,7 +121,14 @@ export function SearchResults({
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-10">
-            {events.map((event) => <EventCard key={event.id} event={event} />)}
+            {events.map((event) => (
+              <article key={event.id} className="group flex h-full flex-col rounded-[22px] border border-white/10 bg-[#251331] p-3 shadow-[0_12px_32px_rgba(0,0,0,0.2)] transition-all duration-300 hover:-translate-y-1 hover:border-[#ff791f]/45 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)] [&_h3]:text-white [&_h3]:font-bold [&_h3]:text-[18px] [&_h3]:leading-snug [&_p]:text-white/70 [&_p]:mb-0.5 [&_h3]:mb-1 [&_a:hover_h3]:text-[#ff791f] [&_img]:rounded-xl [&_p.text-orange]:text-[#ff791f] [&_p.text-gray-700]:text-white [&_a>div:first-child]:aspect-[16/10] [&_a>div:first-child]:bg-[#392349] [&_a>div:first-child>div]:bg-[#392349] [&_a>div:first-child>button]:opacity-100 [&_a>div:first-child>button]:shadow-md">
+                <div className="flex-1"><EventCard event={event} compactTime /></div>
+                <Link href={`/events/${event.id}`} className="mt-3 flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[#ff791f] px-4 py-2.5 text-sm font-extrabold text-[#180c21] transition-colors hover:bg-[#ff944b]" aria-label={`Voir les billets pour ${event.name}`}>
+                  <Ticket size={17} /> {event.isSoldOut ? 'Voir l’événement' : 'Réserver'} <ArrowRight size={16} />
+                </Link>
+              </article>
+            ))}
           </div>
           {hasNextPage && (
             <div className="mt-12 text-center">
