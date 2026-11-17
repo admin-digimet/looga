@@ -4,7 +4,7 @@ import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
-import { Search, MapPin, CalendarDays, Tag, ArrowRight, UserRound, Menu, Ticket, Sparkles } from 'lucide-react';
+import { Search, MapPin, CalendarDays, Tag, ArrowRight, UserRound, Menu, Ticket, Sparkles, RotateCcw } from 'lucide-react';
 import { EventCard } from '@/components/EventCard';
 import { EventCardSkeleton } from '@/components/EventCardSkeleton';
 import { Pagination } from '@/components/Pagination';
@@ -83,15 +83,15 @@ export default function HomePage() {
         {mobileMenuOpen && <nav className="md:hidden flex flex-col gap-4 border-t border-white/10 px-6 py-5 text-sm"><Link href="/search">Explorer</Link><Link href="#events-section" onClick={() => setMobileMenuOpen(false)}>Événements</Link><Link href="/organisateur">Organisateurs</Link></nav>}
       </header>
       <main>
-        <section className="relative isolate overflow-hidden min-h-[540px] md:min-h-[610px]">
+        <section className="relative isolate overflow-hidden min-h-[500px] md:min-h-[610px]">
           <div className="absolute inset-0 bg-cover bg-center scale-[1.02]" style={{backgroundImage: "url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1800&q=85')"}} />
           <div className="absolute inset-0 bg-gradient-to-r from-[#13091e]/95 via-[#13091e]/70 to-[#13091e]/15" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#13091e] via-transparent to-transparent" />
-          <div className="relative mx-auto max-w-[1400px] px-5 md:px-9 pt-20 md:pt-28 pb-16 md:pb-20">
+          <div className="relative mx-auto max-w-[1400px] px-5 md:px-9 pt-14 sm:pt-20 md:pt-28 pb-14 md:pb-20">
             <p className="inline-flex items-center gap-2 rounded-full border border-[#ff791f]/40 bg-[#1a0b26]/65 px-4 py-2 font-extrabold tracking-[0.18em] text-[#ff791f] text-xs md:text-sm"><Sparkles size={15}/> ABIDJAN, CÔTE D’IVOIRE</p>
-            <h1 className="mt-2 font-heading text-[52px] leading-[0.95] sm:text-[76px] md:text-[96px] font-black italic tracking-tight">LA VILLE<br/><span className="text-[#ff791f]">EST À TOI.</span></h1>
+            <h1 className="mt-2 font-heading text-[clamp(2.85rem,11vw,4.75rem)] leading-[0.98] sm:text-[76px] md:text-[96px] font-black italic tracking-tight">LA VILLE<br/><span className="text-[#ff791f]">EST À TOI.</span></h1>
             <p className="mt-7 max-w-[490px] text-base md:text-xl leading-relaxed text-white/85">Les soirées, concerts et expériences<br className="hidden sm:block"/> à ne pas manquer à Abidjan.</p>
-            <form onSubmit={submitSearch} className="mt-9 flex items-center gap-3 max-w-[550px] h-[60px] rounded-2xl bg-[#fff]/95 text-[#23152c] border border-white/50 px-5 shadow-[0_12px_40px_rgba(0,0,0,0.25)] focus-within:ring-2 focus-within:ring-[#ff791f]">
+            <form onSubmit={submitSearch} className="mt-9 flex items-center gap-3 max-w-[550px] h-[56px] sm:h-[60px] rounded-2xl bg-[#fff]/95 text-[#23152c] border border-white/50 px-5 shadow-[0_12px_40px_rgba(0,0,0,0.25)] focus-within:ring-2 focus-within:ring-[#ff791f]">
               <Search size={21} className="shrink-0"/><input aria-label="Rechercher un événement" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher une soirée, un artiste, un lieu..." className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-[#776d7e]"/><button type="submit" aria-label="Lancer la recherche" className="rounded-xl bg-[#ff791f] p-2.5 text-[#180c21] hover:bg-[#ff944b]"><ArrowRight size={20}/></button>
             </form>
             <div className="mt-6 flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none]">
@@ -120,8 +120,8 @@ export default function HomePage() {
             </div>
           </div>
           {isError ? <div className="rounded-2xl border border-white/15 bg-white/5 py-14 text-center"><p className="mb-4">Impossible de charger les événements.</p><button onClick={() => refetch()} className="rounded-full bg-[#ff791f] px-6 py-3 font-bold text-[#180c21]">Réessayer</button></div> : <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
-              {isLoading ? Array.from({length: 8}).map((_,i)=><EventCardSkeleton key={i}/>) : events.length === 0 ? <p className="col-span-full py-12 text-white/70">Aucun événement trouvé pour cette sélection.</p> : events.map(event => <article key={event.id} className="group flex h-full flex-col rounded-[22px] border border-white/10 bg-[#251331] p-3 shadow-[0_12px_32px_rgba(0,0,0,0.2)] transition-all duration-300 hover:-translate-y-1 hover:border-[#ff791f]/45 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)] [&_h3]:text-white [&_h3]:font-bold [&_p]:text-white/70 [&_a:hover_h3]:text-[#ff791f] [&_img]:rounded-xl [&_p.text-orange]:text-[#ff791f] [&_p.text-gray-700]:text-white"><div className="flex-1"><EventCard event={event}/></div><Link href={`/events/${event.id}`} className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-[#ff791f] px-4 py-3 text-sm font-extrabold text-[#180c21] transition-colors hover:bg-[#ff944b]" aria-label={`Voir les billets pour ${event.name}`}><Ticket size={17}/> Réserver <ArrowRight size={16}/></Link></article>)}
+            <div className="grid grid-cols-1 min-[520px]:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+              {isLoading ? Array.from({length: 8}).map((_,i)=><EventCardSkeleton key={i}/>) : events.length === 0 ? <div className="col-span-full rounded-[22px] border border-white/10 bg-[#251331]/70 px-5 py-12 text-center sm:py-16"><div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#ff791f]/15 text-[#ff791f]"><Ticket size={27}/></div><h3 className="text-xl font-extrabold">Aucun événement pour le moment</h3><p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-white/65">Aucun événement ne correspond à cette sélection. Explore les autres catégories ou retrouve tous les événements.</p><button type="button" onClick={() => { if (activeTab === 'Tous') router.push('/search'); else changeTab('Tous'); }} className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#ff791f] px-5 py-3 text-sm font-bold text-[#180c21] hover:bg-[#ff944b]"><RotateCcw size={16}/> Voir tous les événements</button></div> : events.map(event => <article key={event.id} className="group flex h-full flex-col rounded-[22px] border border-white/10 bg-[#251331] p-3 shadow-[0_12px_32px_rgba(0,0,0,0.2)] transition-all duration-300 hover:-translate-y-1 hover:border-[#ff791f]/45 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)] [&_h3]:text-white [&_h3]:font-bold [&_h3]:text-[18px] [&_h3]:leading-snug [&_p]:text-white/70 [&_a:hover_h3]:text-[#ff791f] [&_img]:rounded-xl [&_p.text-orange]:text-[#ff791f] [&_p.text-gray-700]:text-white [&_a>div:first-child]:aspect-[16/10] [&_a>div:first-child]:bg-[#392349] [&_a>div:first-child>div]:bg-[#392349] [&_a>div:first-child>button]:opacity-100 [&_a>div:first-child>button]:shadow-md"><div className="flex-1"><EventCard event={event}/></div><Link href={`/events/${event.id}`} className="mt-4 flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#ff791f] px-4 py-3 text-sm font-extrabold text-[#180c21] transition-colors hover:bg-[#ff944b]" aria-label={`Voir les billets pour ${event.name}`}><Ticket size={17}/> {event.isSoldOut ? 'Voir l’événement' : 'Réserver'} <ArrowRight size={16}/></Link></article>)}
             </div>
             {!isLoading && total > 0 && <div className="mt-12 flex flex-col items-center gap-4">{totalPages > 1 && <div className="rounded-xl bg-white p-2 text-[#180c21]"><Pagination page={page} totalPages={totalPages} onPageChange={goToPage}/></div>}<p className="text-sm text-white/60">Affichage de {from} à {to} sur {total} résultat{total > 1 ? 's' : ''}.</p></div>}
           </>}
