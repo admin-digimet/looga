@@ -51,17 +51,17 @@ export function SearchResults({
             <button
               type="button"
               onClick={onOpenFilters}
-              className="lg:hidden inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-full text-sm font-semibold text-gray-700 hover:border-orange"
+              className="lg:hidden inline-flex items-center gap-2 px-4 py-2 border border-white/20 rounded-full text-sm font-semibold text-white/80 hover:border-orange"
             >
               Filtres
               {activeFiltersCount > 0 && (
-                <span className="ml-1 inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-orange text-white text-[11px] font-bold">
+                <span className="ml-1 inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-[#ff791f] text-[#14091f] text-[11px] font-bold">
                   {activeFiltersCount}
                 </span>
               )}
             </button>
           )}
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-white/60">
             {isLoading
               ? 'Recherche en cours…'
               : `${total.toLocaleString('fr-FR')} ${total > 1 ? 'événements trouvés' : 'événement trouvé'}`}
@@ -69,11 +69,11 @@ export function SearchResults({
         </div>
 
         <label className="inline-flex items-center gap-2 text-sm">
-          <span className="text-gray-600">Trier par</span>
+          <span className="text-white/60">Trier par</span>
           <select
             value={sort}
             onChange={(e) => onSortChange(e.target.value as SortPreset)}
-            className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm font-semibold text-gray-700 bg-white outline-none focus:border-orange cursor-pointer"
+            className="border border-white/20 rounded-lg px-3 py-1.5 text-sm font-semibold text-white/80 bg-[#382044] outline-none focus:border-orange cursor-pointer"
           >
             {SORT_OPTIONS.map((s) => (
               <option key={s.key} value={s.key}>{s.label}</option>
@@ -85,11 +85,11 @@ export function SearchResults({
       {/* Body */}
       {isError ? (
         <div className="text-center py-20">
-          <p className="text-gray-500 mb-4">Une erreur est survenue.</p>
+          <p className="text-white/55 mb-4">Une erreur est survenue.</p>
           <button
             type="button"
             onClick={onResetFilters}
-            className="border border-gray-300 text-gray-700 font-semibold py-2 px-6 rounded-lg hover:bg-gray-50"
+            className="border border-white/20 text-white/80 font-semibold py-2 px-6 rounded-lg hover:bg-white/10"
           >
             Réinitialiser les filtres
           </button>
@@ -100,19 +100,19 @@ export function SearchResults({
         </div>
       ) : events.length === 0 ? (
         <div className="text-center py-20">
-          <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-orange/10 flex items-center justify-center">
-            <SearchX className="w-8 h-8 text-orange" />
+          <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-[#ff791f]/10 flex items-center justify-center">
+            <SearchX className="w-8 h-8 text-[#ff791f]" />
           </div>
-          <h3 className="font-heading text-xl font-extrabold text-gray-900 mb-2">
+          <h3 className="font-heading text-xl font-extrabold text-white mb-2">
             Aucun événement trouvé
           </h3>
-          <p className="text-sm text-gray-500 mb-6 max-w-sm mx-auto">
+          <p className="text-sm text-white/55 mb-6 max-w-sm mx-auto">
             Essaie d&apos;élargir tes critères ou de réinitialiser les filtres.
           </p>
           <button
             type="button"
             onClick={onResetFilters}
-            className="inline-block bg-orange text-white font-bold py-3 px-7 rounded-xl hover:opacity-90"
+            className="inline-block bg-[#ff791f] text-[#14091f] font-bold py-3 px-7 rounded-xl hover:opacity-90"
           >
             Réinitialiser les filtres
           </button>
@@ -128,7 +128,7 @@ export function SearchResults({
                 type="button"
                 onClick={onLoadMore}
                 disabled={isFetchingNextPage}
-                className="inline-flex items-center gap-2 border border-gray-300 text-gray-700 font-semibold py-3 px-8 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                className="inline-flex items-center gap-2 border border-white/20 text-white/80 font-semibold py-3 px-8 rounded-lg hover:bg-white/10 disabled:opacity-50"
               >
                 {isFetchingNextPage && <Loader2 className="w-4 h-4 animate-spin" />}
                 {isFetchingNextPage ? 'Chargement…' : "Voir plus d'événements"}

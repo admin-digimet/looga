@@ -86,10 +86,10 @@ export function SearchFilters({
     categories.length + cities.length + (period !== 'all' ? 1 : 0) + (price !== 'all' ? 1 : 0);
 
   return (
-    <aside className="bg-white border border-gray-200 rounded-2xl p-5 lg:sticky lg:top-24 w-full lg:w-[280px] shrink-0 max-h-[calc(100vh-7rem)] overflow-y-auto">
+    <aside className="bg-[#21132b] border border-white/10 rounded-2xl p-5 lg:sticky lg:top-24 w-full lg:w-[280px] shrink-0 max-h-[calc(100vh-7rem)] overflow-y-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
-        <h3 className="font-heading font-extrabold text-gray-900 text-lg">Filtres</h3>
+        <h3 className="font-heading font-extrabold text-white text-lg">Filtres</h3>
         <div className="flex items-center gap-2">
           {activeCount > 0 && (
             <button
@@ -104,10 +104,10 @@ export function SearchFilters({
             <button
               type="button"
               onClick={onClose}
-              className="lg:hidden p-1 hover:bg-gray-100 rounded-full"
+              className="lg:hidden p-1 hover:bg-white/10 rounded-full"
               aria-label="Fermer les filtres"
             >
-              <X className="w-5 h-5 text-gray-500" />
+              <X className="w-5 h-5 text-white/50" />
             </button>
           )}
         </div>
@@ -115,7 +115,7 @@ export function SearchFilters({
 
       {/* Période */}
       <section className="mb-6">
-        <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">Période</h4>
+        <h4 className="text-xs font-bold uppercase tracking-wider text-white/50 mb-3">Période</h4>
         <div className="space-y-1.5">
           {PERIOD_OPTIONS.map((opt) => (
             <label
@@ -127,9 +127,9 @@ export function SearchFilters({
                 name="period"
                 checked={period === opt.key}
                 onChange={() => onChange({ period: opt.key })}
-                className="w-4 h-4 accent-orange cursor-pointer"
+                className="w-4 h-4 accent-[#ff791f] cursor-pointer"
               />
-              <span className="text-sm text-gray-700 group-hover:text-gray-900">{opt.label}</span>
+              <span className="text-sm text-white/75 group-hover:text-white">{opt.label}</span>
             </label>
           ))}
         </div>
@@ -137,7 +137,7 @@ export function SearchFilters({
 
       {/* Prix */}
       <section className="mb-6">
-        <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">Prix</h4>
+        <h4 className="text-xs font-bold uppercase tracking-wider text-white/50 mb-3">Prix</h4>
         <div className="space-y-1.5">
           {PRICE_OPTIONS.map((opt) => (
             <label
@@ -149,9 +149,9 @@ export function SearchFilters({
                 name="price"
                 checked={price === opt.key}
                 onChange={() => onChange({ price: opt.key })}
-                className="w-4 h-4 accent-orange cursor-pointer"
+                className="w-4 h-4 accent-[#ff791f] cursor-pointer"
               />
-              <span className="text-sm text-gray-700 group-hover:text-gray-900">{opt.label}</span>
+              <span className="text-sm text-white/75 group-hover:text-white">{opt.label}</span>
             </label>
           ))}
         </div>
@@ -159,7 +159,7 @@ export function SearchFilters({
 
       {/* Catégories */}
       <section className="mb-6">
-        <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">
+        <h4 className="text-xs font-bold uppercase tracking-wider text-white/50 mb-3">
           Catégories {categories.length > 0 && <span className="text-orange">({categories.length})</span>}
         </h4>
         <div className="space-y-1">
@@ -172,9 +172,9 @@ export function SearchFilters({
                 type="checkbox"
                 checked={categories.includes(cat.key)}
                 onChange={() => toggleCategory(cat.key)}
-                className="w-4 h-4 accent-orange rounded cursor-pointer"
+                className="w-4 h-4 accent-[#ff791f] rounded cursor-pointer"
               />
-              <span className="text-sm text-gray-700 group-hover:text-gray-900">{cat.label}</span>
+              <span className="text-sm text-white/75 group-hover:text-white">{cat.label}</span>
             </label>
           ))}
         </div>
@@ -182,7 +182,7 @@ export function SearchFilters({
 
       {/* Villes */}
       <section>
-        <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">
+        <h4 className="text-xs font-bold uppercase tracking-wider text-white/50 mb-3">
           Villes {cities.length > 0 && <span className="text-orange">({cities.length})</span>}
         </h4>
         <div className="flex flex-wrap gap-2">
@@ -195,8 +195,8 @@ export function SearchFilters({
                 onClick={() => toggleCity(city)}
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
                   active
-                    ? 'bg-orange text-white border-orange'
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-orange/50'
+                    ? 'bg-[#ff791f] text-[#14091f] border-[#ff791f]'
+                    : 'bg-[#382044] text-white/75 border-white/20 hover:border-orange/50'
                 }`}
               >
                 {city}
