@@ -4,7 +4,7 @@ import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
-import { Search, MapPin, CalendarDays, Tag, ArrowRight, UserRound, Menu } from 'lucide-react';
+import { Search, MapPin, CalendarDays, Tag, ArrowRight, UserRound, Menu, Instagram, Facebook } from 'lucide-react';
 import { EventCard } from '@/components/EventCard';
 import { EventCardSkeleton } from '@/components/EventCardSkeleton';
 import { Pagination } from '@/components/Pagination';
@@ -127,7 +127,53 @@ export default function HomePage() {
           </>}
         </section>
       </main>
-      <footer className="border-t border-white/10 px-5 md:px-9 py-8 text-center text-sm text-white/55">© Looga · <Link href="/search" className="hover:text-white">Explorer les événements</Link> · <Link href="/organisateur" className="hover:text-white">Organisateurs</Link></footer>
+      <footer className="mx-auto max-w-[1400px] px-4 pb-5 md:px-9 md:pb-9" aria-label="Pied de page Looga">
+        <div className="rounded-[22px] bg-[#0e0e10] px-5 py-6 text-white md:px-8 md:py-7">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#39363e] pb-7">
+            <Link href="/" className="font-heading text-[30px] font-extrabold tracking-[-1px] text-[#ff791f]">looga.</Link>
+            <span className="text-sm text-[#bcb8c0]">La ville est à toi.</span>
+          </div>
+          <div className="grid grid-cols-1 gap-9 py-8 sm:grid-cols-3 md:gap-12">
+            <div>
+              <h2 className="mb-3 text-base font-bold">Découvrir</h2>
+              <ul className="space-y-3 text-sm text-[#c6c1c9]">
+                <li><Link href="/search" className="hover:text-[#ff791f]">Tous les événements</Link></li>
+                <li><Link href="/search?categories=soirees" className="hover:text-[#ff791f]">Soirées &amp; Clubs</Link></li>
+                <li><Link href="/search?categories=concerts" className="hover:text-[#ff791f]">Concerts &amp; Live</Link></li>
+                <li><Link href="/search?categories=festival" className="hover:text-[#ff791f]">Festivals &amp; Open Air</Link></li>
+                <li><Link href="/search?categories=gastronomie,bien_etre,mode,workshops" className="hover:text-[#ff791f]">Lifestyle &amp; Expériences</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h2 className="mb-3 text-base font-bold">Looga</h2>
+              <ul className="space-y-3 text-sm text-[#c6c1c9]">
+                <li><Link href="/a-propos" className="hover:text-[#ff791f]">À propos</Link></li>
+                <li><Link href="/organisateur" className="hover:text-[#ff791f]">Créer un événement</Link></li>
+                <li><Link href="/aide" className="hover:text-[#ff791f]">Centre d&apos;aide</Link></li>
+                <li><Link href="/contact" className="hover:text-[#ff791f]">Contact</Link></li>
+                <li><Link href="/mobile" className="hover:text-[#ff791f]">Application mobile</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h2 className="mb-3 text-base font-bold">Informations</h2>
+              <ul className="space-y-3 text-sm text-[#c6c1c9]">
+                <li><Link href="/cgu" className="hover:text-[#ff791f]">Conditions générales d&apos;utilisation</Link></li>
+                <li><Link href="/confidentialite" className="hover:text-[#ff791f]">Politique de confidentialité</Link></li>
+                <li><Link href="/securite" className="hover:text-[#ff791f]">Sécurité</Link></li>
+                <li><Link href="/communaute" className="hover:text-[#ff791f]">Règles d&apos;utilisation</Link></li>
+              </ul>
+            </div>
+          </div>
+          <div className="flex flex-col gap-4 border-t border-[#39363e] pt-7 text-sm text-[#a8a3ad] sm:flex-row sm:items-center sm:justify-between">
+            <span>© 2026 Looga</span>
+            <div className="flex items-center gap-5">
+              <span aria-label="Instagram" title="Instagram"><Instagram size={20}/></span>
+              <span aria-label="Facebook" title="Facebook"><Facebook size={20}/></span>
+              <span>Côte d&apos;Ivoire</span>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
