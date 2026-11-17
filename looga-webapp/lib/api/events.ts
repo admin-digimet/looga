@@ -103,7 +103,7 @@ function periodRange(preset: PeriodPreset | undefined): { gte?: string; lt?: str
   if (!preset || preset === 'all') return {};
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const isoDate = (d: Date) => d.toISOString().slice(0, 10);
+  const isoDate = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   switch (preset) {
     case 'today': {
       const tomorrow = new Date(today);
@@ -148,25 +148,30 @@ export async function searchEvents(params: SearchEventsParams): Promise<Paginate
     search.set('category', `in.(${list})`);
   }
 
-  if (cities && cities.length > 0) {
-    // ilike multi via "or" — match si le nom de ville est dans location_name
-    const ors = cities.map((c) => `location_name.ilike.*${c}*`).join(',');
-    search.set('or', `(${ors})`);
-  }
+  // Combine city and keyword as AND of two OR groups, never as a single OR.
+  // This preserves independent filtering when both criteria are present.
+  const cityVariants: Record<string, string[]> = {
+    'Abidjan': ['Abidjan'],
+    'Grand-Bassam': ['Grand-Bassam', 'Grand Bassam'],
+    'Assinie': ['Assinie', 'Assinié'],
+  };
+  const selectedCities = (cities ?? []).flatMap((city) => cityVariants[city] ?? [city]);
+  const safePattern = (value: string) => value.trim().replace(/[*,().]/g, '');
+  const cityTerms = selectedCities
+    .map(safePattern)
+    .filter(Boolean)
+    .map((city) => `location_name.ilike.*${city}*`);
+  const keyword = q ? safePattern(q) : '';
+  const keywordTerms = keyword ? [
+    `title.ilike.*${keyword}*`,
+    `description.ilike.*${keyword}*`,
+    `location_name.ilike.*${keyword}*`,
+  ] : [];
 
-  if (q && q.trim()) {
-    const safe = q.trim().replace(/[*,()]/g, '');
-    // Search dans title OU description OU location_name
-    const orParam = `(title.ilike.*${safe}*,description.ilike.*${safe}*,location_name.ilike.*${safe}*)`;
-    // Si on a déjà un "or" pour les villes, on doit utiliser "and" avec un nested or — PostgREST limite à un seul or top-level
-    // Pour MVP : si villes ET search, on combine en concaténant les conditions du search dans le or villes
-    const existing = search.get('or');
-    if (existing) {
-      const merged = existing.slice(1, -1) + ',title.ilike.*' + safe + '*,description.ilike.*' + safe + '*';
-      search.set('or', `(${merged})`);
-    } else {
-      search.set('or', orParam);
-    }
+  if (cityTerms.length && keywordTerms.length) {
+    search.set('and', `(or(${cityTerms.join(',')}),or(${keywordTerms.join(',')}))`);
+  } else if (cityTerms.length || keywordTerms.length) {
+    search.set('or', `(${(cityTerms.length ? cityTerms : keywordTerms).join(',')})`);
   }
 
   if (price === 'free') search.set('min_price', 'eq.0');
