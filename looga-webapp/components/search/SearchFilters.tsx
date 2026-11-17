@@ -4,36 +4,19 @@ import { X, RotateCcw } from 'lucide-react';
 import type { EventCategory } from '@/types';
 import type { PricePreset, PeriodPreset } from '@/lib/api/events';
 
-const ALL_CATEGORIES: { key: EventCategory; label: string }[] = [
-  { key: 'concerts',    label: 'Concerts & Musique' },
-  { key: 'soirees',     label: 'Soirées & Fêtes' },
-  { key: 'culture',     label: 'Culture & Arts' },
-  { key: 'sports',      label: 'Sports & Fitness' },
-  { key: 'workshops',   label: 'Ateliers & Formation' },
-  { key: 'gastronomie', label: 'Gastronomie & Food' },
-  { key: 'conferences', label: 'Conférences & Séminaires' },
-  { key: 'networking',  label: 'Networking & Business' },
-  { key: 'mode',        label: 'Mode & Lifestyle' },
-  { key: 'famille',     label: 'Famille & Loisirs' },
-  { key: 'humour',      label: 'Humour & Stand-up' },
-  { key: 'religieux',   label: 'Religieux & Spirituel' },
-  { key: 'cinema',      label: 'Cinéma & Séries' },
-  { key: 'caritatif',   label: 'Caritatif & Solidaire' },
-  { key: 'enfants',     label: 'Enfants & Jeunesse' },
-  { key: 'gaming',      label: 'Gaming & E-sport' },
-  { key: 'tournee',     label: 'Caravane & Tournée' },
-  { key: 'salon',       label: 'Salon & Exposition' },
-  { key: 'theatre',     label: 'Théâtre & Spectacle' },
-  { key: 'bien_etre',   label: 'Bien-être & Yoga' },
-  { key: 'festival',    label: 'Festival & Carnaval' },
-  { key: 'auto_moto',   label: 'Auto-Moto & Course' },
-  { key: 'autre',       label: 'Autre' },
+// Regroupement d'affichage uniquement : les catégories historiques restent dans la base.
+// Chaque sélection envoie les identifiants historiques à l'API de recherche.
+const CATEGORY_GROUPS: { label: string; keys: EventCategory[] }[] = [
+  { label: 'Soirées & Clubs', keys: ['soirees'] },
+  { label: 'Concerts & Live', keys: ['concerts', 'tournee', 'theatre', 'humour'] },
+  { label: 'Festivals & Open Air', keys: ['festival', 'culture', 'sports', 'auto_moto'] },
+  { label: 'Lifestyle & Expériences', keys: [
+    'workshops', 'gastronomie', 'conferences', 'networking', 'mode', 'famille',
+    'religieux', 'cinema', 'caritatif', 'enfants', 'gaming', 'salon', 'bien_etre', 'autre',
+  ] },
 ];
 
-const POPULAR_CITIES = [
-  'Abidjan', 'Bouaké', 'Yamoussoukro', 'Grand-Bassam',
-  'San-Pédro', 'Korhogo', 'Daloa', 'Man',
-];
+const POPULAR_CITIES = ['Abidjan', 'Grand-Bassam', 'Assinie'];
 
 const PERIOD_OPTIONS: { key: PeriodPreset; label: string }[] = [
   { key: 'all',     label: 'À tout moment' },
@@ -68,10 +51,11 @@ export function SearchFilters({
   onReset,
   onClose,
 }: Props) {
-  const toggleCategory = (cat: EventCategory) => {
-    const next = categories.includes(cat)
-      ? categories.filter((c) => c !== cat)
-      : [...categories, cat];
+  const toggleCategoryGroup = (keys: EventCategory[]) => {
+    const active = keys.every((key) => categories.includes(key));
+    const next = active
+      ? categories.filter((key) => !keys.includes(key))
+      : Array.from(new Set([...categories, ...keys]));
     onChange({ categories: next });
   };
 
@@ -83,7 +67,7 @@ export function SearchFilters({
   };
 
   const activeCount =
-    categories.length + cities.length + (period !== 'all' ? 1 : 0) + (price !== 'all' ? 1 : 0);
+    CATEGORY_GROUPS.filter((group) => group.keys.some((key) => categories.includes(key))).length + cities.length + (period !== 'all' ? 1 : 0) + (price !== 'all' ? 1 : 0);
 
   return (
     <aside className="bg-[#21132b] border border-white/10 rounded-2xl p-5 lg:sticky lg:top-24 w-full lg:w-[280px] shrink-0 max-h-[calc(100vh-7rem)] overflow-y-auto">
@@ -160,23 +144,23 @@ export function SearchFilters({
       {/* Catégories */}
       <section className="mb-6">
         <h4 className="text-xs font-bold uppercase tracking-wider text-white/50 mb-3">
-          Catégories {categories.length > 0 && <span className="text-orange">({categories.length})</span>}
+          Catégories {categories.length > 0 && <span className="text-orange">({CATEGORY_GROUPS.filter((group) => group.keys.some((key) => categories.includes(key))).length})</span>}
         </h4>
         <div className="space-y-1">
-          {ALL_CATEGORIES.map((cat) => (
-            <label
-              key={cat.key}
-              className="flex items-center gap-2.5 py-1.5 cursor-pointer group"
-            >
-              <input
-                type="checkbox"
-                checked={categories.includes(cat.key)}
-                onChange={() => toggleCategory(cat.key)}
-                className="w-4 h-4 accent-[#ff791f] rounded cursor-pointer"
-              />
-              <span className="text-sm text-white/75 group-hover:text-white">{cat.label}</span>
-            </label>
-          ))}
+          {CATEGORY_GROUPS.map((group) => {
+            const selected = group.keys.every((key) => categories.includes(key));
+            return (
+              <label key={group.label} className="flex items-center gap-2.5 py-2 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={selected}
+                  onChange={() => toggleCategoryGroup(group.keys)}
+                  className="w-4 h-4 accent-[#ff791f] rounded cursor-pointer"
+                />
+                <span className="text-sm text-white/75 group-hover:text-white">{group.label}</span>
+              </label>
+            );
+          })}
         </div>
       </section>
 
