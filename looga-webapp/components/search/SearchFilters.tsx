@@ -6,7 +6,7 @@ import type { PricePreset, PeriodPreset } from '@/lib/api/events';
 
 // Regroupement d'affichage uniquement : les catégories historiques restent dans la base.
 // Chaque sélection envoie les identifiants historiques à l'API de recherche.
-const CATEGORY_GROUPS: { label: string; keys: EventCategory[] }[] = [
+export const CATEGORY_GROUPS: { label: string; keys: EventCategory[] }[] = [
   { label: 'Soirées & Clubs', keys: ['soirees'] },
   { label: 'Concerts & Live', keys: ['concerts', 'tournee', 'theatre', 'humour'] },
   { label: 'Festivals & Open Air', keys: ['festival', 'culture', 'sports', 'auto_moto'] },
@@ -52,7 +52,7 @@ export function SearchFilters({
   onClose,
 }: Props) {
   const toggleCategoryGroup = (keys: EventCategory[]) => {
-    const active = keys.every((key) => categories.includes(key));
+    const active = keys.some((key) => categories.includes(key));
     const next = active
       ? categories.filter((key) => !keys.includes(key))
       : Array.from(new Set([...categories, ...keys]));
@@ -149,11 +149,13 @@ export function SearchFilters({
         <div className="space-y-1">
           {CATEGORY_GROUPS.map((group) => {
             const selected = group.keys.every((key) => categories.includes(key));
+            const partiallySelected = !selected && group.keys.some((key) => categories.includes(key));
             return (
               <label key={group.label} className="flex items-center gap-2.5 py-2 cursor-pointer group">
                 <input
                   type="checkbox"
                   checked={selected}
+                  ref={(el) => { if (el) el.indeterminate = partiallySelected; }}
                   onChange={() => toggleCategoryGroup(group.keys)}
                   className="w-4 h-4 accent-[#ff791f] rounded cursor-pointer"
                 />
