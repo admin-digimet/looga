@@ -4,7 +4,7 @@ import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
-import { Search, MapPin, CalendarDays, Tag, ArrowRight, UserRound, Menu } from 'lucide-react';
+import { Search, MapPin, CalendarDays, Tag, ArrowRight, UserRound, Menu, Ticket, Sparkles } from 'lucide-react';
 import { EventCard } from '@/components/EventCard';
 import { EventCardSkeleton } from '@/components/EventCardSkeleton';
 import { Pagination } from '@/components/Pagination';
@@ -83,18 +83,18 @@ export default function HomePage() {
         {mobileMenuOpen && <nav className="md:hidden flex flex-col gap-4 border-t border-white/10 px-6 py-5 text-sm"><Link href="/search">Explorer</Link><Link href="#events-section" onClick={() => setMobileMenuOpen(false)}>Événements</Link><Link href="/organisateur">Organisateurs</Link></nav>}
       </header>
       <main>
-        <section className="relative isolate overflow-hidden min-h-[460px] md:min-h-[510px]">
-          <div className="absolute inset-0 bg-cover bg-center" style={{backgroundImage: "url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1800&q=85')"}} />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#13091e] via-[#13091e]/80 to-[#13091e]/25" />
+        <section className="relative isolate overflow-hidden min-h-[540px] md:min-h-[610px]">
+          <div className="absolute inset-0 bg-cover bg-center scale-[1.02]" style={{backgroundImage: "url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1800&q=85')"}} />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#13091e]/95 via-[#13091e]/70 to-[#13091e]/15" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#13091e] via-transparent to-transparent" />
-          <div className="relative mx-auto max-w-[1400px] px-5 md:px-9 pt-14 md:pt-20 pb-12">
-            <p className="font-extrabold italic tracking-[0.15em] text-[#ff791f] text-sm md:text-lg">ABIDJAN</p>
-            <h1 className="mt-2 font-heading text-[45px] leading-[0.99] sm:text-6xl md:text-[78px] font-black italic tracking-tight">LA VILLE<br/><span className="text-[#ff791f]">EST À TOI.</span></h1>
-            <p className="mt-5 max-w-[370px] text-base md:text-lg leading-snug">Les soirées, concerts et expériences<br className="hidden sm:block"/> à ne pas manquer à Abidjan.</p>
-            <form onSubmit={submitSearch} className="mt-7 flex items-center gap-3 max-w-[480px] h-[54px] rounded-full bg-[#42294f]/95 border border-white/15 px-5 focus-within:ring-2 focus-within:ring-[#ff791f]">
-              <Search size={21} className="shrink-0"/><input aria-label="Rechercher un événement" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher une soirée, un artiste, un lieu..." className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-white/70"/><button type="submit" aria-label="Lancer la recherche"><ArrowRight size={20}/></button>
+          <div className="relative mx-auto max-w-[1400px] px-5 md:px-9 pt-20 md:pt-28 pb-16 md:pb-20">
+            <p className="inline-flex items-center gap-2 rounded-full border border-[#ff791f]/40 bg-[#1a0b26]/65 px-4 py-2 font-extrabold tracking-[0.18em] text-[#ff791f] text-xs md:text-sm"><Sparkles size={15}/> ABIDJAN, CÔTE D’IVOIRE</p>
+            <h1 className="mt-2 font-heading text-[52px] leading-[0.95] sm:text-[76px] md:text-[96px] font-black italic tracking-tight">LA VILLE<br/><span className="text-[#ff791f]">EST À TOI.</span></h1>
+            <p className="mt-7 max-w-[490px] text-base md:text-xl leading-relaxed text-white/85">Les soirées, concerts et expériences<br className="hidden sm:block"/> à ne pas manquer à Abidjan.</p>
+            <form onSubmit={submitSearch} className="mt-9 flex items-center gap-3 max-w-[550px] h-[60px] rounded-2xl bg-[#fff]/95 text-[#23152c] border border-white/50 px-5 shadow-[0_12px_40px_rgba(0,0,0,0.25)] focus-within:ring-2 focus-within:ring-[#ff791f]">
+              <Search size={21} className="shrink-0"/><input aria-label="Rechercher un événement" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher une soirée, un artiste, un lieu..." className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-[#776d7e]"/><button type="submit" aria-label="Lancer la recherche" className="rounded-xl bg-[#ff791f] p-2.5 text-[#180c21] hover:bg-[#ff944b]"><ArrowRight size={20}/></button>
             </form>
-            <div className="mt-7 flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none]">
+            <div className="mt-6 flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none]">
               <Link href="/search?period=today" className="shrink-0 inline-flex items-center gap-2 rounded-full bg-[#ff791f] px-5 py-3 text-sm font-bold text-[#180c21]"><CalendarDays size={17}/> Ce soir</Link>
               <Link href="/search?period=weekend" className="shrink-0 inline-flex items-center gap-2 rounded-full bg-[#3b2149]/95 px-5 py-3 text-sm font-bold"><CalendarDays size={17}/> Ce week-end</Link>
               <Link href="/search?price=free" className="shrink-0 inline-flex items-center gap-2 rounded-full bg-[#3b2149]/95 px-5 py-3 text-sm font-bold"><Tag size={17}/> Gratuit</Link>
@@ -102,13 +102,13 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-        <section className="mx-auto max-w-[1400px] px-5 md:px-9 pt-3 pb-10">
-          <h2 className="font-heading text-2xl font-extrabold mb-5">Explorer par catégorie</h2>
+        <section className="mx-auto max-w-[1400px] px-5 md:px-9 pt-10 md:pt-14 pb-12">
+          <h2 className="font-heading text-2xl md:text-3xl font-extrabold mb-6">Explorer par catégorie</h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
-            {CATEGORIES.map(category => <Link key={category.label} href={`/search?categories=${category.slugs.join(',')}`} className="group relative aspect-[1.5/1] sm:aspect-[1.8/1] overflow-hidden rounded-2xl border border-white/10 bg-[#382044]">
+            {CATEGORIES.map(category => <Link key={category.label} href={`/search?categories=${category.slugs.join(',')}`} className="group relative aspect-[1.1/1] sm:aspect-[1.45/1] overflow-hidden rounded-[22px] border border-white/10 bg-[#382044] shadow-[0_14px_35px_rgba(0,0,0,0.2)]">
               <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style={{backgroundImage: `url('${category.image}')`}} />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#16091f] via-[#16091f]/25 to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 p-3 md:p-5"><span className="font-bold text-sm md:text-base leading-tight">{category.label}</span><ArrowRight size={20} className="shrink-0 text-[#ff791f]"/></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#16091f]/95 via-[#16091f]/20 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 p-3 md:p-5"><span className="font-extrabold text-sm md:text-lg leading-tight">{category.label}</span><ArrowRight size={20} className="shrink-0 text-[#ff791f]"/></div>
             </Link>)}
           </div>
         </section>
@@ -121,9 +121,9 @@ export default function HomePage() {
           </div>
           {isError ? <div className="rounded-2xl border border-white/15 bg-white/5 py-14 text-center"><p className="mb-4">Impossible de charger les événements.</p><button onClick={() => refetch()} className="rounded-full bg-[#ff791f] px-6 py-3 font-bold text-[#180c21]">Réessayer</button></div> : <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
-              {isLoading ? Array.from({length: 8}).map((_,i)=><EventCardSkeleton key={i}/>) : events.length === 0 ? <p className="col-span-full py-12 text-white/70">Aucun événement trouvé pour cette sélection.</p> : events.map(event => <div key={event.id} className="rounded-2xl border border-white/10 bg-[#251331] p-3 [&_p]:text-white/70 [&_h3]:text-white [&_h3]:font-bold [&_a:hover_h3]:text-[#ff791f]"><EventCard event={event}/></div>)}
+              {isLoading ? Array.from({length: 8}).map((_,i)=><EventCardSkeleton key={i}/>) : events.length === 0 ? <p className="col-span-full py-12 text-white/70">Aucun événement trouvé pour cette sélection.</p> : events.map(event => <article key={event.id} className="group flex h-full flex-col rounded-[22px] border border-white/10 bg-[#251331] p-3 shadow-[0_12px_32px_rgba(0,0,0,0.2)] transition-all duration-300 hover:-translate-y-1 hover:border-[#ff791f]/45 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)] [&_h3]:text-white [&_h3]:font-bold [&_p]:text-white/70 [&_a:hover_h3]:text-[#ff791f] [&_img]:rounded-xl [&_p.text-orange]:text-[#ff791f] [&_p.text-gray-700]:text-white"><div className="flex-1"><EventCard event={event}/></div><Link href={`/events/${event.id}`} className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-[#ff791f] px-4 py-3 text-sm font-extrabold text-[#180c21] transition-colors hover:bg-[#ff944b]" aria-label={`Voir les billets pour ${event.name}`}><Ticket size={17}/> Réserver <ArrowRight size={16}/></Link></article>)}
             </div>
-            {!isLoading && total > 0 && <div className="mt-12 flex flex-col items-center gap-4"><div className="rounded-xl bg-white p-2 text-[#180c21]"><Pagination page={page} totalPages={totalPages} onPageChange={goToPage}/></div><p className="text-sm text-white/60">Affichage de {from} à {to} sur {total} résultat{total > 1 ? 's' : ''}.</p></div>}
+            {!isLoading && total > 0 && <div className="mt-12 flex flex-col items-center gap-4">{totalPages > 1 && <div className="rounded-xl bg-white p-2 text-[#180c21]"><Pagination page={page} totalPages={totalPages} onPageChange={goToPage}/></div>}<p className="text-sm text-white/60">Affichage de {from} à {to} sur {total} résultat{total > 1 ? 's' : ''}.</p></div>}
           </>}
         </section>
       </main>
