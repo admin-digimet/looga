@@ -5,8 +5,8 @@ const CATEGORIES = CATEGORY_GROUPS.map(group => ({ label: group.label, slugs: gr
 
 export function AboutFooter() {
   return (
-      <footer className="mx-auto max-w-[1400px] px-4 pb-5 md:px-9 md:pb-9" aria-label="Pied de page Looga">
-        <div className="rounded-[22px] bg-[#0e0e10] px-5 py-6 text-white md:px-8 md:py-7">
+      <footer className="w-full px-0 pb-0" aria-label="Pied de page Looga">
+        <div className="w-full bg-[#0e0e10] px-5 py-8 text-white sm:px-8 md:px-12 md:py-10 lg:px-[max(3rem,calc((100vw-1200px)/2))]">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#39363e] pb-7">
             <Link href="/" className="font-heading text-[30px] font-extrabold tracking-[-1px] text-[#ff791f]">looga.</Link>
             <span className="text-sm text-[#bcb8c0]">La ville est à toi.</span>
