@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { LogOut, Settings, Ticket, User as UserIcon } from 'lucide-react';
+import { Heart, LogOut, Settings, Ticket, User as UserIcon } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useLogout } from '@/hooks/useAuth';
 
@@ -74,6 +74,9 @@ export function ProfileMenu() {
 
             <MenuItem href="/tickets" icon={Ticket} onSelect={() => setOpen(false)}>
               Mes billets
+            </MenuItem>
+            <MenuItem href="/favorites" icon={Heart} onSelect={() => setOpen(false)}>
+              Mes favoris
             </MenuItem>
             <MenuItem href="/profile" icon={UserIcon} onSelect={() => setOpen(false)}>
               Mon profil
