@@ -6,13 +6,28 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useLogin } from '@/hooks/useAuth';
 import type { AxiosError } from 'axios';
 
+function safeRedirect(value: string | null): string {
+  if (!value || !value.startsWith('/') || value.startsWith('//')) return '/';
+  if (value.includes('\\') || /[\u0000-\u001F\u007F]/.test(value)) return '/';
+  try {
+    const decoded = decodeURIComponent(value);
+    if (!decoded.startsWith('/') || decoded.startsWith('//') || decoded.includes('\\') || /[\u0000-\u001F\u007F]/.test(decoded)) {
+      return '/';
+    }
+  } catch {
+    return '/';
+  }
+  return value;
+}
+
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect');
+  const redirect = safeRedirect(searchParams.get('redirect'));
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const loginMutation = useLogin({ onSuccess: () => router.push(redirect ?? '/') });
+  const [showPassword, setShowPassword] = useState(false);
+  const loginMutation = useLogin({ onSuccess: () => router.push(redirect) });
 
   const getErrorMessage = (error: unknown): string => {
     const axiosError = error as AxiosError<any>;
@@ -44,11 +59,13 @@ function LoginForm() {
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-sm font-semibold text-[#F5EFF8] mb-2">
+          <label htmlFor="login-email" className="block text-sm font-semibold text-[#F5EFF8] mb-2">
             Adresse email
           </label>
           <input
+            id="login-email"
             type="email"
+            autoComplete="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -58,17 +75,42 @@ function LoginForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-[#F5EFF8] mb-2">
+          <label htmlFor="login-password" className="block text-sm font-semibold text-[#F5EFF8] mb-2">
             Mot de passe
           </label>
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-[#533D61] bg-[#311F3D] text-white placeholder:text-[#A798B2] rounded-xl px-4 py-3.5 text-base outline-none focus:border-[#FF701F] focus:ring-2 focus:ring-[#FF701F]/25 transition"
-            placeholder="••••••••"
-          />
+          <div className="relative">
+            <input
+              id="login-password"
+              type={showPassword ? 'text' : 'password'}
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full border border-[#533D61] bg-[#311F3D] text-white placeholder:text-[#A798B2] rounded-xl px-4 py-3.5 pr-12 text-base outline-none focus:border-[#FF701F] focus:ring-2 focus:ring-[#FF701F]/25 transition"
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((current) => !current)}
+              aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+              aria-pressed={showPassword}
+              className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-xl text-[#BFAFCB] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF701F]"
+            >
+              {showPassword ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" />
+                  <path d="M9.9 5.2A10.9 10.9 0 0 1 12 5c7 0 10 7 10 7a14 14 0 0 1-3.1 4.1" />
+                  <path d="M6.3 6.3A14.1 14.1 0 0 0 2 12s3 7 10 7a10.7 10.7 0 0 0 4.4-.9" />
+                  <path d="m3 3 18 18" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              )}
+            </button>
+          </div>
         </div>
 
         {loginMutation.isError && (
@@ -89,7 +131,7 @@ function LoginForm() {
       <p className="text-center text-sm text-[#BFAFCB] mt-7">
         Pas encore de compte ?{' '}
         <Link
-          href={redirect ? `/auth/register?redirect=${encodeURIComponent(redirect)}` : '/auth/register'}
+          href={redirect !== '/' ? `/auth/register?redirect=${encodeURIComponent(redirect)}` : '/auth/register'}
           className="text-[#FF8B48] font-semibold hover:underline"
         >
           Créer un compte
