@@ -19,6 +19,7 @@ interface Props {
   total: number;
   isLoading: boolean;
   isError: boolean;
+  isFetchNextPageError: boolean;
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
   sort: SortPreset;
@@ -34,6 +35,7 @@ export function SearchResults({
   total,
   isLoading,
   isError,
+  isFetchNextPageError,
   hasNextPage,
   isFetchingNextPage,
   sort,
@@ -84,7 +86,7 @@ export function SearchResults({
       </div>
 
       {/* Body */}
-      {isError ? (
+      {isError && events.length === 0 ? (
         <div className="text-center py-20">
           <p className="text-white/55 mb-4">Une erreur est survenue.</p>
           <button
@@ -130,16 +132,22 @@ export function SearchResults({
               </article>
             ))}
           </div>
-          {hasNextPage && (
+          {(hasNextPage || isFetchNextPageError) && (
             <div className="mt-12 text-center">
+              {isFetchNextPageError && (
+                <p role="alert" className="mb-4 text-sm text-white/70">
+                  Impossible de charger les événements suivants. Les événements déjà affichés sont conservés.
+                </p>
+              )}
               <button
                 type="button"
                 onClick={onLoadMore}
                 disabled={isFetchingNextPage}
+                aria-busy={isFetchingNextPage}
                 className="inline-flex items-center gap-2 border border-white/20 text-white/80 font-semibold py-3 px-8 rounded-lg hover:bg-white/10 disabled:opacity-50"
               >
-                {isFetchingNextPage && <Loader2 className="w-4 h-4 animate-spin" />}
-                {isFetchingNextPage ? 'Chargement…' : "Voir plus d'événements"}
+                {isFetchingNextPage && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
+                {isFetchingNextPage ? 'Chargement…' : isFetchNextPageError ? 'Réessayer le chargement' : "Voir plus d'événements"}
               </button>
             </div>
           )}
