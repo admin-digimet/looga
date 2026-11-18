@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { DynamicInfoPage } from '@/components/DynamicInfoPage';
+import { AboutInfoPage } from '@/components/AboutInfoPage';
 
 export const metadata: Metadata = {
   title: 'À propos — Looga',
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function AProposPage() {
   return (
-    <DynamicInfoPage
+    <AboutInfoPage
       pageKey="a-propos"
       fallbackTitle="Découvre ce qui se passe autour de toi"
       fallbackIntro="Looga est la plateforme qui te permet de découvrir, réserver et partager les meilleurs événements à Abidjan, en quelques secondes."
@@ -21,7 +21,7 @@ export default function AProposPage() {
                 Trouver une bonne sortie ne devrait pas être compliqué. Entre les événements dispersés, les informations difficiles à trouver et les réservations peu pratiques, sortir demande souvent plus d’effort que nécessaire.
               </p>
               <p className="mb-3">
-                <span className="font-medium text-ink">Looga simplifie tout.</span>
+                <span className="font-semibold text-white">Looga simplifie tout.</span>
               </p>
               <p>
                 Sur une seule plateforme, tu peux découvrir les événements autour de toi, réserver rapidement et partager avec tes amis.
@@ -64,7 +64,7 @@ export default function AProposPage() {
                 Looga aide les organisateurs à gagner en visibilité et à gérer leurs réservations simplement.
               </p>
               <p>
-                Crée ton événement, partage-le facilement et accède aux informations de tes participants en temps réel — directement depuis ton <a href="/organisateur" className="text-orange font-medium hover:underline">espace organisateur</a>.
+                Crée ton événement, partage-le facilement et accède aux informations de tes participants en temps réel — directement depuis ton <a href="/organisateur" className="text-[#ff791f] font-semibold hover:underline">espace organisateur</a>.
               </p>
             </>
           ),
@@ -79,13 +79,13 @@ export default function AProposPage() {
               <div className="flex flex-wrap gap-3">
                 <a
                   href="/"
-                  className="inline-block bg-orange text-white font-bold py-3 px-6 rounded-xl hover:opacity-90 transition-colors"
+                  className="inline-block bg-[#ff791f] text-[#180c21] font-bold py-3 px-6 rounded-xl hover:bg-[#ff944b] transition-colors"
                 >
                   Voir les événements
                 </a>
                 <a
                   href="/mobile"
-                  className="inline-block border border-gray-300 text-ink font-semibold py-3 px-6 rounded-xl hover:bg-gray-50 transition-colors"
+                  className="inline-block border border-white/25 text-white font-semibold py-3 px-6 rounded-xl hover:bg-white/10 transition-colors"
                 >
                   Télécharger l’application
                 </a>
