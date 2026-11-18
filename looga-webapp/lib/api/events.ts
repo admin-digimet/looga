@@ -114,7 +114,9 @@ function periodRange(preset: PeriodPreset | undefined): { gte?: string; lt?: str
       // Vendredi 18h → dimanche 23h59
       const friday = new Date(today);
       const day = today.getDay(); // 0=dim, 5=ven, 6=sam
-      const offset = day <= 5 ? 5 - day : 5 + (7 - day);
+      // Samedi et dimanche : conserver le week-end en cours.
+      // Du lundi au jeudi : cibler le vendredi à venir.
+      const offset = day === 0 ? -2 : day === 6 ? -1 : 5 - day;
       friday.setDate(today.getDate() + offset);
       const monday = new Date(friday);
       monday.setDate(friday.getDate() + 3);
