@@ -21,9 +21,9 @@ const POPULAR_CITIES = ['Abidjan', 'Grand-Bassam', 'Assinie'];
 const PERIOD_OPTIONS: { key: PeriodPreset; label: string }[] = [
   { key: 'all',     label: 'À tout moment' },
   { key: 'today',   label: "Aujourd'hui" },
-  { key: 'weekend', label: 'Ce week-end' },
+  { key: 'tonight', label: 'Ce soir' },
   { key: 'week',    label: 'Cette semaine' },
-  { key: 'month',   label: 'Ce mois-ci' },
+  { key: 'weekend', label: 'Ce week-end' },
 ];
 
 const PRICE_OPTIONS: { key: PricePreset; label: string }[] = [
