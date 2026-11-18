@@ -70,9 +70,9 @@ export function SearchFilters({
     CATEGORY_GROUPS.filter((group) => group.keys.some((key) => categories.includes(key))).length + cities.length + (period !== 'all' ? 1 : 0) + (price !== 'all' ? 1 : 0);
 
   return (
-    <aside className="bg-[#21132b] border border-white/10 rounded-2xl p-5 lg:sticky lg:top-24 w-full lg:w-[280px] shrink-0 max-h-[calc(100vh-7rem)] overflow-y-auto">
+    <aside className="bg-[#21132b] border border-white/10 rounded-2xl p-4 lg:p-5 lg:sticky lg:top-24 w-full lg:w-[280px] shrink-0 max-h-[calc(100vh-7rem)] overflow-y-auto [scrollbar-width:thin] [scrollbar-color:#5a386a_#21132b] [&::-webkit-scrollbar]:w-[5px] [&::-webkit-scrollbar-track]:bg-[#21132b] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#5a386a] hover:[&::-webkit-scrollbar-thumb]:bg-[#ff791f]">
       {/* Header */}
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex items-center justify-between mb-4">
         <h3 className="font-heading font-extrabold text-white text-lg">Filtres</h3>
         <div className="flex items-center gap-2">
           {activeCount > 0 && (
@@ -98,13 +98,13 @@ export function SearchFilters({
       </div>
 
       {/* Période */}
-      <section className="mb-6">
+      <section className="mb-4">
         <h4 className="text-xs font-bold uppercase tracking-wider text-white/50 mb-3">Période</h4>
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           {PERIOD_OPTIONS.map((opt) => (
             <label
               key={opt.key}
-              className="flex items-center gap-2.5 py-1.5 cursor-pointer group"
+              className="flex items-center gap-2.5 py-1 cursor-pointer group"
             >
               <input
                 type="radio"
@@ -120,13 +120,13 @@ export function SearchFilters({
       </section>
 
       {/* Prix */}
-      <section className="mb-6">
+      <section className="mb-4">
         <h4 className="text-xs font-bold uppercase tracking-wider text-white/50 mb-3">Prix</h4>
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           {PRICE_OPTIONS.map((opt) => (
             <label
               key={opt.key}
-              className="flex items-center gap-2.5 py-1.5 cursor-pointer group"
+              className="flex items-center gap-2.5 py-1 cursor-pointer group"
             >
               <input
                 type="radio"
@@ -142,7 +142,7 @@ export function SearchFilters({
       </section>
 
       {/* Catégories */}
-      <section className="mb-6">
+      <section className="mb-4">
         <h4 className="text-xs font-bold uppercase tracking-wider text-white/50 mb-3">
           Catégories {categories.length > 0 && <span className="text-orange">({CATEGORY_GROUPS.filter((group) => group.keys.some((key) => categories.includes(key))).length})</span>}
         </h4>
@@ -151,7 +151,7 @@ export function SearchFilters({
             const selected = group.keys.every((key) => categories.includes(key));
             const partiallySelected = !selected && group.keys.some((key) => categories.includes(key));
             return (
-              <label key={group.label} className="flex items-center gap-2.5 py-2 cursor-pointer group">
+              <label key={group.label} className="flex items-center gap-2.5 py-1.5 cursor-pointer group">
                 <input
                   type="checkbox"
                   checked={selected}
