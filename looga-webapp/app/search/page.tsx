@@ -1,4 +1,5 @@
 'use client';
+import { PublicHeader } from '@/components/PublicHeader';
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -35,7 +36,6 @@ function SearchPageContent() {
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchInput, setSearchInput] = useState(q);
-  const [menuOpen, setMenuOpen] = useState(false);
   const { isAuthenticated, isLoading: authLoading } = useAuthStore();
   useEffect(() => setSearchInput(q), [q]);
 
@@ -110,21 +110,7 @@ function SearchPageContent() {
 
   return (
     <div className="min-h-screen bg-[#14091f] text-white flex flex-col">
-      <header className="sticky top-0 z-40 border-b border-white/10 bg-[#14091f]/95 backdrop-blur-xl">
-        <div className="mx-auto flex h-[74px] max-w-[1400px] items-center justify-between gap-4 px-4 md:px-8">
-          <Link href="/" className="font-heading text-3xl font-extrabold tracking-tight text-[#ff791f]">looga.</Link>
-          <nav className="hidden items-center gap-8 text-sm font-semibold md:flex">
-            <Link href="/search" className="hover:text-[#ff791f]">Explorer</Link>
-            <Link href="/search" className="hover:text-[#ff791f]">Événements</Link>
-            <Link href="/organisateur" className="hover:text-[#ff791f]">Organisateurs</Link>
-          </nav>
-          <div className="flex items-center gap-3">
-            {authLoading ? <div className="h-9 w-9 animate-pulse rounded-full bg-white/10" /> : isAuthenticated ? <ProfileMenu /> : <Link href="/auth/login" aria-label="Se connecter" className="rounded-full bg-white/10 p-2.5 hover:bg-white/20"><UserRound className="h-5 w-5" /></Link>}
-            <button type="button" className="rounded-full p-2 md:hidden" onClick={() => setMenuOpen(!menuOpen)} aria-label="Menu" aria-expanded={menuOpen}><Menu className="h-6 w-6" /></button>
-          </div>
-        </div>
-        {menuOpen && <nav className="flex flex-col gap-4 border-t border-white/10 px-6 py-5 text-sm md:hidden"><Link href="/" onClick={() => setMenuOpen(false)}>Accueil</Link><Link href="/search" onClick={() => setMenuOpen(false)}>Explorer les événements</Link><Link href="/organisateur" onClick={() => setMenuOpen(false)}>Créer un événement</Link></nav>}
-      </header>
+      <PublicHeader />
       <main className="mx-auto w-full max-w-[1400px] flex-1 px-4 pb-20 pt-10 md:px-8 md:pt-14">
         <div className="mb-9">
           <p className="mb-3 text-xs font-bold uppercase tracking-[.25em] text-[#ff791f]">Découvre Abidjan</p>
