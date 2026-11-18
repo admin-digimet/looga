@@ -12,8 +12,8 @@ import {
   CheckCircle2,
   MessageCircle,
 } from 'lucide-react';
-import { Navbar } from '@/components/Navbar';
-import { Footer } from '@/components/Footer';
+import { PublicHeader } from '@/components/PublicHeader';
+import { AboutFooter } from '@/components/AboutFooter';
 import { DASHBOARD_URL } from '@/lib/constants';
 
 export const metadata: Metadata = {
@@ -119,14 +119,14 @@ const faq = [
 
 export default function OrganisateurPage() {
   return (
-    <div className="min-h-screen bg-cream font-sans">
-      <Navbar />
+    <div className="min-h-screen bg-[#13091e] font-sans text-white">
+      <PublicHeader />
       <main>
         {/* Hero */}
         <section className="relative overflow-hidden">
           <div
-            className="absolute inset-0 opacity-95"
-            style={{ background: 'linear-gradient(135deg, #FF5C1A 0%, #6B3FA0 100%)' }}
+            className="absolute inset-0"
+            style={{ background: 'radial-gradient(ellipse at 12% 30%, #74351f 0%, #311c3d 45%, #12091d 100%)' }}
           />
           <div className="relative max-w-[1400px] mx-auto px-4 md:px-8 py-20 md:py-28">
             <span className="inline-block px-4 py-1 rounded-full bg-white/15 text-white text-xs font-semibold tracking-wider mb-6">
@@ -144,7 +144,7 @@ export default function OrganisateurPage() {
                 href={DASHBOARD_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-white text-ink font-bold py-4 px-8 rounded-full hover:bg-cream-2 transition-colors"
+                className="inline-flex items-center gap-2 bg-[#ff791f] text-white font-bold py-4 px-8 rounded-full hover:opacity-90 transition-colors"
               >
                 Commencer
                 <ArrowRight className="w-5 h-5" />
@@ -161,10 +161,10 @@ export default function OrganisateurPage() {
 
         {/* Comment ça marche — Créer un événement */}
         <section className="max-w-[1400px] mx-auto px-4 md:px-8 py-20">
-          <h2 className="font-heading font-extrabold text-ink text-3xl md:text-4xl mb-2">
+          <h2 className="font-heading font-extrabold text-white text-3xl md:text-4xl mb-2">
             Simple, rapide, efficace
           </h2>
-          <p className="text-ink-muted text-lg mb-12 max-w-2xl">
+          <p className="text-[#c9bed1] text-lg mb-12 max-w-2xl">
             Créer un événement sur Looga ne prend que quelques minutes. Vous renseignez les informations essentielles et votre événement est immédiatement visible par les utilisateurs.
           </p>
 
@@ -197,16 +197,16 @@ export default function OrganisateurPage() {
             ].map((card) => {
               const Icon = card.icon;
               return (
-                <div key={card.step} className="bg-white rounded-2xl p-6 border border-cream-2">
+                <div key={card.step} className="bg-[#25152f] rounded-2xl p-6 border border-white/10">
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-orange font-heading font-extrabold text-3xl">{card.step}</span>
-                    <Icon className="w-5 h-5 text-orange" />
+                    <span className="text-[#ff791f] font-heading font-extrabold text-3xl">{card.step}</span>
+                    <Icon className="w-5 h-5 text-[#ff791f]" />
                   </div>
-                  <h3 className="font-heading font-bold text-ink text-lg mb-3">{card.title}</h3>
-                  <ul className="space-y-1.5 text-sm text-ink-muted">
+                  <h3 className="font-heading font-bold text-white text-lg mb-3">{card.title}</h3>
+                  <ul className="space-y-1.5 text-sm text-[#c9bed1]">
                     {card.items.map((item) => (
                       <li key={item} className="flex items-start gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-orange shrink-0 mt-0.5" />
+                        <CheckCircle2 className="w-4 h-4 text-[#ff791f] shrink-0 mt-0.5" />
                         <span>{item}</span>
                       </li>
                     ))}
@@ -219,10 +219,10 @@ export default function OrganisateurPage() {
 
         {/* Atouts (existant gardé) */}
         <section className="max-w-[1400px] mx-auto px-4 md:px-8 pb-20">
-          <h2 className="font-heading font-extrabold text-ink text-3xl md:text-4xl mb-2">
+          <h2 className="font-heading font-extrabold text-white text-3xl md:text-4xl mb-2">
             Tout ce qu’il vous faut. Rien de plus.
           </h2>
-          <p className="text-ink-muted text-lg mb-12">
+          <p className="text-[#c9bed1] text-lg mb-12">
             Conçu pour les organisateurs en Côte d’Ivoire.
           </p>
 
@@ -232,13 +232,13 @@ export default function OrganisateurPage() {
               return (
                 <div
                   key={atout.title}
-                  className="bg-white rounded-2xl p-8 border border-cream-2 hover:shadow-md transition-shadow"
+                  className="bg-[#25152f] rounded-2xl p-8 border border-white/10 hover:shadow-md transition-shadow"
                 >
-                  <div className="w-12 h-12 rounded-full bg-orange/10 flex items-center justify-center mb-5">
-                    <Icon className="w-6 h-6 text-orange" />
+                  <div className="w-12 h-12 rounded-full bg-[#ff791f]/10 flex items-center justify-center mb-5">
+                    <Icon className="w-6 h-6 text-[#ff791f]" />
                   </div>
-                  <h3 className="font-heading font-bold text-ink text-xl mb-3">{atout.title}</h3>
-                  <p className="text-ink-muted text-sm leading-relaxed">{atout.description}</p>
+                  <h3 className="font-heading font-bold text-white text-xl mb-3">{atout.title}</h3>
+                  <p className="text-[#c9bed1] text-sm leading-relaxed">{atout.description}</p>
                 </div>
               );
             })}
@@ -246,35 +246,35 @@ export default function OrganisateurPage() {
         </section>
 
         {/* TARIFS */}
-        <section id="tarifs" className="bg-white py-20 scroll-mt-20">
+        <section id="tarifs" className="bg-[#1a1024] py-20 scroll-mt-20">
           <div className="max-w-[1400px] mx-auto px-4 md:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
               <div>
-                <span className="inline-block px-3 py-1 rounded-full bg-orange/10 text-orange text-xs font-bold tracking-wider mb-4">
+                <span className="inline-block px-3 py-1 rounded-full bg-[#ff791f]/10 text-[#ff791f] text-xs font-bold tracking-wider mb-4">
                   TARIFS
                 </span>
-                <h2 className="font-heading font-extrabold text-ink text-3xl md:text-4xl mb-4">
+                <h2 className="font-heading font-extrabold text-white text-3xl md:text-4xl mb-4">
                   Une commission claire et transparente
                 </h2>
                 <div className="flex items-baseline gap-3 mb-6">
-                  <span className="font-heading font-extrabold text-orange text-6xl">8 %</span>
-                  <span className="text-ink-muted text-lg">par billet vendu</span>
+                  <span className="font-heading font-extrabold text-[#ff791f] text-6xl">8 %</span>
+                  <span className="text-[#c9bed1] text-lg">par billet vendu</span>
                 </div>
-                <ul className="space-y-2.5 text-ink-muted mb-8">
+                <ul className="space-y-2.5 text-[#c9bed1] mb-8">
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-orange shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-5 h-5 text-[#ff791f] shrink-0 mt-0.5" />
                     <span>Aucun abonnement obligatoire</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-orange shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-5 h-5 text-[#ff791f] shrink-0 mt-0.5" />
                     <span>Aucun frais caché</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-orange shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-5 h-5 text-[#ff791f] shrink-0 mt-0.5" />
                     <span>Vous ne payez que lorsque vous vendez</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-orange shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-5 h-5 text-[#ff791f] shrink-0 mt-0.5" />
                     <span>Reversement à la demande</span>
                   </li>
                 </ul>
@@ -282,26 +282,26 @@ export default function OrganisateurPage() {
                   href={DASHBOARD_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-orange text-white font-bold py-3.5 px-7 rounded-xl hover:opacity-90 transition-opacity"
+                  className="inline-flex items-center gap-2 bg-[#ff791f] text-white font-bold py-3.5 px-7 rounded-xl hover:opacity-90 transition-opacity"
                 >
                   Créer un événement
                   <ArrowRight className="w-5 h-5" />
                 </Link>
               </div>
 
-              <div className="bg-cream rounded-2xl p-8 border border-cream-2">
-                <h3 className="font-heading font-bold text-ink text-xl mb-5">
+              <div className="bg-[#25152f] rounded-2xl p-8 border border-white/10">
+                <h3 className="font-heading font-bold text-white text-xl mb-5">
                   Tout est inclus dans la commission
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {inclus.map((feature) => (
-                    <div key={feature} className="flex items-start gap-2 text-sm text-ink">
-                      <CheckCircle2 className="w-4 h-4 text-orange shrink-0 mt-0.5" />
+                    <div key={feature} className="flex items-start gap-2 text-sm text-white">
+                      <CheckCircle2 className="w-4 h-4 text-[#ff791f] shrink-0 mt-0.5" />
                       <span>{feature}</span>
                     </div>
                   ))}
                 </div>
-                <p className="text-ink-muted text-xs mt-6">
+                <p className="text-[#c9bed1] text-xs mt-6">
                   Plus qu’une simple billetterie : Looga permet aussi de gérer les réservations de tables, expériences et événements privés.
                 </p>
               </div>
@@ -311,13 +311,13 @@ export default function OrganisateurPage() {
 
         {/* GUIDES */}
         <section id="guides" className="max-w-[1400px] mx-auto px-4 md:px-8 py-20 scroll-mt-20">
-          <span className="inline-block px-3 py-1 rounded-full bg-orange/10 text-orange text-xs font-bold tracking-wider mb-4">
+          <span className="inline-block px-3 py-1 rounded-full bg-[#ff791f]/10 text-[#ff791f] text-xs font-bold tracking-wider mb-4">
             GUIDES ORGANISATEURS
           </span>
-          <h2 className="font-heading font-extrabold text-ink text-3xl md:text-4xl mb-2">
+          <h2 className="font-heading font-extrabold text-white text-3xl md:text-4xl mb-2">
             Tout ce qu’il faut pour réussir vos événements
           </h2>
-          <p className="text-ink-muted text-lg mb-12 max-w-2xl">
+          <p className="text-[#c9bed1] text-lg mb-12 max-w-2xl">
             Organiser un événement demande plus que publier une affiche. Looga met à disposition des conseils pratiques pour aider les organisateurs à mieux gérer leurs événements, améliorer l’expérience des participants et augmenter leurs ventes.
           </p>
 
@@ -325,12 +325,12 @@ export default function OrganisateurPage() {
             {guides.map((guide) => {
               const Icon = guide.icon;
               return (
-                <div key={guide.title} className="bg-white rounded-2xl p-6 border border-cream-2">
-                  <div className="w-10 h-10 rounded-full bg-orange/10 flex items-center justify-center mb-4">
-                    <Icon className="w-5 h-5 text-orange" />
+                <div key={guide.title} className="bg-[#25152f] rounded-2xl p-6 border border-white/10">
+                  <div className="w-10 h-10 rounded-full bg-[#ff791f]/10 flex items-center justify-center mb-4">
+                    <Icon className="w-5 h-5 text-[#ff791f]" />
                   </div>
-                  <h3 className="font-heading font-bold text-ink text-lg mb-3">{guide.title}</h3>
-                  <ul className="space-y-1.5 text-sm text-ink-muted">
+                  <h3 className="font-heading font-bold text-white text-lg mb-3">{guide.title}</h3>
+                  <ul className="space-y-1.5 text-sm text-[#c9bed1]">
                     {guide.items.map((item) => (
                       <li key={item}>• {item}</li>
                     ))}
@@ -340,9 +340,9 @@ export default function OrganisateurPage() {
             })}
           </div>
 
-          <div className="mt-10 bg-ink/95 rounded-2xl p-8 text-white">
+          <div className="mt-10 bg-[#25152f] rounded-2xl p-8 text-white">
             <div className="flex items-start gap-4">
-              <MessageCircle className="w-8 h-8 text-orange shrink-0" />
+              <MessageCircle className="w-8 h-8 text-[#ff791f] shrink-0" />
               <div className="flex-1">
                 <h3 className="font-heading font-bold text-xl mb-2">Une équipe disponible pour vous aider</h3>
                 <p className="text-white/70 text-sm mb-4">
@@ -350,7 +350,7 @@ export default function OrganisateurPage() {
                 </p>
                 <Link
                   href="/contact"
-                  className="inline-flex items-center gap-2 bg-orange text-white font-bold py-2.5 px-5 rounded-lg hover:opacity-90 transition-opacity text-sm"
+                  className="inline-flex items-center gap-2 bg-[#ff791f] text-white font-bold py-2.5 px-5 rounded-lg hover:opacity-90 transition-opacity text-sm"
                 >
                   Contacter l’équipe
                   <ArrowRight className="w-4 h-4" />
@@ -361,22 +361,22 @@ export default function OrganisateurPage() {
         </section>
 
         {/* FAQ */}
-        <section className="bg-white py-20">
+        <section className="bg-[#1a1024] py-20">
           <div className="max-w-[900px] mx-auto px-4 md:px-8">
-            <h2 className="font-heading font-extrabold text-ink text-3xl md:text-4xl mb-10 text-center">
+            <h2 className="font-heading font-extrabold text-white text-3xl md:text-4xl mb-10 text-center">
               Questions fréquentes
             </h2>
             <div className="space-y-4">
               {faq.map((item) => (
                 <details
                   key={item.q}
-                  className="group bg-cream rounded-xl border border-cream-2 overflow-hidden"
+                  className="group bg-[#25152f] rounded-xl border border-white/10 overflow-hidden"
                 >
-                  <summary className="cursor-pointer list-none p-5 flex items-center justify-between font-heading font-bold text-ink hover:bg-cream-2 transition-colors">
+                  <summary className="cursor-pointer list-none p-5 flex items-center justify-between font-heading font-bold text-white hover:bg-white/5 transition-colors">
                     <span>{item.q}</span>
-                    <span className="text-orange text-2xl transition-transform group-open:rotate-45">+</span>
+                    <span className="text-[#ff791f] text-2xl transition-transform group-open:rotate-45">+</span>
                   </summary>
-                  <div className="px-5 pb-5 text-ink-muted text-sm">{item.a}</div>
+                  <div className="px-5 pb-5 text-[#c9bed1] text-sm">{item.a}</div>
                 </details>
               ))}
             </div>
@@ -385,7 +385,7 @@ export default function OrganisateurPage() {
 
         {/* CTA bottom */}
         <section className="max-w-[1400px] mx-auto px-4 md:px-8 pb-24 pt-20">
-          <div className="rounded-3xl bg-ink text-white p-10 md:p-16 text-center">
+          <div className="rounded-3xl border border-white/10 bg-[#25152f] text-white p-10 md:p-16 text-center">
             <h2 className="font-heading font-extrabold text-3xl md:text-4xl mb-4">
               Prêt à organiser votre prochain événement ?
             </h2>
@@ -397,7 +397,7 @@ export default function OrganisateurPage() {
                 href={DASHBOARD_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-orange text-white font-bold py-4 px-8 rounded-full hover:opacity-90 transition-opacity"
+                className="inline-flex items-center gap-2 bg-[#ff791f] text-white font-bold py-4 px-8 rounded-full hover:opacity-90 transition-opacity"
               >
                 Créer un événement
                 <ArrowRight className="w-5 h-5" />
@@ -412,7 +412,7 @@ export default function OrganisateurPage() {
           </div>
         </section>
       </main>
-      <Footer />
+      <AboutFooter />
     </div>
   );
 }
