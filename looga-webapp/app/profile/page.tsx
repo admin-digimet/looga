@@ -4,15 +4,13 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Mail, Phone, User as UserIcon, Pencil, X, Check, Camera } from 'lucide-react';
 import axios from 'axios';
-import { Navbar } from '@/components/Navbar';
-import { Footer } from '@/components/Footer';
+import { PublicHeader } from '@/components/PublicHeader';
 import { useAuthStore } from '@/lib/store/authStore';
-import { apiClient } from '@/lib/api/client';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/constants';
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading, user, login, token, refreshToken, getFreshToken } = useAuthStore();
+  const { isAuthenticated, isLoading, user, login, refreshToken, getFreshToken } = useAuthStore();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ name: '', phone: '' });
   const [saving, setSaving] = useState(false);
@@ -32,6 +30,10 @@ export default function ProfilePage() {
   useEffect(() => {
     if (user) setForm({ name: user.name ?? '', phone: user.phone ?? '' });
   }, [user]);
+
+  useEffect(() => {
+    return () => { if (avatarPreview?.startsWith('blob:')) URL.revokeObjectURL(avatarPreview); };
+  }, [avatarPreview]);
 
   function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -100,6 +102,7 @@ export default function ProfilePage() {
       setSuccess(true);
       setEditing(false);
       setAvatarFile(null);
+      setAvatarPreview(null);
       setTimeout(() => setSuccess(false), 3000);
     } catch {
       setError('Impossible de sauvegarder. Réessaie dans un instant.');
@@ -119,12 +122,11 @@ export default function ProfilePage() {
 
   if (isLoading || !isAuthenticated) {
     return (
-      <div className="min-h-screen bg-cream font-sans">
-        <Navbar />
+      <div className="min-h-screen bg-[#13091E] text-white font-sans">
+        <PublicHeader />
         <main className="max-w-[1400px] mx-auto px-4 md:px-8 py-16">
-          <div className="h-32 bg-gray-200 rounded animate-pulse" />
+          <div className="h-32 bg-white/10 rounded-2xl animate-pulse" />
         </main>
-        <Footer />
       </div>
     );
   }
@@ -133,24 +135,24 @@ export default function ProfilePage() {
   const displayAvatar = avatarPreview ?? user?.avatar_url ?? null;
 
   return (
-    <div className="min-h-screen bg-cream font-sans">
-      <Navbar />
-      <main className="max-w-3xl mx-auto px-4 md:px-8 py-12">
-        <h1 className="font-heading font-extrabold text-ink text-3xl md:text-4xl mb-8">
+    <div className="min-h-screen bg-[#13091E] text-white font-sans">
+      <PublicHeader />
+      <main className="max-w-3xl mx-auto px-4 md:px-8 py-12 md:py-16">
+        <h1 className="font-heading font-extrabold text-white text-3xl md:text-4xl mb-8">
           Mon profil
         </h1>
 
         {success && (
-          <div className="mb-4 px-4 py-3 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm font-medium flex items-center gap-2">
+          <div className="mb-4 px-4 py-3 bg-emerald-950/60 border border-emerald-600/40 text-emerald-200 rounded-xl text-sm font-medium flex items-center gap-2">
             <Check className="w-4 h-4" /> Profil mis à jour avec succès.
           </div>
         )}
 
-        <div className="bg-white rounded-2xl border border-cream-2 p-6 md:p-8 mb-6">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-5">
+        <div className="bg-[#24152F] rounded-[28px] border border-[#493355] p-6 md:p-9 mb-6 shadow-[0_24px_80px_rgba(0,0,0,0.22)]">
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+            <div className="flex items-center gap-4 sm:gap-5 min-w-0">
               <div className="relative">
-                <div className="w-20 h-20 rounded-full overflow-hidden bg-orange flex items-center justify-center shrink-0">
+                <div className="w-20 h-20 rounded-full overflow-hidden bg-[#FF701F] flex items-center justify-center shrink-0">
                   {displayAvatar ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img src={displayAvatar} alt="Avatar" className="w-full h-full object-cover" />
@@ -163,7 +165,7 @@ export default function ProfilePage() {
                     <button
                       type="button"
                       onClick={() => fileRef.current?.click()}
-                      className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-orange border-2 border-white flex items-center justify-center hover:opacity-90 transition-opacity"
+                      className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-[#FF701F] border-2 border-[#24152F] flex items-center justify-center hover:opacity-90 transition-opacity"
                     >
                       <Camera className="w-3.5 h-3.5 text-white" />
                     </button>
@@ -178,15 +180,15 @@ export default function ProfilePage() {
                 )}
               </div>
               <div>
-                <p className="font-heading font-bold text-xl text-ink">{user?.name ?? '—'}</p>
-                <p className="text-sm text-ink-muted">Membre Looga</p>
+                <p className="font-heading font-bold text-xl text-white break-words">{user?.name ?? '—'}</p>
+                <p className="text-sm text-[#BFAFCB]">Membre Looga</p>
               </div>
             </div>
             {!editing && (
               <button
                 type="button"
                 onClick={() => setEditing(true)}
-                className="flex items-center gap-1.5 text-sm font-semibold text-orange hover:opacity-80 transition-opacity"
+                className="flex items-center gap-1.5 text-sm font-semibold text-[#FF873D] hover:opacity-80 transition-opacity"
               >
                 <Pencil className="w-4 h-4" />
                 Modifier
@@ -195,15 +197,15 @@ export default function ProfilePage() {
           </div>
 
           {editing ? (
-            <form onSubmit={handleSave} className="space-y-4 border-t border-cream-2 pt-6">
+            <form onSubmit={handleSave} className="space-y-4 border-t border-[#493355] pt-6">
               {error && (
-                <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{error}</p>
+                <p className="text-sm text-[#FFE1E4] bg-[#4C202B] border border-[#B55C68] rounded-xl px-4 py-3">{error}</p>
               )}
               <div>
-                <label className="block text-xs text-ink-muted uppercase tracking-wide mb-1.5">Nom complet</label>
+                <label className="block text-xs text-[#BFAFCB] uppercase tracking-wide mb-1.5">Nom complet</label>
                 <input
                   type="text"
-                  className="w-full border border-cream-2 rounded-xl px-4 py-3 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-orange/30 focus:border-orange"
+                  className="w-full border border-[#533D61] bg-[#311F3D] rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-[#FF701F] focus:ring-2 focus:ring-[#FF701F]/25 transition"
                   value={form.name}
                   onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
                   required
@@ -211,44 +213,44 @@ export default function ProfilePage() {
                 />
               </div>
               <div>
-                <label className="block text-xs text-ink-muted uppercase tracking-wide mb-1.5">Téléphone</label>
+                <label className="block text-xs text-[#BFAFCB] uppercase tracking-wide mb-1.5">Téléphone</label>
                 <input
                   type="tel"
-                  className="w-full border border-cream-2 rounded-xl px-4 py-3 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-orange/30 focus:border-orange"
+                  className="w-full border border-[#533D61] bg-[#311F3D] rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-[#FF701F] focus:ring-2 focus:ring-[#FF701F]/25 transition"
                   value={form.phone}
                   onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
                   placeholder="+225 07 00 00 00 00"
                 />
               </div>
               <div>
-                <label className="block text-xs text-ink-muted uppercase tracking-wide mb-1.5">Email</label>
+                <label className="block text-xs text-[#BFAFCB] uppercase tracking-wide mb-1.5">Email</label>
                 <input
                   type="email"
-                  className="w-full border border-cream-2 rounded-xl px-4 py-3 text-sm text-ink-muted bg-gray-50 cursor-not-allowed"
+                  className="w-full border border-[#533D61] rounded-xl px-4 py-3 text-sm text-[#BFAFCB] bg-[#1C1126] cursor-not-allowed"
                   value={user?.email ?? ''}
                   disabled
                 />
-                <p className="text-xs text-ink-muted mt-1">L&apos;email ne peut pas être modifié.</p>
+                <p className="text-xs text-[#BFAFCB] mt-1">L&apos;email ne peut pas être modifié.</p>
               </div>
-              <div className="flex gap-3 pt-2">
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex-1 bg-orange text-white font-bold py-3 px-6 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-60 text-sm"
+                  className="flex-1 bg-[#FF701F] text-[#1A0D20] font-bold py-3 px-6 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-60 text-sm"
                 >
                   {saving ? 'Enregistrement…' : 'Enregistrer'}
                 </button>
                 <button
                   type="button"
                   onClick={cancelEdit}
-                  className="flex items-center gap-1.5 border border-cream-2 text-ink font-semibold py-3 px-5 rounded-xl hover:bg-gray-50 transition-colors text-sm"
+                  className="flex items-center gap-1.5 border border-[#60486E] text-white font-semibold py-3 px-5 rounded-xl hover:bg-white/10 transition-colors text-sm"
                 >
                   <X className="w-4 h-4" /> Annuler
                 </button>
               </div>
             </form>
           ) : (
-            <div className="space-y-4 border-t border-cream-2 pt-6">
+            <div className="space-y-4 border-t border-[#493355] pt-6">
               <Field icon={UserIcon} label="Nom complet" value={user?.name} />
               <Field icon={Mail} label="Email" value={user?.email} />
               <Field icon={Phone} label="Téléphone" value={user?.phone} />
@@ -256,7 +258,6 @@ export default function ProfilePage() {
           )}
         </div>
       </main>
-      <Footer />
     </div>
   );
 }
@@ -269,13 +270,13 @@ interface FieldProps {
 
 function Field({ icon: Icon, label, value }: FieldProps) {
   return (
-    <div className="flex items-center gap-4">
-      <div className="w-10 h-10 rounded-full bg-orange/10 flex items-center justify-center shrink-0">
-        <Icon className="w-4 h-4 text-orange" />
+    <div className="flex items-center gap-4 min-w-0">
+      <div className="w-10 h-10 rounded-full bg-[#38243F] flex items-center justify-center shrink-0">
+        <Icon className="w-4 h-4 text-[#FF701F]" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-xs text-ink-muted uppercase tracking-wide">{label}</p>
-        <p className="text-sm font-medium text-ink truncate">{value || '—'}</p>
+        <p className="text-xs text-[#BFAFCB] uppercase tracking-wide">{label}</p>
+        <p className="text-sm font-medium text-white break-words">{value || '—'}</p>
       </div>
     </div>
   );
