@@ -37,7 +37,7 @@ export function AboutInfoPage({ pageKey, fallbackTitle, fallbackIntro, fallbackS
     <div className="flex min-h-screen flex-col bg-[#13091e] font-sans text-white">
       <PublicHeader />
       <section className="relative isolate overflow-hidden border-b border-white/10">
-        <div className="absolute inset-0 bg-[linear-gradient(120deg,#ff701f_0%,#a14d80_48%,#42215b_100%)] opacity-90" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_12%_30%,#74351f_0%,#311c3d_45%,#12091d_100%)]" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#13091e]/35 to-transparent" />
         <div className="relative mx-auto max-w-[1100px] px-5 py-16 sm:px-8 md:py-24">
           <p className="mb-4 text-sm font-bold uppercase tracking-[0.18em] text-white/85">À propos de Looga</p>
