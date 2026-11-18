@@ -1,69 +1,60 @@
 import Link from 'next/link';
-import { Globe, ChevronDown } from 'lucide-react';
+import { CATEGORY_GROUPS } from '@/components/search/SearchFilters';
 
-export function Footer() {
+const CATEGORIES = CATEGORY_GROUPS.map(group => ({ label: group.label, slugs: group.keys }));
+
+export function AboutFooter() {
   return (
-    <footer className="bg-[#1A1A1A] text-white pt-16 pb-8">
-      <div className="max-w-[1400px] mx-auto px-4 md:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-          <div>
-            <h4 className="font-semibold text-lg mb-4">Utiliser Looga</h4>
-            <ul className="space-y-3 text-sm text-gray-300">
-              <li><Link href="/organisateur" className="hover:text-white">Créer un événement</Link></li>
-              <li><Link href="/organisateur#tarifs" className="hover:text-white">Tarifs</Link></li>
-              <li><Link href="/mobile" className="hover:text-white">Application mobile</Link></li>
-              <li><Link href="/organisateur#guides" className="hover:text-white">Guides organisateurs</Link></li>
-              <li><Link href="/securite" className="hover:text-white">Sécurité</Link></li>
-              <li><Link href="/communaute" className="hover:text-white">Règles de la communauté</Link></li>
-            </ul>
+      <footer className="mx-auto max-w-[1400px] px-4 pb-5 md:px-9 md:pb-9" aria-label="Pied de page Looga">
+        <div className="rounded-[22px] bg-[#0e0e10] px-5 py-6 text-white md:px-8 md:py-7">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#39363e] pb-7">
+            <Link href="/" className="font-heading text-[30px] font-extrabold tracking-[-1px] text-[#ff791f]">looga.</Link>
+            <span className="text-sm text-[#bcb8c0]">La ville est à toi.</span>
           </div>
-          <div>
-            <h4 className="font-semibold text-lg mb-4">Planifier des événements</h4>
-            <ul className="space-y-3 text-sm text-gray-300">
-              <li><Link href="/organisateur" className="hover:text-white">Vente de billets en ligne</Link></li>
-              <li><Link href="/organisateur" className="hover:text-white">Logiciel de billetterie</Link></li>
-              <li><Link href="/organisateur" className="hover:text-white">Système de paiement</Link></li>
-              <li><Link href="/organisateur" className="hover:text-white">Marketing événementiel</Link></li>
-              <li><Link href="/organisateur" className="hover:text-white">Outils de promotion</Link></li>
-            </ul>
+          <div className="grid grid-cols-1 gap-6 py-6 sm:grid-cols-3 sm:gap-9 sm:py-8 md:gap-12">
+            <div>
+              <h2 className="mb-3 text-base font-bold">Découvrir</h2>
+              <ul className="space-y-2 sm:space-y-3 text-sm text-[#c6c1c9]">
+                <li><Link href="/search" className="hover:text-[#ff791f]">Tous les événements</Link></li>
+                {CATEGORIES.map((category) => (
+                  <li key={category.label}>
+                    <Link href={`/search?categories=${category.slugs.join(',')}`} className="hover:text-[#ff791f]">
+                      {category.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h2 className="mb-3 text-base font-bold">Looga</h2>
+              <ul className="space-y-2 sm:space-y-3 text-sm text-[#c6c1c9]">
+                <li><Link href="/a-propos" className="hover:text-[#ff791f]">À propos</Link></li>
+                <li><Link href="/organisateur" className="hover:text-[#ff791f]">Créer un événement</Link></li>
+                <li><Link href="/aide" className="hover:text-[#ff791f]">Centre d&apos;aide</Link></li>
+                <li><Link href="/contact" className="hover:text-[#ff791f]">Contact</Link></li>
+                <li><Link href="/mobile" className="hover:text-[#ff791f]">Application mobile</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h2 className="mb-3 text-base font-bold">Informations</h2>
+              <ul className="space-y-2 sm:space-y-3 text-sm text-[#c6c1c9]">
+                <li><Link href="/cgu" className="hover:text-[#ff791f]">Conditions générales d&apos;utilisation</Link></li>
+                <li><Link href="/confidentialite" className="hover:text-[#ff791f]">Politique de confidentialité</Link></li>
+                <li><Link href="/securite" className="hover:text-[#ff791f]">Sécurité</Link></li>
+                <li><Link href="/communaute" className="hover:text-[#ff791f]">Règles d&apos;utilisation</Link></li>
+              </ul>
+            </div>
           </div>
-          <div>
-            <h4 className="font-semibold text-lg mb-4">Trouver des événements</h4>
-            <ul className="space-y-3 text-sm text-gray-300">
-              <li><Link href="/" className="hover:text-white">Événements en ligne</Link></li>
-              <li><Link href="/" className="hover:text-white">Concerts & Festivals</Link></li>
-              <li><Link href="/" className="hover:text-white">Classes & Ateliers</Link></li>
-              <li><Link href="/" className="hover:text-white">Événements sportifs</Link></li>
-              <li><Link href="/" className="hover:text-white">Salons professionnels</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold text-lg mb-4">Connectons-nous</h4>
-            <ul className="space-y-3 text-sm text-gray-300">
-              <li><Link href="/aide" className="hover:text-white">Centre d&apos;aide</Link></li>
-              <li><Link href="/contact" className="hover:text-white">Contactez-nous</Link></li>
-              <li><Link href="/communaute" className="hover:text-white">Communauté</Link></li>
-              <li><Link href="/a-propos" className="hover:text-white">À propos de Looga</Link></li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-gray-700 text-xs text-gray-400">
-          <p>© 2026 Looga</p>
-          <div className="flex flex-wrap gap-4 mt-4 md:mt-0">
-            <Link href="/a-propos" className="hover:text-white">À propos</Link>
-            <Link href="/aide" className="hover:text-white">Aide</Link>
-            <Link href="/carrieres" className="hover:text-white">Carrières</Link>
-            <Link href="/cgu" className="hover:text-white">Conditions</Link>
-            <Link href="/confidentialite" className="hover:text-white">Confidentialité</Link>
-          </div>
-          <div className="mt-4 md:mt-0 flex items-center gap-1 cursor-pointer hover:text-white">
-            <Globe className="w-4 h-4" />
-            <span>Côte d&apos;Ivoire</span>
-            <ChevronDown className="w-3 h-3" />
+          <div className="flex flex-col gap-3 border-t border-[#39363e] pt-5 sm:pt-7 text-sm text-[#a8a3ad] sm:flex-row sm:items-center sm:justify-between">
+            <span>© 2026 Looga</span>
+            <div className="flex items-center gap-5">
+              <span aria-label="Instagram" title="Instagram"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="18" cy="6" r="1" fill="currentColor" stroke="none"/></svg></span>
+              <span aria-label="Facebook" title="Facebook"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 22v-9h3l.5-4h-3.5V6.5c0-1.1.4-1.5 1.5-1.5H17V1.4A23 23 0 0 0 14.2 1C11.3 1 9.5 2.8 9.5 6v3H7v4h2.5v9z"/></svg></span>
+              <span>Côte d&apos;Ivoire</span>
+            </div>
           </div>
         </div>
-      </div>
-    </footer>
+      </footer>
   );
 }
+
