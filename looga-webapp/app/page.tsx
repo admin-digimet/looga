@@ -1,4 +1,5 @@
 'use client';
+import { PublicHeader } from '@/components/PublicHeader';
 
 import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
@@ -39,7 +40,6 @@ export default function HomePage() {
   const router = useRouter();
   const { isAuthenticated, isLoading: authLoading } = useAuthStore();
   const [search, setSearch] = useState('');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Tous');
   const [page, setPage] = useState(1);
 
@@ -72,23 +72,7 @@ export default function HomePage() {
   }
   return (
     <div className="min-h-screen bg-[#13091e] text-white font-sans">
-      <header className="relative z-30 border-b border-white/10 bg-[#13091e]">
-        <div className="mx-auto max-w-[1400px] px-5 md:px-9 h-[76px] flex items-center justify-between gap-5">
-          <Link href="/" className="font-heading font-extrabold text-[30px] tracking-[-2px] text-[#ff791f]">looga.</Link>
-          <nav className="hidden md:flex items-center gap-9 text-sm font-semibold">
-            <Link href="/search" className="text-white hover:text-[#ff791f]">Explorer</Link>
-            <Link href="#events-section" className="text-white/75 hover:text-white">Événements</Link>
-            <Link href="/organisateur" className="text-white/75 hover:text-white">Organisateurs</Link>
-          </nav>
-          <div className="flex items-center gap-4">
-            <Link href="/search" aria-label="Rechercher" className="hover:text-[#ff791f]"><Search size={23}/></Link>
-            <Link href="/search?cities=Abidjan" className="hidden sm:flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm">Abidjan <MapPin size={15}/></Link>
-            {authLoading ? <span className="h-9 w-9 rounded-full bg-white/10 animate-pulse" /> : isAuthenticated ? <ProfileMenu /> : <Link href="/auth/login" aria-label="Se connecter" className="rounded-full bg-white/10 p-2"><UserRound size={22}/></Link>}
-            <button className="md:hidden" aria-label="Ouvrir le menu" aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}><Menu size={25}/></button>
-          </div>
-        </div>
-        {mobileMenuOpen && <nav className="md:hidden flex flex-col gap-4 border-t border-white/10 px-6 py-5 text-sm"><Link href="/search">Explorer</Link><Link href="#events-section" onClick={() => setMobileMenuOpen(false)}>Événements</Link><Link href="/organisateur">Organisateurs</Link></nav>}
-      </header>
+      <PublicHeader />
       <main>
         <section className="relative isolate overflow-hidden min-h-[430px] md:min-h-[610px]">
           <div className="absolute inset-0 bg-cover bg-center scale-[1.02]" style={{backgroundImage: "url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1800&q=85')"}} />
