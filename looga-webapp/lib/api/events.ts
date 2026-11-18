@@ -85,7 +85,7 @@ export async function getSimilarEvents(params: {
 }
 
 export type PricePreset = 'all' | 'free' | 'paid';
-export type PeriodPreset = 'all' | 'today' | 'weekend' | 'week' | 'month';
+export type PeriodPreset = 'all' | 'today' | 'tonight' | 'weekend' | 'week' | 'month';
 export type SortPreset = 'date_asc' | 'date_desc' | 'price_asc' | 'price_desc';
 
 export interface SearchEventsParams {
@@ -102,6 +102,13 @@ export interface SearchEventsParams {
 function periodRange(preset: PeriodPreset | undefined): { gte?: string; lt?: string } {
   if (!preset || preset === 'all') return {};
   const now = new Date();
+  // 'Ce soir' utilise la date d'Abidjan (UTC+0), même si le visiteur est à l'étranger.
+  if (preset === 'tonight') {
+    const abidjanDate = now.toISOString().slice(0, 10);
+    const tomorrow = new Date(`${abidjanDate}T00:00:00.000Z`);
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+    return { gte: abidjanDate, lt: tomorrow.toISOString().slice(0, 10) };
+  }
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const isoDate = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   switch (preset) {
@@ -182,6 +189,8 @@ export async function searchEvents(params: SearchEventsParams): Promise<Paginate
   const range = periodRange(period);
   if (range.gte) search.append('event_date', `gte.${range.gte}`);
   if (range.lt) search.append('event_date', `lt.${range.lt}`);
+  // Contrairement à 'Aujourd’hui', 'Ce soir' commence à 18 h.
+  if (period === 'tonight') search.set('event_time', 'gte.18:00:00');
 
   const order =
     sort === 'date_desc' ? 'event_date.desc'
