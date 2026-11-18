@@ -192,11 +192,12 @@ export async function searchEvents(params: SearchEventsParams): Promise<Paginate
   }
   if (andGroups.length) search.set('and', `(${andGroups.join(',')})`);
 
+  // Trier aussi par heure, puis par identifiant pour stabiliser la pagination.
   const order =
-    sort === 'date_desc' ? 'event_date.desc'
-    : sort === 'price_asc' ? 'min_price.asc'
-    : sort === 'price_desc' ? 'min_price.desc'
-    : 'event_date.asc';
+    sort === 'date_desc' ? 'event_date.desc,event_time.desc,id.desc'
+    : sort === 'price_asc' ? 'min_price.asc,event_date.asc,event_time.asc,id.asc'
+    : sort === 'price_desc' ? 'min_price.desc,event_date.asc,event_time.asc,id.asc'
+    : 'event_date.asc,event_time.asc,id.asc';
   search.set('order', order);
 
   // Range header pour pagination + total count
