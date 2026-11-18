@@ -206,7 +206,7 @@ export async function searchEvents(params: SearchEventsParams): Promise<Paginate
   });
 
   if (!res.ok) {
-    return { data: [], nextPage: null, total: 0 };
+    throw new Error(`La recherche des événements a échoué (HTTP ${res.status}).`);
   }
 
   const contentRange = res.headers.get('Content-Range') ?? '';
