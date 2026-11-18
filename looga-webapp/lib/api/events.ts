@@ -79,7 +79,9 @@ export async function getSimilarEvents(params: {
     },
   });
 
-  if (!res.ok) return [];
+  if (!res.ok) {
+    throw new Error(`Le chargement des événements similaires a échoué (HTTP ${res.status}).`);
+  }
   const raw = await res.json();
   return Array.isArray(raw) ? raw.map(transformEvent) : [];
 }
@@ -99,45 +101,37 @@ export interface SearchEventsParams {
   pageSize?: number;
 }
 
-function periodRange(preset: PeriodPreset | undefined): { gte?: string; lt?: string } {
+// Les dates d'événement sont interprétées dans le fuseau d'Abidjan (UTC+0).
+// Les méthodes UTC évitent les décalages liés au fuseau du navigateur.
+function periodRange(preset: PeriodPreset | undefined): { gte?: string; lt?: string; friday?: string } {
   if (!preset || preset === 'all') return {};
   const now = new Date();
-  // 'Ce soir' utilise la date d'Abidjan (UTC+0), même si le visiteur est à l'étranger.
-  if (preset === 'tonight') {
-    const abidjanDate = now.toISOString().slice(0, 10);
-    const tomorrow = new Date(`${abidjanDate}T00:00:00.000Z`);
-    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-    return { gte: abidjanDate, lt: tomorrow.toISOString().slice(0, 10) };
-  }
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const isoDate = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const isoDate = (date: Date) => date.toISOString().slice(0, 10);
+  const addDays = (date: Date, days: number) => {
+    const result = new Date(date);
+    result.setUTCDate(result.getUTCDate() + days);
+    return result;
+  };
+
   switch (preset) {
-    case 'today': {
-      const tomorrow = new Date(today);
-      tomorrow.setDate(today.getDate() + 1);
-      return { gte: isoDate(today), lt: isoDate(tomorrow) };
-    }
+    case 'today':
+    case 'tonight':
+      return { gte: isoDate(today), lt: isoDate(addDays(today, 1)) };
     case 'weekend': {
-      // Vendredi 18h → dimanche 23h59
-      const friday = new Date(today);
-      const day = today.getDay(); // 0=dim, 5=ven, 6=sam
-      // Samedi et dimanche : conserver le week-end en cours.
-      // Du lundi au jeudi : cibler le vendredi à venir.
+      // Vendredi à partir de 18 h, samedi et dimanche en entier.
+      // Le samedi et le dimanche, rester sur le week-end en cours.
+      const day = today.getUTCDay(); // 0 = dimanche, 5 = vendredi, 6 = samedi
       const offset = day === 0 ? -2 : day === 6 ? -1 : 5 - day;
-      friday.setDate(today.getDate() + offset);
-      const monday = new Date(friday);
-      monday.setDate(friday.getDate() + 3);
-      return { gte: isoDate(friday), lt: isoDate(monday) };
+      const friday = addDays(today, offset);
+      return { gte: isoDate(friday), lt: isoDate(addDays(friday, 3)), friday: isoDate(friday) };
     }
-    case 'week': {
-      const inAWeek = new Date(today);
-      inAWeek.setDate(today.getDate() + 7);
-      return { gte: isoDate(today), lt: isoDate(inAWeek) };
-    }
+    case 'week':
+      return { gte: isoDate(today), lt: isoDate(addDays(today, 7)) };
     case 'month': {
-      const inAMonth = new Date(today);
-      inAMonth.setMonth(today.getMonth() + 1);
-      return { gte: isoDate(today), lt: isoDate(inAMonth) };
+      const nextMonth = new Date(today);
+      nextMonth.setUTCMonth(nextMonth.getUTCMonth() + 1);
+      return { gte: isoDate(today), lt: isoDate(nextMonth) };
     }
   }
 }
@@ -177,8 +171,9 @@ export async function searchEvents(params: SearchEventsParams): Promise<Paginate
     `location_name.ilike.*${keyword}*`,
   ] : [];
 
+  const andGroups: string[] = [];
   if (cityTerms.length && keywordTerms.length) {
-    search.set('and', `(or(${cityTerms.join(',')}),or(${keywordTerms.join(',')}))`);
+    andGroups.push(`or(${cityTerms.join(',')})`, `or(${keywordTerms.join(',')})`);
   } else if (cityTerms.length || keywordTerms.length) {
     search.set('or', `(${(cityTerms.length ? cityTerms : keywordTerms).join(',')})`);
   }
@@ -191,6 +186,11 @@ export async function searchEvents(params: SearchEventsParams): Promise<Paginate
   if (range.lt) search.append('event_date', `lt.${range.lt}`);
   // Contrairement à 'Aujourd’hui', 'Ce soir' commence à 18 h.
   if (period === 'tonight') search.set('event_time', 'gte.18:00:00');
+  // Le vendredi, seuls les événements à partir de 18 h font partie du week-end.
+  if (period === 'weekend' && range.friday) {
+    andGroups.push(`or(event_date.gt.${range.friday},and(event_date.eq.${range.friday},event_time.gte.18:00:00))`);
+  }
+  if (andGroups.length) search.set('and', `(${andGroups.join(',')})`);
 
   const order =
     sort === 'date_desc' ? 'event_date.desc'
