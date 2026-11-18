@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
@@ -33,18 +33,18 @@ function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md">
-      <div className="text-center mb-8">
-        <Link href="/" className="text-orange font-bold text-3xl tracking-tighter">
+    <div className="w-full max-w-[440px] rounded-[28px] border border-[#3D294B] bg-[#24152F]/90 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.22)] sm:p-9">
+      <div className="text-center mb-9">
+        <Link href="/" className="inline-block text-[#FF701F] font-black text-4xl tracking-[-0.075em]">
           looga
         </Link>
-        <h1 className="text-2xl font-extrabold text-gray-900 mt-4 mb-2">Bienvenue</h1>
-        <p className="text-gray-500 text-sm">Connectez-vous pour accéder à vos billets</p>
+        <h1 className="text-[28px] font-extrabold text-white mt-6 mb-2 tracking-tight">Content de te revoir.</h1>
+        <p className="text-[#BFAFCB] text-sm leading-6">Connecte-toi pour retrouver tes billets et tes favoris.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
+          <label className="block text-sm font-semibold text-[#F5EFF8] mb-2">
             Adresse email
           </label>
           <input
@@ -52,13 +52,13 @@ function LoginForm() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm outline-none focus:border-orange focus:ring-1 focus:ring-orange transition"
+            className="w-full border border-[#533D61] bg-[#311F3D] text-white placeholder:text-[#A798B2] rounded-xl px-4 py-3.5 text-base outline-none focus:border-[#FF701F] focus:ring-2 focus:ring-[#FF701F]/25 transition"
             placeholder="votre@email.com"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
+          <label className="block text-sm font-semibold text-[#F5EFF8] mb-2">
             Mot de passe
           </label>
           <input
@@ -66,13 +66,13 @@ function LoginForm() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm outline-none focus:border-orange focus:ring-1 focus:ring-orange transition"
+            className="w-full border border-[#533D61] bg-[#311F3D] text-white placeholder:text-[#A798B2] rounded-xl px-4 py-3.5 text-base outline-none focus:border-[#FF701F] focus:ring-2 focus:ring-[#FF701F]/25 transition"
             placeholder="••••••••"
           />
         </div>
 
         {loginMutation.isError && (
-          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+          <div className="bg-[#4C202B] border border-[#B55C68] text-[#FFE1E4] text-sm rounded-xl px-4 py-3">
             {getErrorMessage(loginMutation.error)}
           </div>
         )}
@@ -80,24 +80,24 @@ function LoginForm() {
         <button
           type="submit"
           disabled={loginMutation.isPending}
-          className="w-full bg-orange text-white font-bold py-3.5 rounded-lg hover:opacity-90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full bg-[#FF701F] text-[#1A0D20] font-bold py-4 rounded-xl hover:bg-[#FF873D] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {loginMutation.isPending ? 'Connexion…' : 'Se connecter'}
         </button>
       </form>
 
-      <p className="text-center text-sm text-gray-500 mt-6">
+      <p className="text-center text-sm text-[#BFAFCB] mt-7">
         Pas encore de compte ?{' '}
         <Link
           href={redirect ? `/auth/register?redirect=${encodeURIComponent(redirect)}` : '/auth/register'}
-          className="text-orange font-semibold hover:underline"
+          className="text-[#FF8B48] font-semibold hover:underline"
         >
           Créer un compte
         </Link>
       </p>
 
-      <p className="text-center mt-4">
-        <Link href="/" className="text-sm text-gray-400 hover:text-gray-600">
+      <p className="text-center mt-5">
+        <Link href="/" className="text-sm text-[#AFA1BC] hover:text-white transition">
           ← Retour à l&apos;accueil
         </Link>
       </p>
@@ -107,7 +107,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-white font-sans flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#13091E] text-white font-sans flex items-center justify-center px-4 py-12">
       <Suspense>
         <LoginForm />
       </Suspense>
