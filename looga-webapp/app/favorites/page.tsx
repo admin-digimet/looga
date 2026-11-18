@@ -1,4 +1,5 @@
 'use client';
+import { PublicHeader } from '@/components/PublicHeader';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -50,19 +51,7 @@ export default function FavoritesPage() {
 
   return (
     <div className="min-h-screen bg-[#13091e] text-white flex flex-col">
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#13091e]/95 backdrop-blur-md">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8 h-20 flex items-center justify-between gap-4">
-          <Link href="/" className="text-[#ff791f] font-heading font-extrabold text-3xl tracking-tight" aria-label="Looga — Accueil">looga.</Link>
-          <nav aria-label="Navigation principale" className="flex items-center gap-5 sm:gap-9 text-sm font-semibold">
-            <Link href="/search" className="hover:text-[#ff791f] transition-colors">Explorer</Link>
-            <Link href="/" className="hidden sm:inline hover:text-[#ff791f] transition-colors">Événements</Link>
-            <Link href="/organisateur" className="hidden md:inline hover:text-[#ff791f] transition-colors">Organisateurs</Link>
-          </nav>
-          {!authLoading && isAuthenticated ? <ProfileMenu /> : (
-            <Link href="/auth/login" aria-label="Se connecter" className="rounded-full bg-white/10 p-3 hover:bg-white/20"><UserRound className="w-5 h-5" /></Link>
-          )}
-        </div>
-      </header>
+      <PublicHeader />
 
       <main className="w-full max-w-7xl mx-auto flex-1 px-5 sm:px-8 py-12 sm:py-16">
         <div className="mb-10">
