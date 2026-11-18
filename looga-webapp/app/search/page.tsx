@@ -86,7 +86,7 @@ function SearchPageContent() {
     q, categories, cities, period, price, sort,
   }), [q, categories, cities, period, price, sort]);
 
-  const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  const { data, isLoading, isError, isFetchNextPageError, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useSearchEvents(searchParams);
 
   const events = data?.pages.flatMap((p) => p.data) ?? [];
@@ -147,7 +147,7 @@ function SearchPageContent() {
         </div>
         <div className="flex flex-col gap-6 lg:flex-row">
           <div className="hidden lg:block"><SearchFilters categories={categories} cities={cities} period={period} price={price} onChange={updateUrl} onReset={handleReset} /></div>
-          <SearchResults events={events} total={total} isLoading={isLoading} isError={isError} hasNextPage={!!hasNextPage} isFetchingNextPage={isFetchingNextPage} sort={sort} onSortChange={(s) => updateUrl({ sort: s })} onLoadMore={fetchNextPage} onResetFilters={handleReset} activeFiltersCount={activeFiltersCount} />
+          <SearchResults events={events} total={total} isLoading={isLoading} isError={isError} isFetchNextPageError={isFetchNextPageError} hasNextPage={!!hasNextPage} isFetchingNextPage={isFetchingNextPage} sort={sort} onSortChange={(s) => updateUrl({ sort: s })} onLoadMore={fetchNextPage} onResetFilters={handleReset} activeFiltersCount={activeFiltersCount} />
         </div>
       </main>
       {drawerOpen && <div className="fixed inset-0 z-50 bg-black/75" onClick={(e) => { if (e.target === e.currentTarget) setDrawerOpen(false); }}><div className="absolute bottom-0 right-0 top-0 w-[90%] max-w-sm overflow-y-auto bg-[#21132b] shadow-2xl"><SearchFilters categories={categories} cities={cities} period={period} price={price} onChange={updateUrl} onReset={handleReset} onClose={() => setDrawerOpen(false)} /></div></div>}
