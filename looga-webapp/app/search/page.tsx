@@ -101,7 +101,7 @@ function SearchPageContent() {
     categories.length === keys.length && keys.every((key) => categories.includes(key));
   const quickFilters = [
     { label: 'Tous', active: period === 'all' && price === 'all' && categories.length === 0 && cities.length === 0 && !q, action: handleReset },
-    { label: 'Ce soir', active: period === 'today', action: () => updateUrl({ period: period === 'today' ? 'all' : 'today' }) },
+    { label: 'Ce soir', active: period === 'tonight', action: () => updateUrl({ period: period === 'tonight' ? 'all' : 'tonight' }) },
     { label: 'Ce week-end', active: period === 'weekend', action: () => updateUrl({ period: period === 'weekend' ? 'all' : 'weekend' }) },
     { label: 'Gratuit', active: price === 'free', action: () => updateUrl({ price: price === 'free' ? 'all' : 'free' }) },
     { label: 'Concerts', active: matchesGroup(concertKeys), action: () => updateUrl({ categories: matchesGroup(concertKeys) ? [] : concertKeys }) },
