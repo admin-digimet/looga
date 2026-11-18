@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { CATEGORY_GROUPS } from '@/components/search/SearchFilters';
 
