@@ -12,19 +12,26 @@ import { ProfileMenu } from '@/components/ProfileMenu';
 import { useAuthStore } from '@/lib/store/authStore';
 import * as eventsApi from '@/lib/api/events';
 import type { EventCategory } from '@/types';
+import { CATEGORY_GROUPS } from '@/components/search/SearchFilters';
 
 const EVENTS_SECTION_ID = 'events-section';
 const PAGE_SIZE = 24;
 const TABS = ['Tous', 'Concerts', 'Soirées', 'Ce week-end'];
-const CATEGORIES: { label: string; slugs: EventCategory[]; image: string }[] = [
-  { label: 'Soirées & Clubs', slugs: ['soirees'], image: 'https://images.unsplash.com/photo-1571266028243-d220c9b3b157?w=700&q=80' },
-  { label: 'Concerts & Live', slugs: ['concerts'], image: 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=700&q=80' },
-  { label: 'Festivals & Open Air', slugs: ['festival'], image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=700&q=80' },
-  { label: 'Lifestyle & Expériences', slugs: ['gastronomie', 'bien_etre', 'mode', 'workshops'], image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=700&q=80' },
+// Source unique : mêmes identifiants historiques que les filtres Explorer.
+const CATEGORY_IMAGES = [
+  'https://images.unsplash.com/photo-1571266028243-d220c9b3b157?w=700&q=80',
+  'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=700&q=80',
+  'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=700&q=80',
+  'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=700&q=80',
 ];
+const CATEGORIES = CATEGORY_GROUPS.map((group, index) => ({
+  label: group.label,
+  slugs: group.keys,
+  image: CATEGORY_IMAGES[index],
+}));
 function tabParams(tab: string): { categories?: EventCategory[]; period?: 'weekend' } {
-  if (tab === 'Concerts') return { categories: ['concerts'] };
-  if (tab === 'Soirées') return { categories: ['soirees'] };
+  if (tab === 'Concerts') return { categories: CATEGORY_GROUPS[1].keys };
+  if (tab === 'Soirées') return { categories: CATEGORY_GROUPS[0].keys };
   if (tab === 'Ce week-end') return { period: 'weekend' };
   return {};
 }
@@ -138,10 +145,13 @@ export default function HomePage() {
               <h2 className="mb-3 text-base font-bold">Découvrir</h2>
               <ul className="space-y-2 sm:space-y-3 text-sm text-[#c6c1c9]">
                 <li><Link href="/search" className="hover:text-[#ff791f]">Tous les événements</Link></li>
-                <li><Link href="/search?categories=soirees" className="hover:text-[#ff791f]">Soirées &amp; Clubs</Link></li>
-                <li><Link href="/search?categories=concerts" className="hover:text-[#ff791f]">Concerts &amp; Live</Link></li>
-                <li><Link href="/search?categories=festival" className="hover:text-[#ff791f]">Festivals &amp; Open Air</Link></li>
-                <li><Link href="/search?categories=gastronomie,bien_etre,mode,workshops" className="hover:text-[#ff791f]">Lifestyle &amp; Expériences</Link></li>
+                {CATEGORIES.map((category) => (
+                  <li key={category.label}>
+                    <Link href={`/search?categories=${category.slugs.join(',')}`} className="hover:text-[#ff791f]">
+                      {category.label}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
             <div>
