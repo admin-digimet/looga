@@ -79,7 +79,7 @@ export default function AProposPage() {
               <div className="flex flex-wrap gap-3">
                 <a
                   href="/"
-                  className="inline-block bg-[#ff791f] text-[#180c21] font-bold py-3 px-6 rounded-xl hover:bg-[#ff944b] transition-colors"
+                  className="inline-flex min-h-[48px] items-center justify-center rounded-xl bg-[#ff791f] px-6 py-3 font-bold !text-white hover:bg-[#ff944b] transition-colors"
                 >
                   Voir les événements
                 </a>
