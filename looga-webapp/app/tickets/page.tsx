@@ -12,6 +12,7 @@ import { useTickets } from '@/hooks/useTickets';
 import type { Ticket } from '@/types';
 
 type Tab = 'upcoming' | 'pending' | 'past';
+type PastFilter = 'all' | 'used' | 'unused' | 'cancelled';
 
 function isUpcoming(ticket: Ticket): boolean {
   if (!ticket.eventDate) return true; // pas de date connue → on suppose à venir
@@ -27,6 +28,7 @@ export default function TicketsPage() {
   const { data: tickets, isLoading: ticketsLoading } = useTickets();
 
   const [tab, setTab] = useState<Tab>('upcoming')
+  const [pastFilter, setPastFilter] = useState<PastFilter>('all')
   const [upcomingPage, setUpcomingPage] = useState(1)
   const [pastPage, setPastPage] = useState(1)
   const [pendingPage, setPendingPage] = useState(1)
@@ -63,7 +65,13 @@ export default function TicketsPage() {
     return { upcoming: u, pending: waiting, past: p };
   }, [tickets]);
 
-  const allVisible = tab === 'upcoming' ? upcoming : tab === 'pending' ? pending : past;
+  const filteredPast = past.filter((ticket) => {
+    if (pastFilter === 'used') return ticket.status === 'used';
+    if (pastFilter === 'cancelled') return ticket.status === 'cancelled';
+    if (pastFilter === 'unused') return ticket.status === 'expired' || (ticket.status === 'valid' && !isUpcoming(ticket));
+    return true;
+  });
+  const allVisible = tab === 'upcoming' ? upcoming : tab === 'pending' ? pending : filteredPast;
   const currentPage = tab === 'upcoming' ? upcomingPage : tab === 'pending' ? pendingPage : pastPage;
   const setCurrentPage = tab === 'upcoming' ? setUpcomingPage : tab === 'pending' ? setPendingPage : setPastPage;
   const totalPages = Math.max(1, Math.ceil(allVisible.length / PAGE_SIZE));
@@ -131,11 +139,21 @@ export default function TicketsPage() {
           </div>
         )}
 
+        {tab === 'past' && !ticketsLoading && past.length > 0 && (
+          <div className="mb-5 flex flex-wrap gap-2" aria-label="Filtrer les billets passés">
+            {([{ value: 'all', label: 'Tous' }, { value: 'used', label: 'Utilisés' }, { value: 'unused', label: 'Non utilisés' }, { value: 'cancelled', label: 'Annulés' }] as const).map((item) => (
+              <button key={item.value} type="button" onClick={() => { setPastFilter(item.value); setPastPage(1); }}
+                className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${pastFilter === item.value ? 'border-[#FF791F] bg-[#FF791F]/15 text-[#FF9B59]' : 'border-white/15 text-[#BEB3CA] hover:text-white'}`}>
+                {item.label}
+              </button>
+            ))}
+          </div>
+        )}
         {/* Content */}
         {ticketsLoading ? (
           <div className="space-y-6">
             {Array.from({ length: 2 }).map((_, i) => (
-              <div key={i} className="animate-pulse bg-[#251A30] rounded-2xl h-[360px] sm:h-[260px]" />
+              <div key={i} className="animate-pulse bg-[#251A30] rounded-2xl h-[175px]" />
             ))}
           </div>
         ) : visible.length === 0 ? (
@@ -147,7 +165,7 @@ export default function TicketsPage() {
                 ? 'Aucun billet à venir.'
                 : tab === 'pending'
                 ? 'Aucun paiement en attente.'
-                : 'Aucun billet passé ou annulé.'}
+                : 'Aucun billet dans cette catégorie.'}
             </div>
           )
         ) : (
@@ -197,10 +215,10 @@ function EmptyState() {
         Découvre les événements à Abidjan et réserve ta place en quelques clics.
       </p>
       <Link
-        href="/"
+        href="/search"
         className="inline-block bg-orange text-white font-bold px-7 py-3 rounded-xl hover:opacity-90 transition-colors"
       >
-        Explorer les événements
+        Découvrir les événements
       </Link>
     </div>
   );
