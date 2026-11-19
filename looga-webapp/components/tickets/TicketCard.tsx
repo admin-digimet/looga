@@ -11,6 +11,7 @@ import { TicketQRModal } from './TicketQRModal';
 
 interface Props {
   ticket: Ticket;
+  tickets?: Ticket[];
 }
 
 const STATUS_CONFIG: Record<TicketStatus, { label: string; bg: string; fg: string; dot: string }> = {
@@ -21,7 +22,13 @@ const STATUS_CONFIG: Record<TicketStatus, { label: string; bg: string; fg: strin
   cancelled: { label: 'Annulé',     bg: 'bg-black/8',     fg: 'text-[#6E6B66]',     dot: 'bg-[#6E6B66]' },
 };
 
-export function TicketCard({ ticket }: Props) {
+export function TicketCard({ ticket, tickets }: Props) {
+  const reservationTickets = tickets?.length ? tickets : [ticket];
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const selectedTicket = reservationTickets[selectedIndex] ?? ticket;
+  const availableQrTickets = reservationTickets.filter((item) => item.status === 'valid' && Boolean(item.qrCode || item.ticketNumber));
+  const totalQuantity = reservationTickets.length > 1 ? reservationTickets.length : Math.max(1, ticket.quantity || 1);
+
   const [qrOpen, setQrOpen] = useState(false);
   const [resuming, setResuming] = useState(false);
   const status = STATUS_CONFIG[ticket.status];
@@ -85,7 +92,7 @@ export function TicketCard({ ticket }: Props) {
             {ticket.eventDate && <div className="flex items-start gap-2 text-xs text-[#FF9B59] sm:text-sm"><Calendar className="mt-0.5 h-4 w-4 shrink-0"/><span>{formatEventDate(ticket.eventDate, ticket.eventTime)}</span></div>}
             {ticket.eventLocation && <div className="flex items-start gap-2 text-xs text-[#C6BAD0] sm:text-sm"><MapPin className="mt-0.5 h-4 w-4 shrink-0"/><span className="line-clamp-2">{ticket.eventLocation}</span></div>}
             <div className="flex flex-wrap gap-2 pt-1">
-              <span className="rounded-full bg-white/10 px-2.5 py-1 text-[11px] text-[#DDD3E6]">{ticket.quantity > 1 ? `${ticket.quantity} billets` : '1 billet'}</span>
+              <span className="rounded-full bg-white/10 px-2.5 py-1 text-[11px] text-[#DDD3E6]">{totalQuantity > 1 ? `${totalQuantity} billets` : '1 billet'}</span>
               {ticket.ticketTypeName && <span className="max-w-full truncate rounded-full bg-white/10 px-2.5 py-1 text-[11px] text-[#DDD3E6]">{ticket.ticketTypeName}</span>}
             </div>
           </div>
@@ -96,8 +103,8 @@ export function TicketCard({ ticket }: Props) {
               {resuming ? <Loader2 className="h-4 w-4 animate-spin"/> : <CreditCard className="h-4 w-4"/>}{resuming ? 'Redirection…' : 'Finaliser mon paiement'}
             </button>
           ) : canInspect ? (
-            <button type="button" onClick={() => setQrOpen(true)} className="flex items-center justify-center gap-2 rounded-xl bg-[#FF791F] px-4 py-3 text-sm font-bold text-white hover:brightness-110">
-              <QrCode className="h-4 w-4"/>Voir mon billet
+            <button type="button" onClick={() => { setSelectedIndex(0); setQrOpen(true); }} className="flex items-center justify-center gap-2 rounded-xl bg-[#FF791F] px-4 py-3 text-sm font-bold text-white hover:brightness-110">
+              <QrCode className="h-4 w-4"/>{totalQuantity > 1 ? 'Voir mes billets' : 'Voir mon billet'}
             </button>
           ) : (
             <div className="flex items-center justify-center gap-2 rounded-xl bg-white/10 px-4 py-3 text-sm font-semibold text-[#D4CBDD]"><ChevronRight className="h-4 w-4"/>Billet indisponible</div>
@@ -108,7 +115,18 @@ export function TicketCard({ ticket }: Props) {
         </div>
         {canPresent && calendarUrl && <div className="border-t border-white/10 px-4 pb-3 text-right"><a href={calendarUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-[#FF9B59] hover:underline">Ajouter au calendrier</a></div>}
       </article>
-      {qrOpen && canInspect && <TicketQRModal ticket={ticket} onClose={() => setQrOpen(false)} />}
+      {qrOpen && canInspect && (
+        <>
+          {availableQrTickets.length > 1 && (
+            <div className="fixed inset-x-4 bottom-4 z-[60] mx-auto flex max-w-sm items-center justify-between gap-2 rounded-2xl bg-[#261A31] p-3 text-white shadow-2xl" aria-label="Navigation entre les billets">
+              <button type="button" className="rounded-lg bg-white/10 px-3 py-2 text-sm disabled:opacity-30" disabled={selectedIndex <= 0} onClick={() => setSelectedIndex((i) => Math.max(0, i - 1))}>Précédent</button>
+              <span className="text-xs font-semibold">Billet {selectedIndex + 1} / {availableQrTickets.length}</span>
+              <button type="button" className="rounded-lg bg-[#FF791F] px-3 py-2 text-sm disabled:opacity-30" disabled={selectedIndex >= availableQrTickets.length - 1} onClick={() => setSelectedIndex((i) => Math.min(availableQrTickets.length - 1, i + 1))}>Suivant</button>
+            </div>
+          )}
+          <TicketQRModal ticket={availableQrTickets[selectedIndex] ?? selectedTicket} onClose={() => { setQrOpen(false); setSelectedIndex(0); }} />
+        </>
+      )}
     </>
   );
 }
