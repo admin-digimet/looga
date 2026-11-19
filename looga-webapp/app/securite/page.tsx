@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { DynamicInfoPage } from '@/components/DynamicInfoPage';
+import { LegalInfoPage } from '@/components/LegalInfoPage';
 
 export const metadata: Metadata = {
   title: 'Sécurité — Looga',
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function SecuritePage() {
   return (
-    <DynamicInfoPage
+    <LegalInfoPage
       pageKey="securite"
       fallbackTitle="Vos paiements et vos données sont notre priorité"
       fallbackIntro="Looga met en place des outils de sécurité pour protéger les utilisateurs, les organisateurs et l’expérience des événements."
