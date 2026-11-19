@@ -1,11 +1,15 @@
 import Link from 'next/link';
-import { CATEGORY_GROUPS } from '@/components/search/SearchFilters';
-
-// Les liens de la colonne Découvrir reprennent la source unique de l'Accueil.
-const CATEGORIES = CATEGORY_GROUPS.map((group) => ({
-  label: group.label,
-  slugs: group.keys,
-}));
+// Catégories publiques stables : mêmes intitulés et slugs que le footer validé.
+// Ne pas importer SearchFilters ici : le footer doit rester indépendant des filtres.
+const CATEGORIES = [
+  { label: 'Soirées & Clubs', slugs: ['soirees'] },
+  { label: 'Concerts & Live', slugs: ['concerts', 'tournee', 'theatre', 'humour'] },
+  { label: 'Festivals & Open Air', slugs: ['festival', 'culture', 'sports', 'auto_moto'] },
+  { label: 'Lifestyle & Expériences', slugs: [
+    'workshops', 'gastronomie', 'conferences', 'networking', 'mode', 'famille',
+    'religieux', 'cinema', 'caritatif', 'enfants', 'gaming', 'salon', 'bien_etre', 'autre',
+  ] },
+];
 
 export function PublicFooter() {
   return (
