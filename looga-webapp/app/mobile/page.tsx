@@ -8,158 +8,162 @@ import {
   Ticket,
   MapPin,
   Smartphone,
+  Apple,
+  Sparkles,
 } from 'lucide-react';
-import { Navbar } from '@/components/Navbar';
+import { PublicHeader } from '@/components/PublicHeader';
 import { Footer } from '@/components/Footer';
 
 export const metadata: Metadata = {
-  title: 'Application mobile — Looga',
+  title: 'Application mobile bientôt disponible — Looga',
   description:
-    'Découvrez les meilleurs événements, réservez en quelques secondes et partagez vos sorties avec l’application Looga.',
+    'L’application Looga arrive bientôt sur iOS et Android. En attendant, découvre les événements à Abidjan directement sur le web.',
 };
 
 const features = [
   {
     icon: Search,
-    title: 'Découvrez ce qui se passe à Abidjan',
-    body: 'Concerts, soirées, festivals, expériences, événements lifestyle ou culturels. Looga vous permet de découvrir facilement tout ce qui se passe autour de vous, sur une seule application. Fini les événements dispersés entre Instagram, WhatsApp et le bouche-à-oreille.',
+    title: 'Découvre ce qui se passe à Abidjan',
+    body: 'Concerts, soirées, festivals et expériences : retrouve plus facilement les sorties qui te correspondent.',
   },
   {
     icon: Zap,
-    title: 'Une expérience pensée pour sortir facilement',
-    body: 'Avec Looga, réserver une sortie devient simple. En quelques secondes, vous découvrez un événement, choisissez votre ticket, payez rapidement et recevez votre QR Code instantanément — directement depuis votre téléphone.',
+    title: 'Des sorties plus simples à organiser',
+    body: 'L’application est pensée pour faciliter la découverte des événements et les réservations depuis ton téléphone.',
   },
   {
     icon: Users,
-    title: 'Les meilleures sorties se vivent ensemble',
-    body: 'Invitez vos amis, partagez des événements et organisez vos sorties plus facilement. Looga est pensé pour rendre les expériences sociales plus simples et plus spontanées.',
+    title: 'Partage les bons plans avec tes amis',
+    body: 'Repère les événements qui te plaisent et partage tes idées de sorties avec tes proches.',
   },
   {
     icon: Ticket,
-    title: 'Vos tickets au même endroit',
-    body: 'Tous vos tickets et réservations sont accessibles directement dans l’application. Plus besoin de rechercher des captures d’écran ou des messages perdus — vos QR Codes restent disponibles à tout moment.',
+    title: 'Tes billets au même endroit',
+    body: 'Nous préparons une expérience qui te permettra de retrouver facilement tes billets et tes réservations.',
   },
   {
     icon: MapPin,
-    title: 'Pensé pour Abidjan',
-    body: 'Paiement mobile money, nightlife, événements culturels, réservations, expériences. Looga est construit pour la manière dont les gens découvrent et vivent réellement les sorties à Abidjan. Notre objectif : simplifier la découverte et rendre la culture plus accessible.',
+    title: 'Imaginée pour Abidjan',
+    body: 'Une expérience adaptée aux habitudes de sortie locales, pour découvrir et profiter pleinement de la ville.',
   },
 ];
 
 export default function MobilePage() {
   return (
-    <div className="min-h-screen bg-cream font-sans">
-      <Navbar />
+    <div className="min-h-screen bg-[#14091e] font-sans text-white">
+      <PublicHeader />
       <main>
-        {/* Hero */}
-        <section className="relative overflow-hidden">
+        <section className="relative isolate overflow-hidden border-b border-white/10">
           <div
-            className="absolute inset-0 opacity-95"
-            style={{ background: 'linear-gradient(135deg, #FF5C1A 0%, #6B3FA0 100%)' }}
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                'radial-gradient(ellipse at 7% 23%, rgba(255,111,36,0.23) 0%, transparent 43%), linear-gradient(115deg, #32172d 0%, #21112c 52%, #14091e 100%)',
+            }}
           />
-          <div className="relative max-w-[1400px] mx-auto px-4 md:px-8 py-20 md:py-28">
-            <span className="inline-block px-4 py-1 rounded-full bg-white/15 text-white text-xs font-semibold tracking-wider mb-6">
-              APPLICATION MOBILE
-            </span>
-            <h1 className="font-heading font-extrabold text-white text-4xl md:text-6xl tracking-tight leading-[1.05] max-w-3xl mb-6">
-              Toute la ville dans votre poche.
-            </h1>
-            <p className="text-white/90 text-lg md:text-xl max-w-2xl mb-10">
-              Découvrez les meilleurs événements, réservez en quelques secondes et partagez vos sorties avec vos amis grâce à l’application Looga.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 bg-white text-orange font-bold py-4 px-8 rounded-full hover:opacity-90 transition-opacity"
-              >
-                <Smartphone className="w-5 h-5" />
-                Utiliser Looga sur le web
-              </Link>
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 border border-white/40 text-white font-semibold py-4 px-8 rounded-full hover:bg-white/10 transition-colors"
-              >
-                Découvrir les événements
-                <ArrowRight className="w-5 h-5" />
-              </Link>
+          <div className="relative mx-auto max-w-[1150px] px-5 py-20 sm:px-8 md:py-28 lg:py-32">
+            <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[#ff792b]/35 bg-[#ff792b]/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] text-[#ffae76]">
+              <Sparkles className="h-4 w-4" aria-hidden="true" />
+              Bientôt disponible
             </div>
+            <p className="mb-5 text-xs font-bold uppercase tracking-[0.22em] text-white/75">
+              Application mobile Looga
+            </p>
+            <h1 className="mb-7 max-w-4xl font-heading text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+              Looga arrive dans ta poche.
+            </h1>
+            <p className="mb-10 max-w-2xl text-base leading-relaxed text-white/80 sm:text-lg md:text-xl">
+              Tes événements préférés, tes sorties et tes meilleurs moments.
+              Bientôt, retrouve l’expérience Looga sur iOS et Android.
+            </p>
+
+            <div className="mb-10 grid max-w-md grid-cols-2 gap-3 sm:gap-4">
+              <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/[0.06] p-4 backdrop-blur-sm">
+                <Apple className="h-7 w-7 shrink-0" aria-hidden="true" />
+                <div>
+                  <p className="font-bold">iOS</p>
+                  <p className="text-sm text-white/60">À venir</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/[0.06] p-4 backdrop-blur-sm">
+                <Smartphone className="h-7 w-7 shrink-0" aria-hidden="true" />
+                <div>
+                  <p className="font-bold">Android</p>
+                  <p className="text-sm text-white/60">À venir</p>
+                </div>
+              </div>
+            </div>
+
+            <Link
+              href="/"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#ff781f] px-7 py-3 font-bold text-white transition-colors hover:bg-[#ff8d40] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+            >
+              Découvrir les événements
+              <ArrowRight className="h-5 w-5" aria-hidden="true" />
+            </Link>
+            <p className="mt-4 text-sm text-white/60">
+              En attendant l’application, profite de Looga directement sur le web.
+            </p>
           </div>
         </section>
 
-        {/* Features */}
-        <section className="max-w-[1100px] mx-auto px-4 md:px-8 py-20">
-          <div className="space-y-12">
-            {features.map((feature, idx) => {
+        <section className="mx-auto max-w-[1100px] px-5 py-16 sm:px-8 md:py-24">
+          <div className="mb-10 max-w-2xl">
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-[#ff8d40]">
+              Ce qu’on prépare
+            </p>
+            <h2 className="font-heading text-3xl font-extrabold tracking-tight sm:text-4xl">
+              Une nouvelle façon de vivre tes sorties.
+            </h2>
+            <p className="mt-4 leading-relaxed text-white/65">
+              Voici un aperçu des fonctionnalités envisagées pour l’application mobile.
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            {features.map((feature) => {
               const Icon = feature.icon;
-              const reverse = idx % 2 === 1;
               return (
-                <div
+                <article
                   key={feature.title}
-                  className={`grid grid-cols-1 md:grid-cols-[80px_1fr] gap-6 items-start ${reverse ? '' : ''}`}
+                  className="rounded-2xl border border-white/10 bg-[#24152f] p-6 sm:p-7"
                 >
-                  <div className="w-16 h-16 rounded-2xl bg-white border border-cream-2 flex items-center justify-center shadow-sm">
-                    <Icon className="w-7 h-7 text-orange" />
+                  <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-[#ff781f]/15">
+                    <Icon className="h-6 w-6 text-[#ff8d40]" aria-hidden="true" />
                   </div>
-                  <div>
-                    <h2 className="font-heading font-extrabold text-ink text-2xl md:text-3xl mb-3">
-                      {feature.title}
-                    </h2>
-                    <p className="text-ink-muted text-base leading-relaxed max-w-2xl">
-                      {feature.body}
-                    </p>
-                  </div>
-                </div>
+                  <h3 className="mb-3 font-heading text-xl font-bold">{feature.title}</h3>
+                  <p className="leading-relaxed text-white/70">{feature.body}</p>
+                </article>
               );
             })}
           </div>
         </section>
 
-        {/* Disponible sur le web */}
-        <section className="bg-white py-20">
-          <div className="max-w-[900px] mx-auto px-4 md:px-8 text-center">
-            <span className="inline-block px-3 py-1 rounded-full bg-orange/10 text-orange text-xs font-bold tracking-wider mb-4">
-              DISPONIBLE MAINTENANT
-            </span>
-            <h2 className="font-heading font-extrabold text-ink text-3xl md:text-4xl mb-4">
-              Looga est disponible sur le web
-            </h2>
-            <p className="text-ink-muted text-lg mb-10 max-w-xl mx-auto">
-              Pas besoin d’attendre — accède à tous les événements d’Abidjan, réserve tes billets et gère tes sorties directement depuis ton navigateur, sur mobile ou desktop.
+        <section className="px-5 pb-20 sm:px-8 md:pb-28">
+          <div className="mx-auto max-w-[1100px] rounded-3xl border border-white/10 bg-[#24152f] px-6 py-12 text-center sm:px-10 md:py-16">
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-[#ff8d40]">
+              Disponible dès maintenant
             </p>
-            <div className="flex flex-wrap gap-3 justify-center">
+            <h2 className="mb-4 font-heading text-3xl font-extrabold sm:text-4xl">
+              Looga est déjà sur le web.
+            </h2>
+            <p className="mx-auto mb-8 max-w-xl text-lg leading-relaxed text-white/70">
+              Pas besoin d’attendre pour découvrir les événements à Abidjan.
+              Retrouve Looga depuis ton navigateur, sur téléphone ou ordinateur.
+            </p>
+            <div className="flex flex-wrap justify-center gap-3">
               <Link
                 href="/"
-                className="inline-flex items-center gap-2 bg-orange text-white font-bold py-4 px-8 rounded-full hover:opacity-90 transition-opacity"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#ff781f] px-7 py-3 font-bold text-white transition-colors hover:bg-[#ff8d40]"
               >
-                Découvrir les événements
-                <ArrowRight className="w-5 h-5" />
+                Voir les événements
+                <ArrowRight className="h-5 w-5" aria-hidden="true" />
               </Link>
               <Link
                 href="/auth/register"
-                className="inline-flex items-center gap-2 border border-gray-300 text-ink font-semibold py-4 px-8 rounded-full hover:bg-gray-50 transition-colors"
+                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/25 px-7 py-3 font-semibold text-white transition-colors hover:bg-white/10"
               >
-                Créer un compte gratuit
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* CTA final */}
-        <section className="max-w-[1400px] mx-auto px-4 md:px-8 py-20">
-          <div className="rounded-3xl bg-ink text-white p-10 md:p-16 text-center">
-            <h2 className="font-heading font-extrabold text-3xl md:text-4xl mb-4">
-              Prêt à découvrir votre prochaine sortie ?
-            </h2>
-            <p className="text-white/70 text-lg mb-8 max-w-xl mx-auto">
-              Rejoignez la communauté Looga et découvrez les meilleurs événements autour de vous.
-            </p>
-            <div className="flex flex-wrap gap-3 justify-center">
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 bg-orange text-white font-bold py-4 px-8 rounded-full hover:opacity-90 transition-opacity"
-              >
-                Voir les événements
-                <ArrowRight className="w-5 h-5" />
+                Créer un compte
               </Link>
             </div>
           </div>
