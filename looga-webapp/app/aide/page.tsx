@@ -11,8 +11,8 @@ export default function AidePage() {
   return (
     <HelpInfoPage
       pageKey="aide"
-      fallbackTitle="Centre d'aide Looga"
-      fallbackIntro="Trouve rapidement des réponses à tes questions et apprends à utiliser Looga facilement."
+      fallbackTitle="Une question ? On est là."
+      fallbackIntro="Trouve rapidement des réponses à tes questions et profite pleinement de Looga."
       fallbackSections={[
         {
           heading: "Comment pouvons-nous t'aider ?",
