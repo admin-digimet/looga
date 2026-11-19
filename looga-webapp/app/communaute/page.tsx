@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { DynamicInfoPage } from '@/components/DynamicInfoPage';
+import { LegalInfoPage } from '@/components/LegalInfoPage';
 
 export const metadata: Metadata = {
   title: 'Règles de la communauté — Looga',
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function CommunautePage() {
   return (
-    <DynamicInfoPage
+    <LegalInfoPage
       pageKey="communaute"
       fallbackTitle="Une communauté construite autour du respect"
       fallbackIntro="Looga rassemble des publics et des organisateurs autour d’événements de qualité. Ces règles garantissent une expérience saine, respectueuse et sécurisée pour tous."
