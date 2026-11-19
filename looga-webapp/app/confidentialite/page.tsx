@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { DynamicInfoPage } from '@/components/DynamicInfoPage';
+import { LegalInfoPage } from '@/components/LegalInfoPage';
 
 export const metadata: Metadata = {
   title: 'Politique de confidentialité — Looga',
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function ConfidentialitePage() {
   return (
-    <DynamicInfoPage
+    <LegalInfoPage
       pageKey="confidentialite"
       fallbackTitle="Politique de confidentialité"
       fallbackIntro="La présente politique de confidentialité a pour objet d’informer les utilisateurs de la plateforme Looga sur la manière dont leurs données personnelles sont collectées, utilisées et protégées, conformément à la réglementation applicable en matière de protection des données. Les termes « Looga », « nous », « notre » désignent Looga. Les termes « vous », « votre » désignent tout utilisateur de la plateforme."
