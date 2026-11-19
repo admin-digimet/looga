@@ -82,7 +82,7 @@ export function TicketCard({ ticket }: Props) {
   return (
     <>
       <article
-        className={`relative bg-white rounded-2xl overflow-hidden border border-black/5 shadow-[0_3px_10px_rgba(0,0,0,0.06)] ${
+        className={`relative bg-[#251A30] text-white rounded-2xl overflow-hidden border border-[#41334D] shadow-[0_8px_24px_rgba(0,0,0,0.16)] ${
           isInactive ? 'opacity-75' : ''
         }`}
       >
@@ -118,9 +118,9 @@ export function TicketCard({ ticket }: Props) {
         {/* PERFORATION */}
         <div className="relative">
           {/* Encoches gauche/droite — couleur fond page */}
-          <span className="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-cream" />
-          <span className="absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-cream" />
-          <div className="mx-5 border-t-2 border-dashed border-black/10" />
+          <span className="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-[#160F20]" />
+          <span className="absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-[#160F20]" />
+          <div className="mx-5 border-t-2 border-dashed border-white/15" />
         </div>
 
         {/* BODY — détails + QR */}
@@ -128,40 +128,40 @@ export function TicketCard({ ticket }: Props) {
           {/* Infos event */}
           <div className="flex-1 min-w-0 space-y-2.5">
             {ticket.eventDate && (
-              <div className="flex items-center gap-2 text-sm text-ink">
+              <div className="flex items-center gap-2 text-sm text-white">
                 <Calendar className="w-4 h-4 text-orange shrink-0" />
                 <span className="font-medium">{formatEventDate(ticket.eventDate, ticket.eventTime)}</span>
               </div>
             )}
             {ticket.eventLocation && (
-              <div className="flex items-center gap-2 text-sm text-ink-muted">
+              <div className="flex items-center gap-2 text-sm text-[#BEB3CA]">
                 <MapPin className="w-4 h-4 shrink-0" />
                 <span className="truncate">{ticket.eventLocation}</span>
               </div>
             )}
             {ticket.eventCategory && (
-              <div className="flex items-center gap-2 text-sm text-ink-muted">
+              <div className="flex items-center gap-2 text-sm text-[#BEB3CA]">
                 <Tag className="w-4 h-4 shrink-0" />
                 <span>{CATEGORY_LABEL[ticket.eventCategory] ?? ticket.eventCategory}</span>
               </div>
             )}
 
             {/* Footer card : numéro + type + total */}
-            <div className="pt-3 mt-1 border-t border-black/5 grid grid-cols-2 gap-y-1.5 gap-x-3 text-xs">
+            <div className="pt-3 mt-1 border-t border-white/15 grid grid-cols-2 gap-y-1.5 gap-x-3 text-xs">
               {ticket.ticketTypeName && (
                 <>
-                  <span className="text-ink-muted">Type</span>
-                  <span className="font-semibold text-ink text-right">
+                  <span className="text-[#BEB3CA]">Type</span>
+                  <span className="font-semibold text-white text-right">
                     {ticket.ticketTypeName} × {ticket.quantity}
                   </span>
                 </>
               )}
-              <span className="text-ink-muted">Total</span>
+              <span className="text-[#BEB3CA]">Total</span>
               <span className="font-heading font-extrabold text-orange text-right">
                 {formatPrice(ticket.totalPrice)}
               </span>
-              <span className="text-ink-muted">N° billet</span>
-              <span className="font-mono text-[11px] text-ink text-right truncate">
+              <span className="text-[#BEB3CA]">N° billet</span>
+              <span className="font-mono text-[11px] text-white text-right truncate">
                 {ticket.ticketNumber}
               </span>
             </div>
@@ -185,7 +185,7 @@ export function TicketCard({ ticket }: Props) {
                   className="block"
                 />
               ) : (
-                <div className="w-[110px] h-[110px] flex items-center justify-center text-xs text-ink-muted">
+                <div className="w-[110px] h-[110px] flex items-center justify-center text-xs text-[#5B5164]">
                   Pas de QR
                 </div>
               )}
@@ -218,7 +218,7 @@ export function TicketCard({ ticket }: Props) {
               </button>
             </div>
           ) : (
-            <div className="self-center sm:self-start shrink-0 w-full sm:w-[136px] flex items-center justify-center bg-black/[0.03] border-2 border-dashed border-black/10 rounded-xl p-4 text-center text-xs text-ink-muted">
+            <div className="self-center sm:self-start shrink-0 w-full sm:w-[136px] flex items-center justify-center bg-white/[0.04] border-2 border-dashed border-white/15 rounded-xl p-4 text-center text-xs text-[#BEB3CA]">
               Billet non valide
             </div>
           )}
