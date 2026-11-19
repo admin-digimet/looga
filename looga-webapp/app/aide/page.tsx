@@ -32,15 +32,15 @@ export default function AidePage() {
               </div>
               <div>
                 <p className="font-semibold text-ink mb-1">Comment réserver un ticket ?</p>
-                <p>Sur la page d&apos;un événement, clique sur <strong>Réserver</strong>, choisis ton type de billet, puis finalise le paiement via Mobile Money (MTN, Orange, Wave) ou carte. La confirmation est instantanée.</p>
+                <p>Sur la page d&apos;un événement, clique sur <strong>Réserver</strong>, choisis ton type de billet, puis finalise le paiement avec les moyens de paiement proposés lors de la réservation. Le billet est disponible après confirmation du paiement.</p>
               </div>
               <div>
                 <p className="font-semibold text-ink mb-1">Comment recevoir mon billet ?</p>
-                <p>Ton billet (QR code) est disponible immédiatement dans la section <Link href="/tickets" className="text-orange font-medium hover:underline">Mes billets</Link> de ton compte, dans ton compte. Pour le présenter à l’entrée, ouvre « Mes billets » et affiche le QR code.</p>
+                <p>Après confirmation de ta réservation, ton billet et son QR code sont disponibles dans la rubrique <Link href="/tickets" className="text-orange font-medium hover:underline">Mes billets</Link>. Présente ce QR code à l’entrée de l’événement.</p>
               </div>
               <div>
                 <p className="font-semibold text-ink mb-1">Que faire en cas de problème de réservation ?</p>
-                <p>Si ton paiement a été débité mais que tu n&apos;as pas reçu ton billet, contacte-nous via la page <Link href="/contact" className="text-orange font-medium hover:underline">Contact</Link> en indiquant ton email et le nom de l&apos;événement. Nous traitons toutes les demandes sous 24 h.</p>
+                <p>Si ton paiement a été débité mais que tu n&apos;as pas reçu ton billet, contacte-nous via la page <Link href="/contact" className="text-orange font-medium hover:underline">Contact</Link> en indiquant ton email et le nom de l&apos;événement.</p>
               </div>
             </div>
           ),
@@ -83,7 +83,7 @@ export default function AidePage() {
                 </div>
                 <div>
                   <p className="font-semibold text-ink mb-1">Problèmes de connexion</p>
-                  <p>Si tu ne peux pas te connecter, vérifie ton email et mot de passe. Si tu as oublié ton mot de passe, <Link href="/contact" className="text-orange font-medium hover:underline">contacte le support</Link> pour obtenir de l’aide. Si le problème persiste, <Link href="/contact" className="text-orange font-medium hover:underline">contacte le support</Link>.</p>
+                  <p>Si tu ne peux pas te connecter, vérifie ton email et mot de passe. Si tu as oublié ton mot de passe ou si le problème persiste, <Link href="/contact" className="text-orange font-medium hover:underline">contacte le support</Link>.</p>
                 </div>
               </div>
             </>
