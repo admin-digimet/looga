@@ -358,10 +358,10 @@ export default function EventDetailPage() {
               <h2 className="text-2xl font-bold text-white mb-6">Foire aux questions</h2>
               <div data-event-reveal className="space-y-3 mb-16">
                 {[
-                  { question: "Comment récupérer mon billet après l'achat ?", answer: 'Après confirmation de votre commande, retrouvez votre billet et son QR code dans la rubrique « Mes billets » de votre compte Looga.' },
-                  { question: 'Puis-je obtenir un remboursement ?', answer: 'Les conditions de remboursement dépendent de la politique applicable à cet événement. Consultez les conditions de vente ou contactez l’organisateur avant votre achat.' },
-                  { question: "L'événement est-il accessible aux personnes à mobilité réduite ?", answer: 'Cette information n’est pas précisée ici. Contactez l’organisateur pour confirmer les conditions d’accessibilité.' },
-                  { question: 'Y a-t-il un parking disponible sur place ?', answer: 'La disponibilité d’un parking n’est pas confirmée. Renseignez-vous auprès de l’organisateur ou du lieu.' },
+                  { question: "Comment récupérer mon billet après l'achat ?", answer: 'Une fois ton paiement confirmé, retrouve ton billet directement dans la rubrique « Mes billets » de ton compte Looga. Tu pourras le présenter à l’entrée de l’événement grâce à son QR code.' },
+                  { question: 'Puis-je payer avec Orange Money, Wave ou MTN MoMo ?', answer: 'Les moyens de paiement disponibles te sont présentés au moment de la réservation. Choisis simplement l’option qui te convient et suis les instructions pour finaliser ton achat en toute sécurité.' },
+                  { question: 'Dois-je imprimer mon billet pour entrer ?', answer: 'Pas besoin d’imprimer ton billet ! Présente simplement ton QR code depuis ton téléphone à l’entrée de l’événement. Pense à augmenter la luminosité de ton écran pour faciliter le scan.' },
+                  { question: "Comment savoir où se déroule exactement l'événement ?", answer: 'L’adresse et la localisation de l’événement sont indiquées sur sa page Looga. Tu peux consulter la carte pour repérer le lieu et préparer ton trajet avant de partir.' },
                 ].map(({ question, answer }, i) => (
                   <div key={question} className="overflow-hidden rounded-xl border border-white/10 bg-[#21172c]">
                     <button type="button" aria-expanded={openFaq === i} onClick={() => setOpenFaq(openFaq === i ? null : i)}
