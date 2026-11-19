@@ -17,7 +17,7 @@ const STATUS_CONFIG: Record<TicketStatus, { label: string; bg: string; fg: strin
   valid:     { label: 'Valide',     bg: 'bg-[#00C86422]', fg: 'text-[#007A3C]',     dot: 'bg-[#00C864]' },
   used:      { label: 'Utilisé',    bg: 'bg-black/8',     fg: 'text-[#6E6B66]',     dot: 'bg-[#6E6B66]' },
   expired:   { label: 'Expiré',     bg: 'bg-[#FF3B3B22]', fg: 'text-[#B22020]',     dot: 'bg-[#FF3B3B]' },
-  cancelled: { label: 'Annulé',     bg: 'bg-black/8',     fg: 'text-[#6E6B66]',     dot: 'bg-[#6E6B66]' },
+  cancelled: { label: 'Annulé',     bg: 'bg-[#C62828]', fg: 'text-white',       dot: 'bg-white' },
 };
 
 const CATEGORY_LABEL: Record<string, string> = {
@@ -49,7 +49,15 @@ const CATEGORY_LABEL: Record<string, string> = {
 export function TicketCard({ ticket }: Props) {
   const [qrOpen, setQrOpen] = useState(false);
   const [resuming, setResuming] = useState(false);
-  const status = STATUS_CONFIG[ticket.status];
+  // Un billet confirmé mais non scanné n'est plus « Valide » une fois l'événement passé.
+  // La comparaison est cohérente avec le filtrage par date de /tickets.
+  const eventTimestamp = ticket.eventDate ? new Date(ticket.eventDate).getTime() : NaN;
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const isPastEvent = Number.isFinite(eventTimestamp) && eventTimestamp < startOfToday.getTime();
+  const status = ticket.status === 'valid' && isPastEvent
+    ? { label: 'Non utilisé', bg: 'bg-white/15', fg: 'text-white', dot: 'bg-[#C8B8D6]' }
+    : STATUS_CONFIG[ticket.status];
   const isInactive = ticket.status === 'expired' || ticket.status === 'cancelled' || ticket.status === 'used';
   const qrValue = ticket.qrCode || ticket.ticketNumber;
   // Le QR n'est présentable à l'entrée que si le paiement est confirmé.
