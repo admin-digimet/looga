@@ -14,6 +14,23 @@ import type { Ticket } from '@/types';
 type Tab = 'upcoming' | 'pending' | 'past';
 type PastFilter = 'all' | 'used' | 'unused' | 'cancelled';
 
+type TicketGroup = { id: string; tickets: Ticket[] };
+
+// Une référence de paiement commune est le seul indice de réservation disponible.
+// Sans référence, on conserve des cartes distinctes plutôt que de fusionner deux achats.
+function groupTickets(tickets: Ticket[]): TicketGroup[] {
+  const groups = new Map<string, TicketGroup>();
+  for (const ticket of tickets) {
+    const ref = ticket.paymentRef?.trim();
+    const key = ref ? `payment:${ref}:event:${ticket.eventId}` : `ticket:${ticket.id}`;
+    const existing = groups.get(key);
+    if (existing) existing.tickets.push(ticket);
+    else groups.set(key, { id: key, tickets: [ticket] });
+  }
+  return [...groups.values()];
+}
+
+
 function isUpcoming(ticket: Ticket): boolean {
   if (!ticket.eventDate) return true; // pas de date connue → on suppose à venir
   const eventTs = new Date(ticket.eventDate).getTime();
@@ -71,7 +88,7 @@ export default function TicketsPage() {
     if (pastFilter === 'unused') return ticket.status === 'expired' || (ticket.status === 'valid' && !isUpcoming(ticket));
     return true;
   });
-  const allVisible = tab === 'upcoming' ? upcoming : tab === 'pending' ? pending : filteredPast;
+  const allVisible = groupTickets(tab === 'upcoming' ? upcoming : tab === 'pending' ? pending : filteredPast);
   const currentPage = tab === 'upcoming' ? upcomingPage : tab === 'pending' ? pendingPage : pastPage;
   const setCurrentPage = tab === 'upcoming' ? setUpcomingPage : tab === 'pending' ? setPendingPage : setPastPage;
   const totalPages = Math.max(1, Math.ceil(allVisible.length / PAGE_SIZE));
@@ -172,7 +189,7 @@ export default function TicketsPage() {
           <>
             <div className="space-y-5">
               {visible.map((t) => (
-                <TicketCard key={t.id} ticket={t} />
+                <TicketCard key={t.id} ticket={t.tickets[0]} tickets={t.tickets} />
               ))}
             </div>
             {totalPages > 1 && (
