@@ -11,7 +11,7 @@ import { useAuthStore } from '@/lib/store/authStore';
 import { useTickets } from '@/hooks/useTickets';
 import type { Ticket } from '@/types';
 
-type Tab = 'upcoming' | 'past' | 'cancelled';
+type Tab = 'upcoming' | 'pending' | 'past';
 
 function isUpcoming(ticket: Ticket): boolean {
   if (!ticket.eventDate) return true; // pas de date connue → on suppose à venir
@@ -29,7 +29,7 @@ export default function TicketsPage() {
   const [tab, setTab] = useState<Tab>('upcoming')
   const [upcomingPage, setUpcomingPage] = useState(1)
   const [pastPage, setPastPage] = useState(1)
-  const [cancelledPage, setCancelledPage] = useState(1)
+  const [pendingPage, setPendingPage] = useState(1)
   const PAGE_SIZE = 10;
 
   useEffect(() => {
@@ -38,28 +38,34 @@ export default function TicketsPage() {
     }
   }, [isAuthenticated, authLoading, router]);
 
-  const { upcoming, past, cancelled } = useMemo(() => {
+  const { upcoming, pending, past } = useMemo(() => {
     const list = tickets ?? [];
     const u: Ticket[] = [];
+    const waiting: Ticket[] = [];
     const p: Ticket[] = [];
-    const c: Ticket[] = [];
+
     for (const t of list) {
-      // Les annulés (paiement abandonné/échoué) sont isolés dans leur onglet
-      // pour la traçabilité, sans polluer "À venir" / "Passés".
-      if (t.status === 'cancelled') c.push(t);
+      // Les paiements non finalisés ont leur propre onglet.
+      // Les billets annulés, expirés ou utilisés restent dans l'historique.
+      if (t.status === 'pending') waiting.push(t);
+      else if (t.status === 'cancelled' || t.status === 'expired' || t.status === 'used') p.push(t);
       else if (isUpcoming(t)) u.push(t);
       else p.push(t);
     }
-    // Tri : à venir = plus proche en premier, passés/annulés = plus récent en premier
-    u.sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime());
-    p.sort((a, b) => new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime());
-    c.sort((a, b) => new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime());
-    return { upcoming: u, past: p, cancelled: c };
+
+    const eventTime = (t: Ticket) => {
+      const ts = new Date(t.eventDate).getTime();
+      return Number.isFinite(ts) ? ts : 0;
+    };
+    u.sort((a, b) => eventTime(a) - eventTime(b));
+    waiting.sort((a, b) => new Date(b.purchasedAt).getTime() - new Date(a.purchasedAt).getTime());
+    p.sort((a, b) => eventTime(b) - eventTime(a));
+    return { upcoming: u, pending: waiting, past: p };
   }, [tickets]);
 
-  const allVisible = tab === 'upcoming' ? upcoming : tab === 'past' ? past : cancelled;
-  const currentPage = tab === 'upcoming' ? upcomingPage : tab === 'past' ? pastPage : cancelledPage;
-  const setCurrentPage = tab === 'upcoming' ? setUpcomingPage : tab === 'past' ? setPastPage : setCancelledPage;
+  const allVisible = tab === 'upcoming' ? upcoming : tab === 'pending' ? pending : past;
+  const currentPage = tab === 'upcoming' ? upcomingPage : tab === 'pending' ? pendingPage : pastPage;
+  const setCurrentPage = tab === 'upcoming' ? setUpcomingPage : tab === 'pending' ? setPendingPage : setPastPage;
   const totalPages = Math.max(1, Math.ceil(allVisible.length / PAGE_SIZE));
   const visible = allVisible.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
@@ -75,7 +81,7 @@ export default function TicketsPage() {
         </p>
 
         {/* Tabs */}
-        {!ticketsLoading && (upcoming.length > 0 || past.length > 0 || cancelled.length > 0) && (
+        {!ticketsLoading && (upcoming.length > 0 || pending.length > 0 || past.length > 0) && (
           <div className="flex items-center gap-1 mb-6 border-b border-white/15">
             <button
               type="button"
@@ -94,6 +100,21 @@ export default function TicketsPage() {
             </button>
             <button
               type="button"
+              onClick={() => { setTab('pending'); setPendingPage(1) }}
+              className={`relative px-4 py-3 text-sm font-semibold transition-colors ${
+                tab === 'pending' ? 'text-[#FF791F]' : 'text-[#BEB3CA] hover:text-white'
+              }`}
+            >
+              En attente
+              {pending.length > 0 && (
+                <span className="ml-1.5 inline-flex items-center justify-center text-[11px] px-1.5 py-0.5 rounded-full bg-white/10 text-[#CFC4DA] font-bold">
+                  {pending.length}
+                </span>
+              )}
+              {tab === 'pending' && <span className="absolute left-2 right-2 -bottom-px h-0.5 bg-orange rounded-full" />}
+            </button>
+            <button
+              type="button"
               onClick={() => { setTab('past'); setPastPage(1) }}
               className={`relative px-4 py-3 text-sm font-semibold transition-colors ${
                 tab === 'past' ? 'text-[#FF791F]' : 'text-[#BEB3CA] hover:text-white'
@@ -107,21 +128,6 @@ export default function TicketsPage() {
               )}
               {tab === 'past' && <span className="absolute left-2 right-2 -bottom-px h-0.5 bg-orange rounded-full" />}
             </button>
-            {cancelled.length > 0 && (
-              <button
-                type="button"
-                onClick={() => { setTab('cancelled'); setCancelledPage(1) }}
-                className={`relative px-4 py-3 text-sm font-semibold transition-colors ${
-                  tab === 'cancelled' ? 'text-[#FF791F]' : 'text-[#BEB3CA] hover:text-white'
-                }`}
-              >
-                Annulé
-                <span className="ml-1.5 inline-flex items-center justify-center text-[11px] px-1.5 py-0.5 rounded-full bg-white/10 text-[#CFC4DA] font-bold">
-                  {cancelled.length}
-                </span>
-                {tab === 'cancelled' && <span className="absolute left-2 right-2 -bottom-px h-0.5 bg-orange rounded-full" />}
-              </button>
-            )}
           </div>
         )}
 
@@ -133,15 +139,15 @@ export default function TicketsPage() {
             ))}
           </div>
         ) : visible.length === 0 ? (
-          upcoming.length === 0 && past.length === 0 && cancelled.length === 0 ? (
+          upcoming.length === 0 && pending.length === 0 && past.length === 0 ? (
             <EmptyState />
           ) : (
             <div className="text-center py-16 text-[#BEB3CA] text-sm">
               {tab === 'upcoming'
                 ? 'Aucun billet à venir.'
-                : tab === 'past'
-                ? 'Aucun billet passé.'
-                : 'Aucun billet annulé.'}
+                : tab === 'pending'
+                ? 'Aucun paiement en attente.'
+                : 'Aucun billet passé ou annulé.'}
             </div>
           )
         ) : (
