@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { DynamicInfoPage } from '@/components/DynamicInfoPage';
+import { HelpInfoPage } from '@/components/HelpInfoPage';
 
 export const metadata: Metadata = {
   title: "Centre d'aide — Looga",
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function AidePage() {
   return (
-    <DynamicInfoPage
+    <HelpInfoPage
       pageKey="aide"
       fallbackTitle="Centre d'aide Looga"
       fallbackIntro="Trouve rapidement des réponses à tes questions et apprends à utiliser Looga facilement."
@@ -36,7 +36,7 @@ export default function AidePage() {
               </div>
               <div>
                 <p className="font-semibold text-ink mb-1">Comment recevoir mon billet ?</p>
-                <p>Ton billet (QR code) est disponible immédiatement dans la section <Link href="/tickets" className="text-orange font-medium hover:underline">Mes billets</Link> de ton compte, accessible sans connexion internet une fois chargé.</p>
+                <p>Ton billet (QR code) est disponible immédiatement dans la section <Link href="/tickets" className="text-orange font-medium hover:underline">Mes billets</Link> de ton compte, dans ton compte. Pour le présenter à l’entrée, ouvre « Mes billets » et affiche le QR code.</p>
               </div>
               <div>
                 <p className="font-semibold text-ink mb-1">Que faire en cas de problème de réservation ?</p>
@@ -83,7 +83,7 @@ export default function AidePage() {
                 </div>
                 <div>
                   <p className="font-semibold text-ink mb-1">Problèmes de connexion</p>
-                  <p>Si tu ne peux pas te connecter, vérifie ton email et mot de passe. En cas d&apos;oubli de mot de passe, utilise l&apos;option <strong>Mot de passe oublié</strong> sur l&apos;écran de connexion. Si le problème persiste, <Link href="/contact" className="text-orange font-medium hover:underline">contacte le support</Link>.</p>
+                  <p>Si tu ne peux pas te connecter, vérifie ton email et mot de passe. Si tu as oublié ton mot de passe, <Link href="/contact" className="text-orange font-medium hover:underline">contacte le support</Link> pour obtenir de l’aide. Si le problème persiste, <Link href="/contact" className="text-orange font-medium hover:underline">contacte le support</Link>.</p>
                 </div>
               </div>
             </>
