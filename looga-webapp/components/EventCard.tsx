@@ -23,9 +23,10 @@ export function EventCard({ event, compactTime = false }: { event: Event; compac
   }
 
   return (
-    <Link href={`/events/${event.id}`} className="flex flex-col group cursor-pointer h-full">
+    <div className="flex flex-col group h-full">
       <div className="relative aspect-[16/10] overflow-hidden rounded-xl mb-3">
-        {event.image ? (
+        <Link href={`/events/${event.id}`} className="block h-full w-full" aria-label={`Voir ${event.name}`}>
+          {event.image ? (
           <img
             src={event.image}
             alt={event.name}
@@ -36,13 +37,14 @@ export function EventCard({ event, compactTime = false }: { event: Event; compac
             🎉
           </div>
         )}
+        </Link>
         <button
           type="button"
           onClick={handleHeartClick}
           aria-label={isSaved ? 'Retirer des favoris' : 'Ajouter aux favoris'}
           aria-pressed={isSaved}
           className={`absolute top-2 right-2 p-2 bg-white/90 rounded-full transition-opacity ${
-            isSaved ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+            isSaved ? 'opacity-100' : 'opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100'
           }`}
         >
           <Heart
@@ -60,7 +62,7 @@ export function EventCard({ event, compactTime = false }: { event: Event; compac
       )}
 
       <h3 className="font-bold text-lg leading-tight mb-1 group-hover:text-orange line-clamp-2 wrap-break-word">
-        {event.name}
+        <Link href={`/events/${event.id}`} className="focus-visible:underline focus-visible:outline-2 focus-visible:outline-orange">{event.name}</Link>
       </h3>
       <p className="text-orange font-semibold text-sm mb-1">
         {compactTime ? formatEventDate(event.date, event.time).replace(/(\d{1,2}):(\d{2})(?::\d{2})?/g, '$1h$2') : formatEventDate(event.date, event.time)}
@@ -68,6 +70,6 @@ export function EventCard({ event, compactTime = false }: { event: Event; compac
       <p className="text-gray-500 text-sm mb-1">{event.location}</p>
       <p className="text-gray-700 text-sm font-medium mb-1">{formatPriceFrom(event.minPrice)}</p>
       <p className="text-gray-500 text-sm mt-auto">{event.organizerName}</p>
-    </Link>
+    </div>
   );
 }
