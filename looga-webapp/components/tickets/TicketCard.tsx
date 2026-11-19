@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { Calendar, MapPin, Tag, ScanLine, Clock, CreditCard, Loader2 } from 'lucide-react';
-import { formatEventDate, formatPrice } from '@/lib/utils';
+import { Calendar, MapPin, CreditCard, Loader2, QrCode, ExternalLink, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
+import { formatEventDate } from '@/lib/utils';
 import { getPaymentStatus } from '@/lib/api/payment';
 import type { Ticket, TicketStatus } from '@/types';
 import { TicketQRModal } from './TicketQRModal';
@@ -17,52 +18,16 @@ const STATUS_CONFIG: Record<TicketStatus, { label: string; bg: string; fg: strin
   valid:     { label: 'Valide',     bg: 'bg-[#00C86422]', fg: 'text-[#007A3C]',     dot: 'bg-[#00C864]' },
   used:      { label: 'Utilisé',    bg: 'bg-black/8',     fg: 'text-[#6E6B66]',     dot: 'bg-[#6E6B66]' },
   expired:   { label: 'Expiré',     bg: 'bg-[#FF3B3B22]', fg: 'text-[#B22020]',     dot: 'bg-[#FF3B3B]' },
-  cancelled: { label: 'Annulé',     bg: 'bg-[#C62828]', fg: 'text-white',       dot: 'bg-white' },
-};
-
-const CATEGORY_LABEL: Record<string, string> = {
-  concerts:    'Concerts',
-  soirees:     'Soirées',
-  culture:     'Culture',
-  sports:      'Sports',
-  workshops:   'Ateliers',
-  gastronomie: 'Gastronomie',
-  conferences: 'Conférences',
-  networking:  'Networking',
-  mode:        'Mode',
-  famille:     'Famille',
-  humour:      'Humour',
-  religieux:   'Religieux',
-  cinema:      'Cinéma',
-  caritatif:   'Caritatif',
-  enfants:     'Enfants',
-  gaming:      'Gaming',
-  tournee:     'Tournée',
-  salon:       'Salon',
-  theatre:     'Théâtre',
-  bien_etre:   'Bien-être',
-  festival:    'Festival',
-  auto_moto:   'Auto-Moto',
-  autre:       'Événement',
+  cancelled: { label: 'Annulé',     bg: 'bg-black/8',     fg: 'text-[#6E6B66]',     dot: 'bg-[#6E6B66]' },
 };
 
 export function TicketCard({ ticket }: Props) {
   const [qrOpen, setQrOpen] = useState(false);
   const [resuming, setResuming] = useState(false);
-  // Un billet confirmé mais non scanné n'est plus « Valide » une fois l'événement passé.
-  // La comparaison est cohérente avec le filtrage par date de /tickets.
-  const eventTimestamp = ticket.eventDate ? new Date(ticket.eventDate).getTime() : NaN;
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
-  const isPastEvent = Number.isFinite(eventTimestamp) && eventTimestamp < startOfToday.getTime();
-  const status = ticket.status === 'valid' && isPastEvent
-    ? { label: 'Non utilisé', bg: 'bg-white/15', fg: 'text-white', dot: 'bg-[#C8B8D6]' }
-    : STATUS_CONFIG[ticket.status];
-  const isInactive = ticket.status === 'expired' || ticket.status === 'cancelled' || ticket.status === 'used';
+  const status = STATUS_CONFIG[ticket.status];
   const qrValue = ticket.qrCode || ticket.ticketNumber;
   // Le QR n'est présentable à l'entrée que si le paiement est confirmé.
   // Un billet 'pending' (paiement non finalisé) ne doit jamais afficher de QR.
-  const showQr = ticket.status === 'valid' || ticket.status === 'used';
   const isPending = ticket.status === 'pending';
 
   // Reprend le paiement : redirige directement vers le checkout GeniusPay
@@ -87,158 +52,63 @@ export function TicketCard({ ticket }: Props) {
     }
   }
 
+  const eventTimestamp = ticket.eventDate ? new Date(ticket.eventDate).getTime() : NaN;
+  const eventPast = Number.isFinite(eventTimestamp) && eventTimestamp < new Date().setHours(0, 0, 0, 0);
+  const displayStatus = ticket.status === 'valid' && eventPast
+    ? { label: 'Non utilisé', bg: 'bg-white/10', fg: 'text-[#D4CBDD]', dot: 'bg-[#BEB3CA]' }
+    : ticket.status === 'cancelled'
+      ? { label: 'Annulé', bg: 'bg-[#C92A3B]', fg: 'text-white', dot: 'bg-white' }
+      : ticket.status === 'valid'
+        ? { label: 'Valide', bg: 'bg-emerald-500/20', fg: 'text-emerald-300', dot: 'bg-emerald-400' }
+        : { ...status, fg: ticket.status === 'pending' ? 'text-amber-300' : 'text-[#D4CBDD]' };
+  const canPresent = ticket.status === 'valid' && !eventPast && Boolean(qrValue);
+  const canInspect = ticket.status === 'valid' && !eventPast && Boolean(qrValue);
+  const calendarDate = ticket.eventDate ? new Date(ticket.eventDate) : null;
+  const calendarUrl = calendarDate && !Number.isNaN(calendarDate.getTime())
+    ? `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(ticket.eventName || 'Événement Looga')}&dates=${calendarDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')}/${new Date(calendarDate.getTime() + 2 * 60 * 60 * 1000).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')}&details=${encodeURIComponent('Événement sur Looga')}&location=${encodeURIComponent(ticket.eventLocation || '')}`
+    : null;
+
   return (
     <>
-      <article
-        className={`relative bg-[#251A30] text-white rounded-2xl overflow-hidden border border-[#41334D] shadow-[0_8px_24px_rgba(0,0,0,0.16)] ${
-          isInactive ? 'opacity-75' : ''
-        }`}
-      >
-        {/* HERO — image event */}
-        <div className="relative h-[140px] w-full overflow-hidden">
-          {ticket.eventImage ? (
-            <img
-              src={ticket.eventImage}
-              alt={ticket.eventName}
-              loading="lazy"
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-orange to-violet" />
-          )}
-          {/* Overlay gradient pour lisibilité du texte */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
-
-          {/* Badge statut */}
-          <span
-            className={`absolute top-3 right-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${status.bg} ${status.fg} backdrop-blur-sm`}
-          >
-            <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
-            {status.label}
-          </span>
-
-          {/* Nom event */}
-          <h3 className="absolute bottom-3 left-4 right-4 font-heading font-extrabold text-white text-lg leading-tight line-clamp-2 wrap-break-word">
-            {ticket.eventName || 'Événement'}
-          </h3>
-        </div>
-
-        {/* PERFORATION */}
-        <div className="relative">
-          {/* Encoches gauche/droite — couleur fond page */}
-          <span className="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-[#160F20]" />
-          <span className="absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-[#160F20]" />
-          <div className="mx-5 border-t-2 border-dashed border-white/15" />
-        </div>
-
-        {/* BODY — détails + QR */}
-        <div className="p-5 flex flex-col sm:flex-row gap-5">
-          {/* Infos event */}
-          <div className="flex-1 min-w-0 space-y-2.5">
-            {ticket.eventDate && (
-              <div className="flex items-center gap-2 text-sm text-white">
-                <Calendar className="w-4 h-4 text-orange shrink-0" />
-                <span className="font-medium">{formatEventDate(ticket.eventDate, ticket.eventTime)}</span>
-              </div>
-            )}
-            {ticket.eventLocation && (
-              <div className="flex items-center gap-2 text-sm text-[#BEB3CA]">
-                <MapPin className="w-4 h-4 shrink-0" />
-                <span className="truncate">{ticket.eventLocation}</span>
-              </div>
-            )}
-            {ticket.eventCategory && (
-              <div className="flex items-center gap-2 text-sm text-[#BEB3CA]">
-                <Tag className="w-4 h-4 shrink-0" />
-                <span>{CATEGORY_LABEL[ticket.eventCategory] ?? ticket.eventCategory}</span>
-              </div>
-            )}
-
-            {/* Footer card : numéro + type + total */}
-            <div className="pt-3 mt-1 border-t border-white/15 grid grid-cols-2 gap-y-1.5 gap-x-3 text-xs">
-              {ticket.ticketTypeName && (
-                <>
-                  <span className="text-[#BEB3CA]">Type</span>
-                  <span className="font-semibold text-white text-right">
-                    {ticket.ticketTypeName} × {ticket.quantity}
-                  </span>
-                </>
-              )}
-              <span className="text-[#BEB3CA]">Total</span>
-              <span className="font-heading font-extrabold text-orange text-right">
-                {formatPrice(ticket.totalPrice)}
+      <article className="overflow-hidden rounded-2xl border border-[#493652] bg-[#261A31] text-white shadow-[0_8px_24px_rgba(0,0,0,0.14)]">
+        <div className="flex gap-3 p-3 sm:gap-5 sm:p-4">
+          <div className="h-32 w-28 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-[#FF791F] to-[#4E276C] sm:h-36 sm:w-36">
+            {ticket.eventImage && <img src={ticket.eventImage} alt={ticket.eventName || 'Affiche de l’événement'} loading="lazy" className="h-full w-full object-cover" />}
+          </div>
+          <div className="min-w-0 flex-1 space-y-2">
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <h3 className="min-w-0 flex-1 font-heading text-base font-extrabold leading-snug sm:text-lg">{ticket.eventName || 'Événement'}</h3>
+              <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${displayStatus.bg} ${displayStatus.fg}`}>
+                <span className={`h-1.5 w-1.5 rounded-full ${displayStatus.dot}`} />{displayStatus.label}
               </span>
-              <span className="text-[#BEB3CA]">N° billet</span>
-              <span className="font-mono text-[11px] text-white text-right truncate">
-                {ticket.ticketNumber}
-              </span>
+            </div>
+            {ticket.eventDate && <div className="flex items-start gap-2 text-xs text-[#FF9B59] sm:text-sm"><Calendar className="mt-0.5 h-4 w-4 shrink-0"/><span>{formatEventDate(ticket.eventDate, ticket.eventTime)}</span></div>}
+            {ticket.eventLocation && <div className="flex items-start gap-2 text-xs text-[#C6BAD0] sm:text-sm"><MapPin className="mt-0.5 h-4 w-4 shrink-0"/><span className="line-clamp-2">{ticket.eventLocation}</span></div>}
+            <div className="flex flex-wrap gap-2 pt-1">
+              <span className="rounded-full bg-white/10 px-2.5 py-1 text-[11px] text-[#DDD3E6]">{ticket.quantity > 1 ? `${ticket.quantity} billets` : '1 billet'}</span>
+              {ticket.ticketTypeName && <span className="max-w-full truncate rounded-full bg-white/10 px-2.5 py-1 text-[11px] text-[#DDD3E6]">{ticket.ticketTypeName}</span>}
             </div>
           </div>
-
-          {/* QR — affiché uniquement si le paiement est confirmé */}
-          {showQr ? (
-            <button
-              type="button"
-              onClick={() => setQrOpen(true)}
-              disabled={!qrValue}
-              className="self-center sm:self-start shrink-0 group relative bg-white border-2 border-black/5 rounded-xl p-3 transition-all hover:border-orange/50 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label="Agrandir le QR code"
-            >
-              {qrValue ? (
-                <QRCodeSVG
-                  value={qrValue}
-                  size={110}
-                  level="M"
-                  marginSize={0}
-                  className="block"
-                />
-              ) : (
-                <div className="w-[110px] h-[110px] flex items-center justify-center text-xs text-[#5B5164]">
-                  Pas de QR
-                </div>
-              )}
-              <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-ink text-white text-[10px] font-semibold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                <ScanLine className="w-3 h-3" />
-                Agrandir
-              </span>
-            </button>
-          ) : isPending ? (
-            <div className="self-center sm:self-start shrink-0 w-full sm:w-[136px] flex flex-col items-center justify-center gap-2.5 bg-[#FFB80012] border-2 border-dashed border-[#FFB80055] rounded-xl p-4 text-center">
-              <Clock className="w-6 h-6 text-[#9A6E00]" />
-              <span className="text-xs font-semibold text-[#9A6E00] leading-tight">
-                Paiement en attente
-              </span>
-              <span className="text-[10px] text-[#9A6E00]/80 leading-snug">
-                Sans paiement, ce billet sera annulé sous ~30 min.
-              </span>
-              <button
-                type="button"
-                onClick={handleResumePayment}
-                disabled={resuming}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange text-white text-[11px] font-bold hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-wait"
-              >
-                {resuming ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <CreditCard className="w-3.5 h-3.5" />
-                )}
-                {resuming ? 'Redirection…' : 'Finaliser'}
-              </button>
-            </div>
-          ) : (
-            <div className="self-center sm:self-start shrink-0 w-full sm:w-[136px] flex items-center justify-center bg-white/[0.04] border-2 border-dashed border-white/15 rounded-xl p-4 text-center text-xs text-[#BEB3CA]">
-              Billet non valide
-            </div>
-          )}
         </div>
+        <div className="grid grid-cols-1 gap-2 border-t border-white/10 p-3 sm:grid-cols-2 sm:p-4">
+          {isPending ? (
+            <button type="button" onClick={handleResumePayment} disabled={resuming} className="flex items-center justify-center gap-2 rounded-xl bg-[#FF791F] px-4 py-3 text-sm font-bold text-white hover:brightness-110 disabled:opacity-60">
+              {resuming ? <Loader2 className="h-4 w-4 animate-spin"/> : <CreditCard className="h-4 w-4"/>}{resuming ? 'Redirection…' : 'Finaliser mon paiement'}
+            </button>
+          ) : canInspect ? (
+            <button type="button" onClick={() => setQrOpen(true)} className="flex items-center justify-center gap-2 rounded-xl bg-[#FF791F] px-4 py-3 text-sm font-bold text-white hover:brightness-110">
+              <QrCode className="h-4 w-4"/>Voir mon billet
+            </button>
+          ) : (
+            <div className="flex items-center justify-center gap-2 rounded-xl bg-white/10 px-4 py-3 text-sm font-semibold text-[#D4CBDD]"><ChevronRight className="h-4 w-4"/>Billet indisponible</div>
+          )}
+          <Link href={`/events/${ticket.eventId}`} className="flex items-center justify-center gap-2 rounded-xl bg-[#41314D] px-4 py-3 text-sm font-bold text-white hover:bg-[#513B60]">
+            <ExternalLink className="h-4 w-4"/>Voir l&apos;événement
+          </Link>
+        </div>
+        {canPresent && calendarUrl && <div className="border-t border-white/10 px-4 pb-3 text-right"><a href={calendarUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-[#FF9B59] hover:underline">Ajouter au calendrier</a></div>}
       </article>
-
-      {qrOpen && showQr && (
-        <TicketQRModal
-          ticket={ticket}
-          onClose={() => setQrOpen(false)}
-        />
-      )}
+      {qrOpen && canInspect && <TicketQRModal ticket={ticket} onClose={() => setQrOpen(false)} />}
     </>
   );
 }
