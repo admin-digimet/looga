@@ -95,9 +95,18 @@ function dynamicQuestions(body: string, heading: string): Question[] {
 export function HelpInfoPage({ pageKey, fallbackTitle, fallbackIntro, fallbackSections }: HelpInfoPageProps) {
   const { data, isLoading } = usePageContent(pageKey);
   const useFallback = isLoading || !data || (data.sections?.length ?? 0) === 0;
-  const categories: HelpCategory[] = useFallback
+  // La rubrique d'introduction est déjà représentée par la bannière.
+  // Filtrage appliqué aussi aux sections issues du back-office, sans toucher aux données enregistrées.
+  const isIntroCategory = (heading: string) =>
+    heading.trim().toLocaleLowerCase('fr').replace(/[’]/g, "'") === "comment pouvons-nous t'aider ?";
+  const displayHeading = (heading: string) =>
+    heading.trim().toLocaleLowerCase('fr') === 'utilisateurs' ? 'Participants' : heading;
+
+  const categories: HelpCategory[] = (useFallback
     ? fallbackSections.map(section => ({ heading: section.heading, questions: fallbackQuestions(section.body, section.heading) }))
-    : data.sections.map(section => ({ heading: section.heading, questions: dynamicQuestions(section.body, section.heading) }));
+    : data.sections.map(section => ({ heading: section.heading, questions: dynamicQuestions(section.body, section.heading) })))
+    .filter(category => !isIntroCategory(category.heading))
+    .map(category => ({ ...category, heading: displayHeading(category.heading) }));
 
   return (
     <div className="flex min-h-screen flex-col bg-[#13091e] font-sans text-white">
