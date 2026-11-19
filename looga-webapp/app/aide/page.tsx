@@ -15,15 +15,7 @@ export default function AidePage() {
       fallbackIntro="Trouve rapidement des réponses à tes questions et profite pleinement de Looga."
       fallbackSections={[
         {
-          heading: "Comment pouvons-nous t'aider ?",
-          body: (
-            <p>
-              Que tu sois utilisateur ou organisateur, cette page regroupe les réponses aux questions les plus fréquentes sur l&apos;utilisation de Looga.
-            </p>
-          ),
-        },
-        {
-          heading: 'Utilisateurs',
+          heading: 'Participants',
           body: (
             <div className="space-y-5">
               <div>
