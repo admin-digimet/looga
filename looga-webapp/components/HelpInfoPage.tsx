@@ -95,8 +95,6 @@ function dynamicQuestions(body: string, heading: string): Question[] {
 export function HelpInfoPage({ pageKey, fallbackTitle, fallbackIntro, fallbackSections }: HelpInfoPageProps) {
   const { data, isLoading } = usePageContent(pageKey);
   const useFallback = isLoading || !data || (data.sections?.length ?? 0) === 0;
-  const title = useFallback ? fallbackTitle : data.title;
-  const intro = useFallback ? fallbackIntro : (data.intro ?? undefined);
   const categories: HelpCategory[] = useFallback
     ? fallbackSections.map(section => ({ heading: section.heading, questions: fallbackQuestions(section.body, section.heading) }))
     : data.sections.map(section => ({ heading: section.heading, questions: dynamicQuestions(section.body, section.heading) }));
@@ -109,8 +107,8 @@ export function HelpInfoPage({ pageKey, fallbackTitle, fallbackIntro, fallbackSe
         <div className="absolute inset-0 bg-gradient-to-t from-[#13091e]/35 to-transparent" />
         <div className="relative mx-auto max-w-[1100px] px-5 py-16 sm:px-8 md:py-24">
           <p className="mb-4 text-sm font-bold uppercase tracking-[0.18em] text-white/85">CENTRE D’AIDE LOOGA</p>
-          <h1 className="max-w-[950px] font-heading text-4xl font-black leading-[1.08] tracking-tight sm:text-5xl md:text-6xl">{title}</h1>
-          {intro && <p className="mt-6 max-w-[700px] text-base leading-relaxed text-white/90 md:text-lg">{intro}</p>}
+          <h1 className="max-w-[950px] font-heading text-4xl font-black leading-[1.08] tracking-tight sm:text-5xl md:text-6xl">Une question ? On est là.</h1>
+          <p className="mt-6 max-w-[700px] text-base leading-relaxed text-white/90 md:text-lg">Trouve rapidement des réponses à tes questions et profite pleinement de Looga.</p>
         </div>
       </section>
       <main className="mx-auto w-full max-w-[1100px] flex-1 px-5 py-12 sm:px-8 md:py-16">
