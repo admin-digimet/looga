@@ -12,7 +12,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { PublicHeader } from '@/components/PublicHeader';
-import { Footer } from '@/components/Footer';
+import { PublicFooter } from '@/components/PublicFooter';
 
 export const metadata: Metadata = {
   title: 'Application mobile bientôt disponible — Looga',
@@ -169,7 +169,7 @@ export default function MobilePage() {
           </div>
         </section>
       </main>
-      <Footer />
+      <PublicFooter />
     </div>
   );
 }
