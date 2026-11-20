@@ -6,7 +6,7 @@ import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
-import { Search, MapPin, CalendarDays, Tag, ArrowRight, Ticket, Sparkles, RotateCcw } from 'lucide-react';
+import { Search, MapPin, CalendarDays, Tag, ArrowRight, Ticket, RotateCcw } from 'lucide-react';
 import { EventCard } from '@/components/EventCard';
 import { EventCardSkeleton } from '@/components/EventCardSkeleton';
 import * as eventsApi from '@/lib/api/events';
@@ -19,7 +19,7 @@ const LOAD_MORE_SIZE = 8;
 const TABS = ['Tous', 'Concerts', 'Soirées', 'Ce week-end'];
 // Source unique : mêmes identifiants historiques que les filtres Explorer.
 const CATEGORY_IMAGES = [
-  'https://images.unsplash.com/photo-1571266028243-d220c9b3b157?w=700&q=80',
+  'https://images.unsplash.com/photo-1744313930610-1649242d1fcd?w=700&q=80', // Soirées & Clubs : photographie provisoire, Unsplash / Artem Polezhaev
   'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=700&q=80',
   'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=700&q=80',
   'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=700&q=80',
@@ -70,11 +70,10 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-r from-[#13091e]/95 via-[#13091e]/70 to-[#13091e]/15" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#13091e] via-transparent to-transparent" />
           <div className="relative mx-auto max-w-[1400px] px-5 md:px-9 pt-9 sm:pt-16 md:pt-28 pb-9 sm:pb-14 md:pb-20">
-            <p className="inline-flex items-center gap-2 rounded-full border border-[#FF5C1A]/40 bg-[#1a0b26]/65 px-4 py-2 font-extrabold tracking-[0.18em] text-[#FF5C1A] text-xs md:text-sm"><Sparkles size={15}/> ABIDJAN, CÔTE D’IVOIRE</p>
-            <h1 className="mt-2 font-heading text-[clamp(2.55rem,10.3vw,4.75rem)] leading-[0.98] sm:text-[76px] md:text-[96px] font-black italic tracking-tight">LA VILLE<br/><span className="text-[#FF5C1A]">EST À TOI.</span></h1>
+            <h1 className="font-heading text-[clamp(2.2rem,9vw,4.75rem)] leading-[0.98] sm:text-[76px] md:text-[96px] font-black italic tracking-tight"><span className="block">ABIDJAN NE</span><span className="block text-[#FF5C1A]">DORT PAS.</span></h1>
             <p className="mt-5 md:mt-7 max-w-[490px] text-base md:text-xl leading-relaxed text-white/85">Les soirées, concerts et expériences<br className="hidden sm:block"/> à ne pas manquer à Abidjan.</p>
             <form onSubmit={submitSearch} className="mt-6 md:mt-9 flex items-center gap-3 max-w-[550px] h-[56px] sm:h-[60px] rounded-2xl bg-[#fff]/95 text-[#23152c] border border-white/50 px-5 shadow-[0_12px_40px_rgba(0,0,0,0.25)] focus-within:ring-2 focus-within:ring-[#FF5C1A]">
-              <Search size={21} className="shrink-0"/><input aria-label="Rechercher un événement" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher une soirée, un artiste, un lieu..." className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-[#776d7e]"/><button type="submit" aria-label="Lancer la recherche" className="rounded-xl bg-[#FF5C1A] p-2.5 text-white hover:bg-[#FF7438]"><ArrowRight size={20}/></button>
+              <Search size={21} className="shrink-0"/><input aria-label="Rechercher un événement" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Tu sors où ?" className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-[#776d7e]"/><button type="submit" aria-label="Lancer la recherche" className="rounded-xl bg-[#FF5C1A] p-2.5 text-white hover:bg-[#FF7438]"><ArrowRight size={20}/></button>
             </form>
             <div className="relative mt-4 md:mt-6 flex gap-2 md:gap-3 overflow-x-auto pb-3 snap-x snap-mandatory [scrollbar-width:none] [&>a]:snap-start">
               <Link href="/search?period=tonight" className="shrink-0 inline-flex items-center gap-2 rounded-full bg-[#FF5C1A] px-3.5 py-2.5 md:px-5 md:py-3 text-xs sm:text-sm font-bold text-white"><CalendarDays size={17}/> Ce soir</Link>
@@ -85,7 +84,7 @@ export default function HomePage() {
           </div>
         </section>
         <section className="mx-auto max-w-[1400px] px-5 md:px-9 pt-10 md:pt-14 pb-12">
-          <h2 className="font-heading text-2xl md:text-3xl font-extrabold mb-6">Explorer par catégorie</h2>
+          <h2 className="font-heading text-2xl md:text-3xl font-extrabold mb-6">C’EST QUOI TON MOOD ?</h2>
           <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:grid md:grid-cols-4 md:gap-5 md:overflow-visible md:pb-0">
             {CATEGORIES.map(category => <Link key={category.label} href={`/search?categories=${category.slugs.join(',')}`} className="group relative aspect-[1.25/1] w-[78%] max-w-[300px] shrink-0 snap-start md:aspect-[1.45/1] md:w-auto md:max-w-none overflow-hidden rounded-[22px] border border-white/10 bg-[#382044] shadow-[0_14px_35px_rgba(0,0,0,0.2)]">
               <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style={{backgroundImage: `url('${category.image}')`}} />
