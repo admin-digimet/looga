@@ -68,7 +68,7 @@ export function EventCard({ event, compactTime = false, highlightFreePrice = fal
         {compactTime ? formatEventDate(event.date, event.time).replace(/(\d{1,2}):(\d{2})(?::\d{2})?/g, '$1h$2') : formatEventDate(event.date, event.time)}
       </p>
       <p className="text-gray-500 text-sm mb-1">{event.location}</p>
-      <p className={`${highlightFreePrice && event.minPrice === 0 ? 'text-[#FF5C1A]' : 'text-gray-700'} text-sm font-medium mb-1`}>{formatPriceFrom(event.minPrice)}</p>
+      <p className={`${highlightFreePrice && event.minPrice === 0 ? '!text-[#FF5C1A]' : 'text-gray-700'} text-sm font-medium mb-1`}>{formatPriceFrom(event.minPrice)}</p>
       <p className="text-gray-500 text-sm mt-auto">{event.organizerName}</p>
     </div>
   );
