@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Bell, Globe, Shield } from 'lucide-react';
-import { Navbar } from '@/components/Navbar';
-import { Footer } from '@/components/Footer';
+import { Bell, Globe, Shield, ArrowUpRight } from 'lucide-react';
+import { PublicHeader } from '@/components/PublicHeader';
+import { PublicFooter } from '@/components/PublicFooter';
 import { useAuthStore } from '@/lib/store/authStore';
 
 const NOTIF_KEY = 'looga_notif_email';
@@ -17,9 +17,7 @@ export default function ParametresPage() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.replace('/auth/login');
-    }
+    if (!isLoading && !isAuthenticated) router.replace('/auth/login');
   }, [isAuthenticated, isLoading, router]);
 
   useEffect(() => {
@@ -27,96 +25,85 @@ export default function ParametresPage() {
     if (stored !== null) setEmailNotif(stored === 'true');
   }, []);
 
+  useEffect(() => {
+    if (!saved) return;
+    const timeout = window.setTimeout(() => setSaved(false), 2000);
+    return () => window.clearTimeout(timeout);
+  }, [saved]);
+
   function handleToggleNotif() {
     const next = !emailNotif;
     setEmailNotif(next);
     localStorage.setItem(NOTIF_KEY, String(next));
     setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
-  }
-
-  if (isLoading || !isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-cream font-sans">
-        <Navbar />
-        <main className="max-w-[1400px] mx-auto px-4 md:px-8 py-16">
-          <div className="h-32 bg-gray-200 rounded animate-pulse" />
-        </main>
-        <Footer />
-      </div>
-    );
   }
 
   return (
-    <div className="min-h-screen bg-cream font-sans">
-      <Navbar />
-      <main className="max-w-3xl mx-auto px-4 md:px-8 py-12">
-        <h1 className="font-heading font-extrabold text-ink text-3xl md:text-4xl mb-8">
-          Paramètres
-        </h1>
+    <div className="flex min-h-screen flex-col bg-[#130b1e] font-sans text-white">
+      <PublicHeader />
+      <main className="mx-auto w-full max-w-[820px] flex-1 px-5 py-12 md:px-8 md:py-16">
+        {isLoading || !isAuthenticated ? (
+          <div className="h-44 animate-pulse rounded-[22px] bg-[#24172f]" aria-label="Chargement des paramètres" />
+        ) : (
+          <>
+            <header className="mb-9">
+              <h1 className="font-heading text-4xl font-extrabold tracking-tight text-white md:text-5xl">Paramètres</h1>
+              <p className="mt-3 text-sm text-[#b8a8c9] md:text-base">Personnalise ton expérience Looga.</p>
+            </header>
 
-        {saved && (
-          <div className="mb-4 px-4 py-3 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm font-medium">
-            Préférences enregistrées.
-          </div>
+            <div className="overflow-hidden rounded-[22px] border border-[#45314e] bg-[#24172f] divide-y divide-[#45314e]">
+              <div className="flex items-center gap-3 p-5 md:gap-4 md:p-6">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#3a2443]">
+                  <Bell className="h-5 w-5 text-[#ff791f]" aria-hidden="true" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-white md:text-base">Notifications email</p>
+                  <p className="mt-1 text-xs leading-relaxed text-[#b8a8c9] md:text-sm">Reçois des alertes sur les nouveaux événements et tes billets.</p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-label="Notifications email"
+                  aria-checked={emailNotif}
+                  onClick={handleToggleNotif}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ff791f] ${emailNotif ? 'bg-[#ff791f]' : 'bg-[#5a4b66]'}`}
+                >
+                  <span className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${emailNotif ? 'translate-x-5' : 'translate-x-0'}`} />
+                </button>
+              </div>
+
+              <div className="flex items-center gap-3 p-5 md:gap-4 md:p-6">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#3a2443]">
+                  <Globe className="h-5 w-5 text-[#ff791f]" aria-hidden="true" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-white md:text-base">Langue</p>
+                  <p className="mt-1 text-xs leading-relaxed text-[#b8a8c9] md:text-sm">Langue d'affichage de l'application.</p>
+                </div>
+                <span className="shrink-0 rounded-lg bg-[#3a2443] px-3 py-1.5 text-xs font-semibold text-white">Français</span>
+              </div>
+
+              <div className="flex items-center gap-3 p-5 md:gap-4 md:p-6">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#3a2443]">
+                  <Shield className="h-5 w-5 text-[#ff791f]" aria-hidden="true" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-white md:text-base">Confidentialité</p>
+                  <p className="mt-1 text-xs leading-relaxed text-[#b8a8c9] md:text-sm">Consulte notre politique de confidentialité.</p>
+                </div>
+                <Link href="/confidentialite" aria-label="Voir la politique de confidentialité" className="flex shrink-0 items-center gap-1 text-xs font-semibold text-[#ff791f] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ff791f]">
+                  <span className="hidden sm:inline">Voir la politique</span>
+                  <ArrowUpRight className="h-5 w-5" aria-hidden="true" />
+                </Link>
+              </div>
+            </div>
+            <div aria-live="polite" className="mt-4 min-h-6 text-sm text-[#b8a8c9]">
+              {saved ? 'Préférences enregistrées.' : ''}
+            </div>
+          </>
         )}
-
-        <div className="bg-white rounded-2xl border border-cream-2 divide-y divide-cream-2">
-          {/* Notifications */}
-          <div className="flex items-start gap-4 p-5 md:p-6">
-            <div className="w-10 h-10 rounded-full bg-orange/10 flex items-center justify-center shrink-0">
-              <Bell className="w-4 h-4 text-orange" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="font-semibold text-ink text-sm">Notifications email</p>
-              <p className="text-sm text-ink-muted mt-0.5">
-                Reçois des alertes sur les nouveaux événements et tes billets.
-              </p>
-            </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={emailNotif}
-              onClick={handleToggleNotif}
-              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none ${emailNotif ? 'bg-orange' : 'bg-gray-200'}`}
-            >
-              <span
-                className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform ${emailNotif ? 'translate-x-5' : 'translate-x-0'}`}
-              />
-            </button>
-          </div>
-
-          {/* Langue */}
-          <div className="flex items-start gap-4 p-5 md:p-6">
-            <div className="w-10 h-10 rounded-full bg-orange/10 flex items-center justify-center shrink-0">
-              <Globe className="w-4 h-4 text-orange" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="font-semibold text-ink text-sm">Langue</p>
-              <p className="text-sm text-ink-muted mt-0.5">Langue d'affichage de l'application.</p>
-            </div>
-            <span className="shrink-0 text-xs font-semibold text-ink bg-cream-2 px-2 py-1 rounded-lg whitespace-nowrap">Français</span>
-          </div>
-
-          {/* Confidentialité */}
-          <div className="flex items-start gap-4 p-5 md:p-6">
-            <div className="w-10 h-10 rounded-full bg-orange/10 flex items-center justify-center shrink-0">
-              <Shield className="w-4 h-4 text-orange" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="font-semibold text-ink text-sm">Confidentialité</p>
-              <p className="text-sm text-ink-muted mt-0.5">Gère tes données personnelles et consulte notre politique.</p>
-            </div>
-            <Link
-              href="/confidentialite"
-              className="shrink-0 text-xs font-semibold text-orange whitespace-nowrap hover:underline"
-            >
-              Voir la politique →
-            </Link>
-          </div>
-        </div>
       </main>
-      <Footer />
+      <PublicFooter />
     </div>
   );
 }
