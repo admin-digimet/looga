@@ -6,7 +6,7 @@ import { formatEventDate, formatPriceFrom } from '@/lib/utils';
 import { useSavedStore } from '@/lib/store/savedStore';
 import type { Event } from '@/types';
 
-export function EventCard({ event, compactTime = false, highlightFreePrice = false }: { event: Event; compactTime?: boolean; highlightFreePrice?: boolean }) {
+export function EventCard({ event, compactTime = false, highlightFreePrice = false, hideOrganizer = false }: { event: Event; compactTime?: boolean; highlightFreePrice?: boolean; hideOrganizer?: boolean }) {
   const isSaved = useSavedStore((s) => s.saved.includes(event.id));
   const toggleSaved = useSavedStore((s) => s.toggle);
 
@@ -69,7 +69,7 @@ export function EventCard({ event, compactTime = false, highlightFreePrice = fal
       </p>
       <p className="text-gray-500 text-sm mb-1">{event.location}</p>
       <p className={`${highlightFreePrice && event.minPrice === 0 ? '!text-[#FF5C1A]' : 'text-gray-700'} text-sm font-medium mb-1`}>{formatPriceFrom(event.minPrice)}</p>
-      <p className="text-gray-500 text-sm mt-auto">{event.organizerName}</p>
+      {!hideOrganizer && <p className="text-gray-500 text-sm mt-auto">{event.organizerName}</p>}
     </div>
   );
 }
