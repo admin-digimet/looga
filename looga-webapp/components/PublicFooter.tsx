@@ -1,4 +1,8 @@
+'use client';
+
 import Link from 'next/link';
+import { ChevronDown } from 'lucide-react';
+import { useState } from 'react';
 // Catégories publiques stables : mêmes intitulés et slugs que le footer validé.
 // Ne pas importer SearchFilters ici : le footer doit rester indépendant des filtres.
 const CATEGORIES = [
@@ -12,6 +16,8 @@ const CATEGORIES = [
 ];
 
 export function PublicFooter() {
+  const [openSection, setOpenSection] = useState<string | null>(null);
+  const toggleSection = (name: string) => setOpenSection(current => current === name ? null : name);
   return (
     <footer
       className="relative left-1/2 w-screen max-w-none -translate-x-1/2 px-4 pb-5 md:px-9 md:pb-9"
@@ -19,17 +25,17 @@ export function PublicFooter() {
     >
       <div className="mx-auto w-full max-w-[1400px] rounded-[22px] bg-[#0e0e10] px-5 py-6 text-white md:px-8 md:py-7">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#39363e] pb-7">
-            <Link href="/" className="font-heading text-[30px] font-extrabold tracking-[-1px] text-[#ff791f]">looga.</Link>
+            <Link href="/" className="font-heading text-[30px] font-extrabold tracking-[-1px] text-[#FF5C1A]">looga.</Link>
             <span className="text-sm text-[#bcb8c0]">La ville est à toi.</span>
           </div>
-          <div className="grid grid-cols-1 gap-6 py-6 sm:grid-cols-3 sm:gap-9 sm:py-8 md:gap-12">
+          <div className="grid grid-cols-1 gap-0 py-3 md:grid-cols-3 md:gap-12 md:py-8">
             <div>
-              <h2 className="mb-3 text-base font-bold">Découvrir</h2>
-              <ul className="space-y-2 sm:space-y-3 text-sm text-[#c6c1c9]">
-                <li><Link href="/search" className="hover:text-[#ff791f]">Tous les événements</Link></li>
+              <h2 className="md:mb-3 text-base font-bold"><button type="button" aria-expanded={openSection === 'Découvrir'} aria-controls="footer-découvrir" onClick={() => toggleSection('Découvrir')} className="flex w-full items-center justify-between py-4 text-left md:pointer-events-none md:py-0"><span>Découvrir</span><ChevronDown size={18} className={`transition-transform md:hidden ${openSection === 'Découvrir' ? 'rotate-180' : ''}`} /></button></h2>
+              <ul id="footer-découvrir" className={`space-y-3 pb-5 text-sm text-[#c6c1c9] md:block md:pb-0 ${openSection === 'Découvrir' ? 'block' : 'hidden'}`}>
+                <li><Link href="/search" className="hover:text-[#FF5C1A]">Tous les événements</Link></li>
                 {CATEGORIES.map((category) => (
                   <li key={category.label}>
-                    <Link href={`/search?categories=${category.slugs.join(',')}`} className="hover:text-[#ff791f]">
+                    <Link href={`/search?categories=${category.slugs.join(',')}`} className="hover:text-[#FF5C1A]">
                       {category.label}
                     </Link>
                   </li>
@@ -37,22 +43,22 @@ export function PublicFooter() {
               </ul>
             </div>
             <div>
-              <h2 className="mb-3 text-base font-bold">Looga</h2>
-              <ul className="space-y-2 sm:space-y-3 text-sm text-[#c6c1c9]">
-                <li><Link href="/a-propos" className="hover:text-[#ff791f]">À propos</Link></li>
-                <li><Link href="/organisateur" className="hover:text-[#ff791f]">Créer un événement</Link></li>
-                <li><Link href="/aide" className="hover:text-[#ff791f]">Centre d&apos;aide</Link></li>
-                <li><Link href="/contact" className="hover:text-[#ff791f]">Contact</Link></li>
-                <li><Link href="/mobile" className="hover:text-[#ff791f]">Application mobile</Link></li>
+              <h2 className="md:mb-3 text-base font-bold"><button type="button" aria-expanded={openSection === 'Looga'} aria-controls="footer-looga" onClick={() => toggleSection('Looga')} className="flex w-full items-center justify-between py-4 text-left md:pointer-events-none md:py-0"><span>Looga</span><ChevronDown size={18} className={`transition-transform md:hidden ${openSection === 'Looga' ? 'rotate-180' : ''}`} /></button></h2>
+              <ul id="footer-looga" className={`space-y-3 pb-5 text-sm text-[#c6c1c9] md:block md:pb-0 ${openSection === 'Looga' ? 'block' : 'hidden'}`}>
+                <li><Link href="/a-propos" className="hover:text-[#FF5C1A]">À propos</Link></li>
+                <li><Link href="/organisateur" className="hover:text-[#FF5C1A]">Créer un événement</Link></li>
+                <li><Link href="/aide" className="hover:text-[#FF5C1A]">Centre d&apos;aide</Link></li>
+                <li><Link href="/contact" className="hover:text-[#FF5C1A]">Contact</Link></li>
+                <li><Link href="/mobile" className="hover:text-[#FF5C1A]">Application mobile</Link></li>
               </ul>
             </div>
             <div>
-              <h2 className="mb-3 text-base font-bold">Informations</h2>
-              <ul className="space-y-2 sm:space-y-3 text-sm text-[#c6c1c9]">
-                <li><Link href="/cgu" className="hover:text-[#ff791f]">Conditions générales d&apos;utilisation</Link></li>
-                <li><Link href="/confidentialite" className="hover:text-[#ff791f]">Politique de confidentialité</Link></li>
-                <li><Link href="/securite" className="hover:text-[#ff791f]">Sécurité</Link></li>
-                <li><Link href="/communaute" className="hover:text-[#ff791f]">Règles d&apos;utilisation</Link></li>
+              <h2 className="md:mb-3 text-base font-bold"><button type="button" aria-expanded={openSection === 'Informations'} aria-controls="footer-informations" onClick={() => toggleSection('Informations')} className="flex w-full items-center justify-between py-4 text-left md:pointer-events-none md:py-0"><span>Informations</span><ChevronDown size={18} className={`transition-transform md:hidden ${openSection === 'Informations' ? 'rotate-180' : ''}`} /></button></h2>
+              <ul id="footer-informations" className={`space-y-3 pb-5 text-sm text-[#c6c1c9] md:block md:pb-0 ${openSection === 'Informations' ? 'block' : 'hidden'}`}>
+                <li><Link href="/cgu" className="hover:text-[#FF5C1A]">Conditions générales d&apos;utilisation</Link></li>
+                <li><Link href="/confidentialite" className="hover:text-[#FF5C1A]">Politique de confidentialité</Link></li>
+                <li><Link href="/securite" className="hover:text-[#FF5C1A]">Sécurité</Link></li>
+                <li><Link href="/communaute" className="hover:text-[#FF5C1A]">Règles d&apos;utilisation</Link></li>
               </ul>
             </div>
           </div>
