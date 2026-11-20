@@ -38,7 +38,7 @@ export function PublicHeader() {
       </div>
       {menuOpen && (
         <nav id="looga-mobile-nav" aria-label="Navigation mobile" className="flex flex-col gap-1 border-t border-white/10 px-5 py-3 text-sm font-semibold md:hidden">
-          {links.map(link => <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)} aria-current={(pathname === link.href || pathname.startsWith(`${link.href}/`)) ? 'page' : undefined} className={`relative rounded-lg px-4 py-3 transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FF5C1A] ${(pathname === link.href || pathname.startsWith(`${link.href}/`)) ? 'bg-[#3b2149]/65 text-[#FF5C1A] before:absolute before:bottom-2 before:left-0 before:top-2 before:w-[3px] before:rounded-full before:bg-[#FF5C1A]' : 'text-white'}`}`>{link.label}</Link>)}
+          {links.map(link => <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)} aria-current={(pathname === link.href || pathname.startsWith(`${link.href}/`)) ? 'page' : undefined} className={`relative rounded-lg px-4 py-3 transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FF5C1A] ${(pathname === link.href || pathname.startsWith(`${link.href}/`)) ? 'bg-[#3b2149]/65 text-[#FF5C1A] before:absolute before:bottom-2 before:left-0 before:top-2 before:w-[3px] before:rounded-full before:bg-[#FF5C1A]' : 'text-white'}`}>{link.label}</Link>)}
         </nav>
       )}
     </header>
