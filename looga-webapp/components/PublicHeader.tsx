@@ -7,7 +7,7 @@ import { Menu, Search, UserRound, X } from 'lucide-react';
 import { ProfileMenu } from '@/components/ProfileMenu';
 import { useAuthStore } from '@/lib/store/authStore';
 
-/** Navigation commune aux pages Accueil, Explorer et Mes favoris. */
+/** Navigation commune aux pages publiques de Looga. */
 export function PublicHeader() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -17,8 +17,7 @@ export function PublicHeader() {
 
   const links = [
     { href: '/', label: 'Accueil' },
-    { href: '/search', label: 'Explorer' },
-    { href: '/#events-section', label: 'Événements' },
+    { href: '/search', label: 'Découvrir' },
     { href: '/favorites', label: 'Mes favoris' },
     { href: '/organisateur', label: 'Organisateurs' },
   ];
@@ -28,8 +27,7 @@ export function PublicHeader() {
       <div className="mx-auto flex h-[76px] max-w-[1400px] items-center justify-between gap-3 px-5 md:px-9">
         <Link href="/" className="font-heading text-[30px] font-extrabold tracking-[-2px] text-[#ff791f]" aria-label="Looga — Accueil">looga.</Link>
         <nav aria-label="Navigation principale" className="hidden items-center gap-9 text-sm font-semibold md:flex">
-          <Link href="/search" className="hover:text-[#ff791f]">Explorer</Link>
-          <Link href="/#events-section" className="hover:text-[#ff791f]">Événements</Link>
+          <Link href="/search" className="hover:text-[#ff791f]">Découvrir</Link>
           <Link href="/organisateur" className="hover:text-[#ff791f]">Organisateurs</Link>
         </nav>
         <div className="flex items-center gap-3 sm:gap-4">
