@@ -1,14 +1,13 @@
 'use client';
 import { PublicHeader } from '@/components/PublicHeader';
+import { PublicFooter } from '@/components/PublicFooter';
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, Search, SlidersHorizontal, UserRound, Menu } from 'lucide-react';
-import Link from 'next/link';
-import { ProfileMenu } from '@/components/ProfileMenu';
-import { useAuthStore } from '@/lib/store/authStore';
+import { Loader2, Search, SlidersHorizontal } from 'lucide-react';
 import { SearchFilters, CATEGORY_GROUPS } from '@/components/search/SearchFilters';
 import { SearchResults } from '@/components/search/SearchResults';
+import { MobileSearchFilters } from '@/components/search/MobileSearchFilters';
 import { useSearchEvents } from '@/hooks/useEvents';
 import type { EventCategory } from '@/types';
 import type { PeriodPreset, PricePreset, SortPreset } from '@/lib/api/events';
@@ -35,8 +34,8 @@ function SearchPageContent() {
   const sort = (params.get('sort') as SortPreset) ?? 'date_asc';
 
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [draft, setDraft] = useState<{ categories: EventCategory[]; cities: string[]; period: PeriodPreset; price: PricePreset }>({categories: [], cities: [], period: 'all', price: 'all'});
   const [searchInput, setSearchInput] = useState(q);
-  const { isAuthenticated, isLoading: authLoading } = useAuthStore();
   useEffect(() => setSearchInput(q), [q]);
 
   // Lock body scroll quand drawer mobile ouvert
@@ -78,6 +77,14 @@ function SearchPageContent() {
     router.replace(qs ? `/search?${qs}` : '/search', { scroll: false });
   }, [params, router]);
 
+  const openFilters = () => {
+    setDraft({ categories: [...categories], cities: [...cities], period, price });
+    setDrawerOpen(true);
+  };
+  const applyFilters = () => {
+    updateUrl(draft);
+    setDrawerOpen(false);
+  };
   const handleReset = useCallback(() => {
     router.replace('/search', { scroll: false });
   }, [router]);
@@ -111,79 +118,44 @@ function SearchPageContent() {
   return (
     <div className="min-h-screen bg-[#14091f] text-white flex flex-col">
       <PublicHeader />
-      <main className="mx-auto w-full max-w-[1400px] flex-1 px-4 pb-20 pt-10 md:px-8 md:pt-14">
-        <div className="mb-9">
-          <p className="mb-3 text-xs font-bold uppercase tracking-[.25em] text-[#ff791f]">Découvre Abidjan</p>
+      <main className="mx-auto w-full max-w-[1400px] flex-1 px-4 pb-10 pt-10 md:px-8 md:pb-16 md:pt-14">
+        <div className="mb-7">
+          <p className="mb-3 text-xs font-bold uppercase tracking-[.18em] text-[#FF5C1A]">Vis tes meilleurs moments</p>
           <h1 className="font-heading text-3xl font-extrabold leading-tight sm:text-4xl md:text-5xl">
-            {q ? <>Résultats pour <span className="text-[#ff791f]">« {q} »</span></> : <>Trouve ta prochaine <span className="text-[#ff791f]">sortie.</span></>}
+            <>LA VILLE <span className="block text-[#FF5C1A]">T’ATTEND.</span></>
           </h1>
-          <p className="mt-3 text-sm text-white/60 md:text-base">Soirées, concerts et expériences : découvre ce qui t'attend.</p>
-          <form onSubmit={(e) => { e.preventDefault(); updateUrl({ q: searchInput.trim() }); }} className="mt-7 flex h-14 max-w-2xl items-center gap-3 rounded-2xl bg-white px-4 text-[#24162e] shadow-lg md:h-16">
+          <p className="mt-3 text-sm text-white/60 md:text-base">Concerts, soirées, festivals… trouve ce qui te fait vibrer.</p>
+          <form onSubmit={(e) => { e.preventDefault(); updateUrl({ q: searchInput.trim() }); }} className="mt-7 flex h-14 max-w-2xl items-center gap-3 rounded-2xl bg-white px-4 text-[#24162e] shadow-lg focus-within:ring-2 focus-within:ring-[#FF5C1A] md:h-16">
             <Search className="h-5 w-5 shrink-0 text-[#81748b]" />
-            <input value={searchInput} onChange={(e) => setSearchInput(e.target.value)} placeholder="Rechercher un événement, un artiste, un lieu..." aria-label="Rechercher des événements" className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-[#81748b] md:text-base" />
-            <button type="submit" className="rounded-xl bg-[#ff791f] p-3 text-[#14091f] hover:bg-[#ff9347]" aria-label="Lancer la recherche"><Search className="h-5 w-5" /></button>
+            <input value={searchInput} onChange={(e) => setSearchInput(e.target.value)} placeholder="Tu sors où ?" aria-label="Rechercher des événements" className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-[#81748b] md:text-base" />
+            <button type="submit" className="rounded-xl bg-[#FF5C1A] p-3 text-white hover:bg-[#FF7438]" aria-label="Lancer la recherche"><Search className="h-5 w-5" /></button>
           </form>
           <div className="-mx-4 mt-5 flex gap-2 overflow-x-auto px-4 pb-2 md:mx-0 md:flex-wrap md:px-0" aria-label="Filtres rapides">
-            {quickFilters.map((filter) => <button key={filter.label} type="button" onClick={filter.action} aria-pressed={filter.active} className={`shrink-0 rounded-full border px-4 py-2.5 text-sm font-semibold transition-colors ${filter.active ? 'border-[#ff791f] bg-[#ff791f] text-[#14091f]' : 'border-white/10 bg-[#382044] text-white hover:border-[#ff791f]/70'}`}>{filter.label}</button>)}
+            {quickFilters.map((filter) => <button key={filter.label} type="button" onClick={filter.action} aria-pressed={filter.active} className={`shrink-0 rounded-full border px-4 py-2.5 text-sm font-semibold transition-colors ${filter.active ? 'border-[#FF5C1A] bg-[#FF5C1A] text-white' : 'border-white/10 bg-[#382044] text-white hover:border-[#FF5C1A]/70'}`}>{filter.label}</button>)}
           </div>
         </div>
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-heading text-2xl font-extrabold md:text-3xl">Tous les <span className="text-[#ff791f]">événements</span></h2>
-          <button type="button" onClick={() => setDrawerOpen(true)} className="inline-flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm lg:hidden"><SlidersHorizontal className="h-4 w-4" /> Filtres {activeFiltersCount > 0 && `(${activeFiltersCount})`}</button>
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-heading text-2xl font-extrabold md:text-3xl">Tous les <span className="text-[#FF5C1A]">événements</span></h2>
+          <button type="button" onClick={openFilters} className="inline-flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm lg:hidden"><SlidersHorizontal className="h-4 w-4" /> Filtres {activeFiltersCount > 0 && `(${activeFiltersCount})`}</button>
         </div>
         <div className="flex flex-col gap-6 lg:flex-row">
           <div className="hidden lg:block"><SearchFilters categories={categories} cities={cities} period={period} price={price} onChange={updateUrl} onReset={handleReset} /></div>
           <SearchResults events={events} total={total} isLoading={isLoading} isError={isError} isFetchNextPageError={isFetchNextPageError} hasNextPage={!!hasNextPage} isFetchingNextPage={isFetchingNextPage} sort={sort} onSortChange={(s) => updateUrl({ sort: s })} onLoadMore={fetchNextPage} onResetFilters={handleReset} activeFiltersCount={activeFiltersCount} />
         </div>
       </main>
-      {drawerOpen && <div className="fixed inset-0 z-50 bg-black/75" onClick={(e) => { if (e.target === e.currentTarget) setDrawerOpen(false); }}><div className="absolute bottom-0 right-0 top-0 w-[90%] max-w-sm overflow-y-auto bg-[#21132b] shadow-2xl"><SearchFilters categories={categories} cities={cities} period={period} price={price} onChange={updateUrl} onReset={handleReset} onClose={() => setDrawerOpen(false)} /></div></div>}
-      <footer className="mx-auto max-w-[1400px] px-4 pb-5 md:px-9 md:pb-9" aria-label="Pied de page Looga">
-        <div className="rounded-[22px] bg-[#0e0e10] px-5 py-6 text-white md:px-8 md:py-7">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#39363e] pb-7">
-            <Link href="/" className="font-heading text-[30px] font-extrabold tracking-[-1px] text-[#ff791f]">looga.</Link>
-            <span className="text-sm text-[#bcb8c0]">La ville est à toi.</span>
-          </div>
-          <div className="grid grid-cols-1 gap-6 py-6 sm:grid-cols-3 sm:gap-9 sm:py-8 md:gap-12">
-            <div>
-              <h2 className="mb-3 text-base font-bold">Découvrir</h2>
-              <ul className="space-y-2 sm:space-y-3 text-sm text-[#c6c1c9]">
-                <li><Link href="/search" className="hover:text-[#ff791f]">Tous les événements</Link></li>
-                <li><Link href="/search?categories=soirees" className="hover:text-[#ff791f]">Soirées &amp; Clubs</Link></li>
-                <li><Link href={`/search?categories=${CATEGORY_GROUPS[1].keys.join(',')}`} className="hover:text-[#ff791f]">Concerts &amp; Live</Link></li>
-                <li><Link href={`/search?categories=${CATEGORY_GROUPS[2].keys.join(',')}`} className="hover:text-[#ff791f]">Festivals &amp; Open Air</Link></li>
-                <li><Link href={`/search?categories=${CATEGORY_GROUPS[3].keys.join(',')}`} className="hover:text-[#ff791f]">Lifestyle &amp; Expériences</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h2 className="mb-3 text-base font-bold">Looga</h2>
-              <ul className="space-y-2 sm:space-y-3 text-sm text-[#c6c1c9]">
-                <li><Link href="/a-propos" className="hover:text-[#ff791f]">À propos</Link></li>
-                <li><Link href="/organisateur" className="hover:text-[#ff791f]">Créer un événement</Link></li>
-                <li><Link href="/aide" className="hover:text-[#ff791f]">Centre d&apos;aide</Link></li>
-                <li><Link href="/contact" className="hover:text-[#ff791f]">Contact</Link></li>
-                <li><Link href="/mobile" className="hover:text-[#ff791f]">Application mobile</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h2 className="mb-3 text-base font-bold">Informations</h2>
-              <ul className="space-y-2 sm:space-y-3 text-sm text-[#c6c1c9]">
-                <li><Link href="/cgu" className="hover:text-[#ff791f]">Conditions générales d&apos;utilisation</Link></li>
-                <li><Link href="/confidentialite" className="hover:text-[#ff791f]">Politique de confidentialité</Link></li>
-                <li><Link href="/securite" className="hover:text-[#ff791f]">Sécurité</Link></li>
-                <li><Link href="/communaute" className="hover:text-[#ff791f]">Règles d&apos;utilisation</Link></li>
-              </ul>
-            </div>
-          </div>
-          <div className="flex flex-col gap-3 border-t border-[#39363e] pt-5 sm:pt-7 text-sm text-[#a8a3ad] sm:flex-row sm:items-center sm:justify-between">
-            <span>© 2026 Looga</span>
-            <div className="flex items-center gap-5">
-              <span aria-label="Instagram" title="Instagram"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="18" cy="6" r="1" fill="currentColor" stroke="none"/></svg></span>
-              <span aria-label="Facebook" title="Facebook"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 22v-9h3l.5-4h-3.5V6.5c0-1.1.4-1.5 1.5-1.5H17V1.4A23 23 0 0 0 14.2 1C11.3 1 9.5 2.8 9.5 6v3H7v4h2.5v9z"/></svg></span>
-              <span>Côte d&apos;Ivoire</span>
-            </div>
+      {drawerOpen && (
+        <div className="fixed inset-0 z-50 bg-black/75 lg:hidden" onClick={(e) => { if (e.target === e.currentTarget) setDrawerOpen(false); }}>
+          <div role="dialog" aria-modal="true" aria-label="Filtres des événements" className="absolute inset-x-0 bottom-0 flex max-h-[90dvh] flex-col overflow-hidden rounded-t-[24px] border-t border-white/15 bg-[#21132b] shadow-2xl">
+            <MobileSearchFilters
+              categories={draft.categories} cities={draft.cities} period={draft.period} price={draft.price}
+              onChange={(patch) => setDraft((current) => ({ ...current, ...patch }))}
+              onReset={() => setDraft({ categories: [], cities: [], period: 'all', price: 'all' })}
+              onClose={() => setDrawerOpen(false)} onApply={applyFilters}
+            />
           </div>
         </div>
-      </footer>
+      )}
+      <PublicFooter />
     </div>
   );
 }
