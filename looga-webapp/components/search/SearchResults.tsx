@@ -1,6 +1,6 @@
 'use client';
 
-import { SearchX, Loader2, Ticket, ArrowRight } from 'lucide-react';
+import { SearchX, Loader2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { EventCard } from '@/components/EventCard';
 import { EventCardSkeleton } from '@/components/EventCardSkeleton';
@@ -58,7 +58,7 @@ export function SearchResults({
             >
               Filtres
               {activeFiltersCount > 0 && (
-                <span className="ml-1 inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-[#ff791f] text-[#14091f] text-[11px] font-bold">
+                <span className="ml-1 inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-[#FF5C1A] text-[#14091f] text-[11px] font-bold">
                   {activeFiltersCount}
                 </span>
               )}
@@ -98,42 +98,45 @@ export function SearchResults({
           </button>
         </div>
       ) : isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 md:gap-6 [&_.animate-pulse>div]:bg-[#392349]">
           {Array.from({ length: 6 }).map((_, i) => <EventCardSkeleton key={i} />)}
         </div>
       ) : events.length === 0 ? (
         <div className="text-center py-20">
-          <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-[#ff791f]/10 flex items-center justify-center">
-            <SearchX className="w-8 h-8 text-[#ff791f]" />
+          <div className="relative mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-[22px] bg-[#382044]">
+            <span className="absolute left-2 top-2 h-3 w-3 rounded-full bg-[#FF5C1A]/40" aria-hidden="true" />
+            <span className="absolute bottom-3 right-3 h-2.5 w-2.5 rounded-full bg-[#FF5C1A]/70" aria-hidden="true" />
+            <SearchX className="h-10 w-10 text-[#FF5C1A]" aria-hidden="true" />
           </div>
           <h3 className="font-heading text-xl font-extrabold text-white mb-2">
-            Aucun événement trouvé
+            Pas de sortie par ici… pour l’instant !
           </h3>
           <p className="text-sm text-white/55 mb-6 max-w-sm mx-auto">
-            Essaie d&apos;élargir tes critères ou de réinitialiser les filtres.
+            Essaie d’autres filtres, il y a sûrement quelque chose pour toi.
           </p>
           <button
             type="button"
             onClick={onResetFilters}
-            className="inline-block bg-[#ff791f] text-[#14091f] font-bold py-3 px-7 rounded-xl hover:opacity-90"
+            className="inline-block bg-[#FF5C1A] text-white font-bold py-3 px-7 rounded-xl hover:opacity-90"
           >
-            Réinitialiser les filtres
+            Voir tous les événements
           </button>
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 md:gap-6">
             {events.map((event) => (
-              <article key={event.id} className="group flex h-full flex-col rounded-[22px] border border-white/10 bg-[#251331] p-3 shadow-[0_12px_32px_rgba(0,0,0,0.2)] transition-all duration-300 hover:-translate-y-1 hover:border-[#ff791f]/45 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)] [&_h3]:text-white [&_h3]:font-bold [&_h3]:text-[18px] [&_h3]:leading-snug [&_p]:text-white/70 [&_p]:mb-0.5 [&_h3]:mb-1 [&_a:hover_h3]:text-[#ff791f] [&_img]:rounded-xl [&_p.text-orange]:text-[#ff791f] [&_p.text-gray-700]:text-white [&_a>div:first-child]:aspect-[16/10] [&_a>div:first-child]:bg-[#392349] [&_a>div:first-child>div]:bg-[#392349] [&_a>div:first-child>button]:opacity-100 [&_a>div:first-child>button]:shadow-md">
-                <div className="flex-1"><EventCard event={event} compactTime /></div>
-                <Link href={`/events/${event.id}`} className="mt-3 flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[#ff791f] px-4 py-2.5 text-sm font-extrabold text-[#180c21] transition-colors hover:bg-[#ff944b]" aria-label={`Voir les billets pour ${event.name}`}>
-                  <Ticket size={17} /> {event.isSoldOut ? 'Voir l’événement' : 'Réserver'} <ArrowRight size={16} />
+              <article key={event.id} className="group flex h-full flex-col rounded-[22px] border border-white/10 bg-[#251331] p-3 shadow-[0_12px_32px_rgba(0,0,0,0.2)] transition-all duration-300 hover:border-[#FF5C1A]/45 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)] [&_h3]:text-white [&_h3]:font-bold [&_h3]:text-[18px] [&_h3]:leading-snug [&_p]:text-white/70 [&_p]:mb-0.5 [&_h3]:mb-1 [&_a:hover_h3]:text-[#FF5C1A] [&_img]:rounded-xl [&_p.text-orange]:text-[#FF5C1A] [&_p.text-gray-700]:text-white [&_a>div:first-child]:aspect-[16/10] [&_a>div:first-child]:bg-[#392349] [&_a>div:first-child>div]:bg-[#392349] [&_a>div:first-child>button]:opacity-100 [&_a>div:first-child>button]:shadow-md">
+                <div className="flex-1"><EventCard event={event} compactTime highlightFreePrice hideOrganizer /></div>
+                <Link href={`/events/${event.id}`} className="mt-2 ml-auto inline-flex min-h-11 w-fit items-center justify-center gap-2 rounded-xl bg-[#FF5C1A] px-4 py-2.5 text-sm font-extrabold text-white transition-colors hover:bg-[#FF7438]" aria-label={`Voir les billets pour ${event.name}`}>
+                  {event.isSoldOut ? 'Voir l’événement' : 'Réserver'} <ArrowRight size={16} />
                 </Link>
               </article>
             ))}
           </div>
-          {(hasNextPage || isFetchNextPageError) && (
-            <div className="mt-12 text-center">
+          <div className="mt-8 flex flex-col items-center gap-3">
+            {(hasNextPage || isFetchNextPageError) && (
+              <>
               {isFetchNextPageError && (
                 <p role="alert" className="mb-4 text-sm text-white/70">
                   Impossible de charger les événements suivants. Les événements déjà affichés sont conservés.
@@ -144,13 +147,15 @@ export function SearchResults({
                 onClick={onLoadMore}
                 disabled={isFetchingNextPage}
                 aria-busy={isFetchingNextPage}
-                className="inline-flex items-center gap-2 border border-white/20 text-white/80 font-semibold py-3 px-8 rounded-lg hover:bg-white/10 disabled:opacity-50"
+                className="inline-flex items-center gap-2 border border-[#FF5C1A] text-[#FF5C1A] font-semibold py-3 px-8 rounded-xl hover:bg-[#FF5C1A] hover:text-white disabled:opacity-50"
               >
                 {isFetchingNextPage && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
                 {isFetchingNextPage ? 'Chargement…' : isFetchNextPageError ? 'Réessayer le chargement' : "Voir plus d'événements"}
               </button>
-            </div>
-          )}
+              </>
+            )}
+            <p className="text-xs text-white/55">{events.length} sur {total} événements</p>
+          </div>
         </>
       )}
     </div>

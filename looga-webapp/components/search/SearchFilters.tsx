@@ -70,7 +70,7 @@ export function SearchFilters({
     CATEGORY_GROUPS.filter((group) => group.keys.some((key) => categories.includes(key))).length + cities.length + (period !== 'all' ? 1 : 0) + (price !== 'all' ? 1 : 0);
 
   return (
-    <aside className="bg-[#21132b] border border-white/10 rounded-2xl p-4 lg:p-5 lg:sticky lg:top-24 w-full lg:w-[280px] shrink-0 max-h-[calc(100vh-7rem)] overflow-y-auto [scrollbar-width:thin] [scrollbar-color:#5a386a_#21132b] [&::-webkit-scrollbar]:w-[5px] [&::-webkit-scrollbar-track]:bg-[#21132b] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#5a386a] hover:[&::-webkit-scrollbar-thumb]:bg-[#ff791f]">
+    <aside className="bg-[#21132b] border border-white/10 rounded-2xl p-4 lg:p-5 lg:sticky lg:top-24 w-full lg:w-[280px] shrink-0 max-h-[calc(100vh-7rem)] overflow-y-auto [scrollbar-width:thin] [scrollbar-color:#5a386a_#21132b] [&::-webkit-scrollbar]:w-[5px] [&::-webkit-scrollbar-track]:bg-[#21132b] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#5a386a] hover:[&::-webkit-scrollbar-thumb]:bg-[#FF5C1A]">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-heading font-extrabold text-white text-lg">Filtres</h3>
@@ -111,7 +111,7 @@ export function SearchFilters({
                 name="period"
                 checked={period === opt.key}
                 onChange={() => onChange({ period: opt.key })}
-                className="w-4 h-4 accent-[#ff791f] cursor-pointer"
+                className="w-4 h-4 accent-[#FF5C1A] cursor-pointer"
               />
               <span className="text-sm text-white/75 group-hover:text-white">{opt.label}</span>
             </label>
@@ -133,7 +133,7 @@ export function SearchFilters({
                 name="price"
                 checked={price === opt.key}
                 onChange={() => onChange({ price: opt.key })}
-                className="w-4 h-4 accent-[#ff791f] cursor-pointer"
+                className="w-4 h-4 accent-[#FF5C1A] cursor-pointer"
               />
               <span className="text-sm text-white/75 group-hover:text-white">{opt.label}</span>
             </label>
@@ -157,7 +157,7 @@ export function SearchFilters({
                   checked={selected}
                   ref={(el) => { if (el) el.indeterminate = partiallySelected; }}
                   onChange={() => toggleCategoryGroup(group.keys)}
-                  className="w-4 h-4 accent-[#ff791f] rounded cursor-pointer"
+                  className="w-4 h-4 accent-[#FF5C1A] rounded cursor-pointer"
                 />
                 <span className="text-sm text-white/75 group-hover:text-white">{group.label}</span>
               </label>
@@ -181,7 +181,7 @@ export function SearchFilters({
                 onClick={() => toggleCity(city)}
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
                   active
-                    ? 'bg-[#ff791f] text-[#14091f] border-[#ff791f]'
+                    ? 'bg-[#FF5C1A] text-[#14091f] border-[#FF5C1A]'
                     : 'bg-[#382044] text-white/75 border-white/20 hover:border-orange/50'
                 }`}
               >
