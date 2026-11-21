@@ -199,7 +199,7 @@ export default function EventDetailPage() {
             <div className="lg:col-span-2">
 
               {countdown && (
-                <section aria-label="Compte à rebours" className="mb-7 rounded-2xl border border-[#FF5C1A]/25 bg-[#24172e] px-5 py-4">
+                <section aria-label="Compte à rebours" className="mb-6 sm:mb-7 rounded-2xl border border-[#FF5C1A]/25 bg-[#24172e] px-5 py-4">
                   <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-[#FF5C1A]">Ça commence dans</p>
                   <div className="flex items-center gap-3 sm:gap-5" aria-live="off">
                     {([
@@ -217,7 +217,7 @@ export default function EventDetailPage() {
               )}
 
               {/* Infos pratiques : une carte date et une carte lieu, sans carte géographique intégrée */}
-              <section data-event-reveal className="mb-9">
+              <section data-event-reveal className="mb-7 sm:mb-9">
                 <h2 className="mb-4 text-2xl font-bold text-white">Infos pratiques</h2>
                 <div className="space-y-3">
                   <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-[#21172c] p-4 sm:p-5">
@@ -235,7 +235,7 @@ export default function EventDetailPage() {
               </section>
 
               {/* Carte organisateur conservée */}
-              <section data-event-reveal className="mb-9">
+              <section data-event-reveal className="mb-7 sm:mb-9">
                 <h2 className="mb-4 text-2xl font-bold text-white">Organisé par</h2>
                 <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-white/10 bg-[#21172c] p-4 sm:p-5">
                   {organizer?.logo_url ? <img src={organizer.logo_url} alt={organizer.name} className="h-14 w-14 shrink-0 rounded-full border border-white/10 object-cover" /> : <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#FF5C1A]/15 text-xl font-bold text-[#FF5C1A]">{organizerInitial}</div>}
@@ -247,7 +247,7 @@ export default function EventDetailPage() {
                 </div>
               </section>
 
-              {event.description && <section data-event-reveal className="mb-10 overflow-hidden rounded-2xl border border-white/10 bg-[#21172c]">
+              {event.description && <section data-event-reveal className="mb-8 sm:mb-10 overflow-hidden rounded-2xl border border-white/10 bg-[#21172c]">
                 <button type="button" aria-expanded={descriptionOpen} onClick={() => setDescriptionOpen(!descriptionOpen)} className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-lg font-bold text-white">
                   À propos de l’événement <ChevronDown className={`h-5 w-5 shrink-0 text-[#FF5C1A] transition-transform ${descriptionOpen ? 'rotate-180' : ''}`} />
                 </button>
@@ -255,7 +255,7 @@ export default function EventDetailPage() {
               </section>}
 
               {/* Artistes disponibles : vrais noms/images fournis par l'événement */}
-              {!!event.artists?.length && <section data-event-reveal className="mb-10">
+              {!!event.artists?.length && <section data-event-reveal className="mb-8 sm:mb-10">
                 <div className="mb-4 flex items-center justify-between gap-4"><h2 className="text-2xl font-bold text-white">Artistes et intervenants</h2><div className="hidden gap-2 sm:flex"><button type="button" aria-label="Artistes précédents" onClick={() => artistsCarouselRef.current?.scrollBy({left:-250,behavior:'smooth'})} className="rounded-full border border-white/20 p-2"><ChevronLeft className="h-5 w-5" /></button><button type="button" aria-label="Artistes suivants" onClick={() => artistsCarouselRef.current?.scrollBy({left:250,behavior:'smooth'})} className="rounded-full border border-white/20 p-2"><ChevronRight className="h-5 w-5" /></button></div></div>
                 <div ref={artistsCarouselRef} className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [scrollbar-width:none]">
                   {event.artists.map((artist) => <div key={artist.id} className="w-[66%] shrink-0 snap-start overflow-hidden rounded-[22px] border border-white/10 bg-[#21172c] sm:w-[210px]">
@@ -266,7 +266,7 @@ export default function EventDetailPage() {
               </section>}
 
               {/* Galerie uniquement si plusieurs photos réelles */}
-              {hasGallery && <section data-event-reveal className="mb-10">
+              {hasGallery && <section data-event-reveal className="mb-8 sm:mb-10">
                 <h2 className="mb-4 text-2xl font-bold text-white">Galerie photos</h2>
                 <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-3 [scrollbar-width:none]">
                   {gallery.map((src, index) => <button key={src} type="button" onClick={() => setPhotoIndex(index)} aria-label={`Agrandir la photo ${index+1} sur ${gallery.length}`} className="relative aspect-[4/3] w-[85%] shrink-0 snap-start overflow-hidden rounded-[22px] sm:w-[55%]"><img src={src} alt={`${event.name}, photo ${index+1}`} className="h-full w-full object-cover" /><span className="absolute bottom-3 right-3 rounded-full bg-[#130d1c]/80 px-3 py-1 text-xs text-white">{index+1} / {gallery.length}</span></button>)}
@@ -275,7 +275,7 @@ export default function EventDetailPage() {
 
               {/* Catégories de billets : présentation uniquement ; achat dans TicketModal */}
               {event.ticketTypes?.length > 0 && (
-                <section data-event-reveal className="mb-12">
+                <section data-event-reveal className="mb-9 sm:mb-12">
                   <h2 className="text-2xl font-bold text-white mb-4">Billets disponibles</h2>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     {event.ticketTypes.map((tt) => (
@@ -300,8 +300,8 @@ export default function EventDetailPage() {
               )}
 
               {/* FAQ interactive : ne pas inventer de conditions propres à l'organisateur */}
-              <h2 className="text-2xl font-bold text-white mb-6">Foire aux questions</h2>
-              <div data-event-reveal className="space-y-3 mb-16">
+              <h2 className="text-2xl font-bold text-white mb-4 sm:mb-6">Foire aux questions</h2>
+              <div data-event-reveal className="space-y-3 mb-10 sm:mb-16">
                 {[
                   { question: "Comment récupérer mon billet après l'achat ?", answer: 'Une fois ton paiement confirmé, retrouve ton billet directement dans la rubrique « Mes billets » de ton compte Looga. Tu pourras le présenter à l’entrée de l’événement grâce à son QR code.' },
                   { question: 'Puis-je payer avec Orange Money, Wave ou MTN MoMo ?', answer: 'Les moyens de paiement disponibles te sont présentés au moment de la réservation. Choisis simplement l’option qui te convient et suis les instructions pour finaliser ton achat en toute sécurité.' },
@@ -321,14 +321,13 @@ export default function EventDetailPage() {
               {/* Événements similaires */}
               {similarEvents && similarEvents.length > 0 && (
                 <>
-                  <h2 className="text-2xl font-bold text-white mb-6">
+                  <h2 className="text-2xl font-bold text-white mb-4 sm:mb-6">
                     Pourrait aussi t&apos;intéresser
                   </h2>
-                  <div ref={similarCarouselRef} className="mb-12 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [scrollbar-width:none]">
+                  <div ref={similarCarouselRef} className="mb-9 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [scrollbar-width:none] sm:mb-12">
                     {similarEvents.map((e) => (
-                      <div key={e.id} className="w-[85%] shrink-0 snap-start rounded-[22px] border border-white/10 bg-[#24152f] p-4 text-white sm:w-[48%]">
-                        <EventCard event={e} compactTime highlightFreePrice hideOrganizer darkVariant />
-                        <button type="button" onClick={() => router.push(`/events/${e.id}`)} className="mt-3 ml-auto flex items-center gap-2 rounded-xl bg-[#FF5C1A] px-4 py-2 text-sm font-bold text-white">Voir l’événement <ChevronRight className="h-4 w-4" /></button>
+                      <div key={e.id} className="flex w-[85%] shrink-0 snap-start flex-col rounded-[22px] border border-white/10 bg-[#24152f] p-4 text-white sm:w-[48%]">
+                        <EventCard event={e} compactTime highlightFreePrice hideOrganizer darkVariant showAction />
                       </div>
                     ))}
                   </div>
@@ -383,9 +382,9 @@ export default function EventDetailPage() {
           <button
             onClick={() => setShowModal(true)}
             disabled={event.isSoldOut}
-            className="w-full bg-[#FF5C1A] text-white font-bold py-3.5 rounded-xl hover:opacity-90 transition-colors disabled:bg-white/15"
+            className="w-full min-h-12 bg-[#FF5C1A] text-white text-sm sm:text-base font-bold leading-snug px-3 py-3.5 rounded-xl hover:opacity-90 transition-colors disabled:bg-white/15"
           >
-            {event.isSoldOut ? 'Complet' : `Obtenir des billets — ${formatPriceFrom(event.minPrice)}`}
+            {event.isSoldOut ? 'Billets épuisés' : event.minPrice === 0 ? 'Obtenir des billets — Gratuit' : `Billets dès ${new Intl.NumberFormat('fr-FR').format(event.minPrice)} FCFA`}
           </button>
         </div>
       </main>
