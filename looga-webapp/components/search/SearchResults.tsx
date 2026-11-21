@@ -2,7 +2,7 @@
 
 import { SearchX, Loader2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { EventCard } from '@/components/EventCard';
+import { EventCard, eventCardState } from '@/components/EventCard';
 import { EventCardSkeleton } from '@/components/EventCardSkeleton';
 import type { Event } from '@/types';
 import type { SortPreset } from '@/lib/api/events';
@@ -128,9 +128,9 @@ export function SearchResults({
             {events.map((event) => (
               <article key={event.id} className="group flex h-full flex-col rounded-[22px] border border-white/10 bg-[#251331] p-3 shadow-[0_12px_32px_rgba(0,0,0,0.2)] transition-all duration-300 hover:border-[#FF5C1A]/45 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)] [&_h3]:text-white [&_h3]:font-bold [&_h3]:text-[18px] [&_h3]:leading-snug [&_p]:text-white/70 [&_p]:mb-0.5 [&_h3]:mb-1 [&_a:hover_h3]:text-[#FF5C1A] [&_img]:rounded-xl [&_p.text-orange]:text-[#FF5C1A] [&_p.text-gray-700]:text-white [&_a>div:first-child]:aspect-[16/10] [&_a>div:first-child]:bg-[#392349] [&_a>div:first-child>div]:bg-[#392349] [&_a>div:first-child>button]:opacity-100 [&_a>div:first-child>button]:shadow-md">
                 <div className="flex-1"><EventCard event={event} compactTime highlightFreePrice hideOrganizer /></div>
-                <Link href={`/events/${event.id}`} className="mt-2 ml-auto inline-flex min-h-11 w-fit items-center justify-center gap-2 rounded-xl bg-[#FF5C1A] px-4 py-2.5 text-sm font-extrabold text-white transition-colors hover:bg-[#FF7438]" aria-label={`Voir les billets pour ${event.name}`}>
-                  {event.isSoldOut ? 'Voir l’événement' : 'Réserver'} <ArrowRight size={16} />
-                </Link>
+                {eventCardState(event).soldOut ? <span className="mt-2 ml-auto inline-flex min-h-11 items-center rounded-xl bg-white/10 px-4 py-2.5 text-sm font-bold text-white/60">Billets épuisés</span> : <Link href={`/events/${event.id}`} className="mt-2 ml-auto inline-flex min-h-11 w-fit items-center justify-center gap-2 rounded-xl bg-[#FF5C1A] px-4 py-2.5 text-sm font-extrabold text-white transition-colors hover:bg-[#FF7438]" aria-label={`Voir les billets pour ${event.name}`}>
+                  {eventCardState(event).action} <ArrowRight size={16} />
+                </Link>}
               </article>
             ))}
           </div>
