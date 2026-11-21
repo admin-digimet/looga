@@ -18,6 +18,7 @@ function transformTicketType(raw: any) {
     advantages: raw.advantages,
     stock: raw.stock_remaining ?? raw.stock ?? 0,
     soldOut: (raw.stock_remaining ?? raw.stock ?? 1) === 0,
+    active: raw.is_active ?? true,
   };
 }
 
@@ -46,6 +47,12 @@ function transformEvent(raw: any): Event {
     isSoldOut: raw.is_sold_out ?? raw.isSoldOut ?? false,
     minPrice: raw.min_price ?? raw.minPrice ?? 0,
     createdAt: raw.created_at ?? raw.createdAt ?? '',
+    // Ces champs ne s'affichent que si l'API les transmet réellement.
+    publishedAt: raw.published_at ?? raw.publishedAt ?? undefined,
+    status: raw.status ?? undefined,
+    rescheduledDate: raw.rescheduled_date ?? raw.rescheduledDate ?? undefined,
+    isSponsored: raw.is_sponsored ?? raw.isSponsored ?? false,
+    pricePublished: raw.price_published ?? raw.pricePublished ?? (raw.min_price != null || raw.minPrice != null || (raw.ticket_types ?? raw.ticketTypes ?? []).length > 0),
     locationUrl: raw.location_url ?? raw.locationUrl ?? '',
   };
 }
