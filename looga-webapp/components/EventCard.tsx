@@ -1,12 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { Heart } from 'lucide-react';
+import { Heart, ChevronRight } from 'lucide-react';
 import { formatEventDate, formatPriceFrom } from '@/lib/utils';
 import { useSavedStore } from '@/lib/store/savedStore';
 import type { Event } from '@/types';
 
-export function EventCard({ event, compactTime = false, highlightFreePrice = false, hideOrganizer = false, darkVariant = false }: { event: Event; compactTime?: boolean; highlightFreePrice?: boolean; hideOrganizer?: boolean; darkVariant?: boolean }) {
+export function EventCard({ event, compactTime = false, highlightFreePrice = false, hideOrganizer = false, darkVariant = false, showAction = false }: { event: Event; compactTime?: boolean; highlightFreePrice?: boolean; hideOrganizer?: boolean; darkVariant?: boolean; showAction?: boolean }) {
   const isSaved = useSavedStore((s) => s.saved.includes(event.id));
   const toggleSaved = useSavedStore((s) => s.toggle);
 
@@ -33,7 +33,7 @@ export function EventCard({ event, compactTime = false, highlightFreePrice = fal
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
-          <div className="w-full h-full bg-gray-200 flex items-center justify-center text-4xl">
+          <div className={`w-full h-full flex items-center justify-center text-4xl ${darkVariant ? 'bg-[#352140]' : 'bg-gray-200'}`}>
             🎉
           </div>
         )}
@@ -70,6 +70,13 @@ export function EventCard({ event, compactTime = false, highlightFreePrice = fal
       <p className={`${darkVariant ? 'text-[#b9aec7]' : 'text-gray-500'} text-sm mb-1`}>{event.location}</p>
       <p className={`${highlightFreePrice && event.minPrice === 0 ? '!text-[#FF5C1A]' : darkVariant ? 'text-white' : 'text-gray-700'} text-sm font-medium mb-1`}>{formatPriceFrom(event.minPrice)}</p>
       {!hideOrganizer && <p className="text-gray-500 text-sm mt-auto">{event.organizerName}</p>}
+      {showAction && (
+        <div className="mt-auto flex justify-end pt-3">
+          <Link href={`/events/${event.id}`} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#FF5C1A] px-4 py-2 text-sm font-bold text-white transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF5C1A]">
+            Voir l’événement <ChevronRight className="h-4 w-4" />
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
