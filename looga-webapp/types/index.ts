@@ -33,6 +33,7 @@ export interface TicketType {
   advantages?: string;
   stock: number;
   soldOut: boolean;
+  active?: boolean;
 }
 
 export interface Artist {
@@ -73,6 +74,12 @@ export interface Event {
   isSoldOut: boolean;
   minPrice: number;
   createdAt?: string;
+  /** Date de PUBLICATION effective (ne pas substituer createdAt). */
+  publishedAt?: string;
+  status?: 'published' | 'cancelled' | 'postponed' | string;
+  rescheduledDate?: string;
+  isSponsored?: boolean;
+  pricePublished?: boolean;
   locationUrl?: string;
   images?: string[];
   otherShows?: OtherShow[];
