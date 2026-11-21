@@ -6,7 +6,7 @@ import { formatEventDate, formatPriceFrom } from '@/lib/utils';
 import { useSavedStore } from '@/lib/store/savedStore';
 import type { Event } from '@/types';
 
-export function EventCard({ event, compactTime = false, highlightFreePrice = false, hideOrganizer = false }: { event: Event; compactTime?: boolean; highlightFreePrice?: boolean; hideOrganizer?: boolean }) {
+export function EventCard({ event, compactTime = false, highlightFreePrice = false, hideOrganizer = false, darkVariant = false }: { event: Event; compactTime?: boolean; highlightFreePrice?: boolean; hideOrganizer?: boolean; darkVariant?: boolean }) {
   const isSaved = useSavedStore((s) => s.saved.includes(event.id));
   const toggleSaved = useSavedStore((s) => s.toggle);
 
@@ -23,7 +23,7 @@ export function EventCard({ event, compactTime = false, highlightFreePrice = fal
   }
 
   return (
-    <div className="flex flex-col group h-full">
+    <div className={`flex flex-col group h-full ${darkVariant ? 'text-white' : ''}`}>
       <div className="relative aspect-[16/10] overflow-hidden rounded-xl mb-3">
         <Link href={`/events/${event.id}`} className="block h-full w-full" aria-label={`Voir ${event.name}`}>
           {event.image ? (
@@ -61,14 +61,14 @@ export function EventCard({ event, compactTime = false, highlightFreePrice = fal
         </span>
       )}
 
-      <h3 className="font-bold text-lg leading-tight mb-1 group-hover:text-orange line-clamp-2 wrap-break-word">
+      <h3 className={`font-bold text-lg leading-tight mb-1 group-hover:text-orange line-clamp-2 wrap-break-word ${darkVariant ? 'text-white' : ''}`}>
         <Link href={`/events/${event.id}`} className="focus-visible:underline focus-visible:outline-2 focus-visible:outline-orange">{event.name}</Link>
       </h3>
       <p className="text-orange font-semibold text-sm mb-1">
         {compactTime ? formatEventDate(event.date, event.time).replace(/(\d{1,2}):(\d{2})(?::\d{2})?/g, '$1h$2') : formatEventDate(event.date, event.time)}
       </p>
-      <p className="text-gray-500 text-sm mb-1">{event.location}</p>
-      <p className={`${highlightFreePrice && event.minPrice === 0 ? '!text-[#FF5C1A]' : 'text-gray-700'} text-sm font-medium mb-1`}>{formatPriceFrom(event.minPrice)}</p>
+      <p className={`${darkVariant ? 'text-[#b9aec7]' : 'text-gray-500'} text-sm mb-1`}>{event.location}</p>
+      <p className={`${highlightFreePrice && event.minPrice === 0 ? '!text-[#FF5C1A]' : darkVariant ? 'text-white' : 'text-gray-700'} text-sm font-medium mb-1`}>{formatPriceFrom(event.minPrice)}</p>
       {!hideOrganizer && <p className="text-gray-500 text-sm mt-auto">{event.organizerName}</p>}
     </div>
   );
