@@ -21,8 +21,8 @@ const REPORTED_ERRORS: Record<string, { title: string; message: string }> = {
   default: { title: "Le paiement n'a pas abouti", message: 'Le prestataire a signalé un problème de paiement.' },
 };
 
-const primaryButton = 'inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#ff791f] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#ff8a3e] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ff791f]';
-const secondaryButton = 'inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#604968] px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-[#392844] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ff791f]';
+const primaryButton = 'inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#FF5C1A] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#F15313] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF5C1A]';
+const secondaryButton = 'inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#604968] px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-[#392844] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF5C1A]';
 
 function PageFrame({ children }: { children: React.ReactNode }) {
   return (
@@ -88,7 +88,7 @@ function PaymentErrorContent() {
     <PageFrame>
       <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#492735]">
         {confirmed || (reference && isFetching && !ticket) ? (
-          <Loader2 className="h-9 w-9 animate-spin text-[#ff791f]" aria-hidden="true" />
+          <Loader2 className="h-9 w-9 animate-spin text-[#FF5C1A]" aria-hidden="true" />
         ) : (
           <Clock3 className="h-9 w-9 text-[#ff9a5a]" aria-hidden="true" />
         )}
@@ -105,7 +105,7 @@ function PaymentErrorContent() {
       {!confirmed && (
         <div className="mt-6 rounded-xl border border-[#59435f] bg-[#352440] p-4 text-left">
           <div className="flex items-center gap-2 text-sm font-semibold text-white">
-            <ShieldAlert className="h-5 w-5 shrink-0 text-[#ff791f]" aria-hidden="true" />
+            <ShieldAlert className="h-5 w-5 shrink-0 text-[#FF5C1A]" aria-hidden="true" />
             Avant de réessayer
           </div>
           <p className="mt-2 text-xs leading-relaxed text-[#c7b9d0]">
@@ -147,7 +147,7 @@ export default function PaymentErrorPage() {
   return (
     <Suspense fallback={
       <PageFrame>
-        <Loader2 className="mx-auto h-10 w-10 animate-spin text-[#ff791f]" aria-label="Chargement" />
+        <Loader2 className="mx-auto h-10 w-10 animate-spin text-[#FF5C1A]" aria-label="Chargement" />
       </PageFrame>
     }>
       <PaymentErrorContent />
