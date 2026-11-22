@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Ticket as TicketIcon } from 'lucide-react';
+import { Ticket as TicketIcon, Clock3, CalendarX2 } from 'lucide-react';
 import { PublicHeader } from '@/components/PublicHeader';
 import { PublicFooter } from '@/components/PublicFooter';
 import { TicketCard } from '@/components/tickets/TicketCard';
@@ -32,7 +32,7 @@ function groupTickets(tickets: Ticket[]): TicketGroup[] {
 
 
 function isUpcoming(ticket: Ticket): boolean {
-  if (!ticket.eventDate) return true; // pas de date connue → on suppose à venir
+  if (!ticket.eventDate) return false; // date inconnue : ne pas présumer à venir
   const eventTs = new Date(ticket.eventDate).getTime();
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -102,7 +102,7 @@ export default function TicketsPage() {
       <main className="flex-1 max-w-[820px] w-full mx-auto px-4 md:px-8 py-10">
         <h1 className="font-heading text-3xl md:text-4xl font-extrabold text-white mb-2">Mes billets</h1>
         <p className="text-sm text-[#BEB3CA] mb-8">
-          Présente ton QR à l&apos;entrée. Tu peux l&apos;agrandir d&apos;un clic.
+          Retrouve tes réservations et présente tes billets à l’entrée.
         </p>
 
         {/* Tabs */}
@@ -112,12 +112,12 @@ export default function TicketsPage() {
               type="button"
               onClick={() => { setTab('upcoming'); setUpcomingPage(1) }}
               className={`relative px-4 py-3 text-sm font-semibold transition-colors ${
-                tab === 'upcoming' ? 'text-[#FF791F]' : 'text-[#BEB3CA] hover:text-white'
+                tab === 'upcoming' ? 'text-[#FF5C1A]' : 'text-[#BEB3CA] hover:text-white'
               }`}
             >
               À venir
               {upcoming.length > 0 && (
-                <span className="ml-1.5 inline-flex items-center justify-center text-[11px] px-1.5 py-0.5 rounded-full bg-orange/15 text-[#FF791F] font-bold">
+                <span className="ml-1.5 inline-flex items-center justify-center text-[11px] px-1.5 py-0.5 rounded-full bg-orange/15 text-[#FF5C1A] font-bold">
                   {upcoming.length}
                 </span>
               )}
@@ -127,7 +127,7 @@ export default function TicketsPage() {
               type="button"
               onClick={() => { setTab('pending'); setPendingPage(1) }}
               className={`relative px-4 py-3 text-sm font-semibold transition-colors ${
-                tab === 'pending' ? 'text-[#FF791F]' : 'text-[#BEB3CA] hover:text-white'
+                tab === 'pending' ? 'text-[#FF5C1A]' : 'text-[#BEB3CA] hover:text-white'
               }`}
             >
               En attente
@@ -142,7 +142,7 @@ export default function TicketsPage() {
               type="button"
               onClick={() => { setTab('past'); setPastPage(1) }}
               className={`relative px-4 py-3 text-sm font-semibold transition-colors ${
-                tab === 'past' ? 'text-[#FF791F]' : 'text-[#BEB3CA] hover:text-white'
+                tab === 'past' ? 'text-[#FF5C1A]' : 'text-[#BEB3CA] hover:text-white'
               }`}
             >
               Passés
@@ -160,7 +160,7 @@ export default function TicketsPage() {
           <div className="mb-5 flex flex-wrap gap-2" aria-label="Filtrer les billets passés">
             {([{ value: 'all', label: 'Tous' }, { value: 'used', label: 'Utilisés' }, { value: 'unused', label: 'Non utilisés' }, { value: 'cancelled', label: 'Annulés' }] as const).map((item) => (
               <button key={item.value} type="button" onClick={() => { setPastFilter(item.value); setPastPage(1); }}
-                className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${pastFilter === item.value ? 'border-[#FF791F] bg-[#FF791F]/15 text-[#FF9B59]' : 'border-white/15 text-[#BEB3CA] hover:text-white'}`}>
+                className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${pastFilter === item.value ? 'border-[#FF5C1A] bg-[#FF5C1A]/15 text-[#FF9B59]' : 'border-white/15 text-[#BEB3CA] hover:text-white'}`}>
                 {item.label}
               </button>
             ))}
@@ -175,29 +175,31 @@ export default function TicketsPage() {
           </div>
         ) : visible.length === 0 ? (
           upcoming.length === 0 && pending.length === 0 && past.length === 0 ? (
-            <EmptyState />
+            <EmptyState tab={tab} />
           ) : (
-            <div className="text-center py-16 text-[#BEB3CA] text-sm">
-              {tab === 'upcoming'
-                ? 'Aucun billet à venir.'
-                : tab === 'pending'
-                ? 'Aucun paiement en attente.'
-                : 'Aucun billet dans cette catégorie.'}
-            </div>
+            <EmptyState tab={tab} />
           )
         ) : (
           <>
-            <div className="space-y-5">
-              {visible.map((t) => (
-                <TicketCard key={t.id} ticket={t.tickets[0]} tickets={t.tickets} />
-              ))}
+            <div className="space-y-7">
+              {Object.entries(visible.reduce<Record<string, TicketGroup[]>>((acc, group) => {
+                const anchor = group.tickets[0];
+                const rawDate = tab === 'pending' ? anchor.purchasedAt : anchor.eventDate;
+                const date = rawDate ? new Date(rawDate) : null;
+                const month = date && !isNaN(date.getTime()) ? new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(date) : 'Date non renseignée';
+                (acc[month] ||= []).push(group);
+                return acc;
+              }, {})).map(([month, groups]) => <section key={month}>
+                <div className="mb-4 flex items-center gap-4"><h2 className="font-heading font-extrabold uppercase text-[#FF5C1A] text-sm">{month}</h2><div className="h-px flex-1 bg-white/15"/></div>
+                <div className="space-y-5">{groups.map(group => <TicketCard key={group.id} ticket={group.tickets[0]} tickets={group.tickets}/>)}</div>
+              </section>)}
             </div>
             {totalPages > 1 && (
               <div className="flex items-center justify-center gap-2 mt-8">
                 <button
                   onClick={() => setCurrentPage(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="px-4 py-2 rounded-xl text-sm font-semibold border border-white/15 disabled:opacity-30 disabled:cursor-not-allowed hover:border-orange/40 hover:text-[#FF791F] transition-colors"
+                  className="px-4 py-2 rounded-xl text-sm font-semibold border border-white/15 disabled:opacity-30 disabled:cursor-not-allowed hover:border-orange/40 hover:text-[#FF5C1A] transition-colors"
                 >
                   ‹ Précédent
                 </button>
@@ -207,7 +209,7 @@ export default function TicketsPage() {
                 <button
                   onClick={() => setCurrentPage(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="px-4 py-2 rounded-xl text-sm font-semibold border border-white/15 disabled:opacity-30 disabled:cursor-not-allowed hover:border-orange/40 hover:text-[#FF791F] transition-colors"
+                  className="px-4 py-2 rounded-xl text-sm font-semibold border border-white/15 disabled:opacity-30 disabled:cursor-not-allowed hover:border-orange/40 hover:text-[#FF5C1A] transition-colors"
                 >
                   Suivant ›
                 </button>
@@ -221,22 +223,16 @@ export default function TicketsPage() {
   );
 }
 
-function EmptyState() {
-  return (
-    <div className="text-center py-20">
-      <div className="w-16 h-16 rounded-2xl bg-[#FF791F]/10 mx-auto flex items-center justify-center mb-5">
-        <TicketIcon className="w-8 h-8 text-[#FF791F]" />
-      </div>
-      <h2 className="font-heading text-xl font-extrabold text-white mb-2">Aucun billet pour le moment</h2>
-      <p className="text-sm text-[#BEB3CA] mb-8">
-        Découvre les événements à Abidjan et réserve ta place en quelques clics.
-      </p>
-      <Link
-        href="/search"
-        className="inline-block bg-orange text-white font-bold px-7 py-3 rounded-xl hover:opacity-90 transition-colors"
-      >
-        Découvrir les événements
-      </Link>
-    </div>
-  );
+function EmptyState({ tab }: { tab: Tab }) {
+  const configs = {
+    upcoming: { title: 'Ton prochain bon plan t’attend !', detail: 'Découvre les sorties à venir et prépare ton prochain moment.', icon: TicketIcon },
+    pending: { title: 'Aucune réservation en attente.', detail: 'Tes paiements en cours apparaîtront ici.', icon: Clock3 },
+    past: { title: 'Pas encore de souvenirs ici !', detail: 'Tu retrouveras tes anciennes réservations dans cet onglet.', icon: CalendarX2 },
+  };
+  const info = configs[tab]; const Icon = info.icon;
+  return <div className="text-center py-16">
+    <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#FF5C1A]/10"><Icon className="h-8 w-8 text-[#FF5C1A]"/></div>
+    <h2 className="font-heading text-xl font-extrabold mb-2">{info.title}</h2><p className="text-sm text-[#BEB3CA] mb-7">{info.detail}</p>
+    {tab !== 'pending' && <Link href="/search" className="inline-block rounded-xl bg-[#FF5C1A] px-6 py-3 text-sm font-bold text-white">Découvrir les événements</Link>}
+  </div>;
 }
