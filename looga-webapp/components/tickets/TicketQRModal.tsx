@@ -80,9 +80,8 @@ export function TicketQRModal({ ticket, tickets, onClose }: Props) {
           )}
 
           {/* Numéro de billet */}
-          <p className="mt-5 font-mono text-sm text-ink-muted">
-            {current.ticketNumber}
-          </p>
+          <p className="mt-5 font-mono text-sm text-ink-muted">{current.ticketNumber || current.id}</p>
+          <p className="mt-2 rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">Valide</p>
 
           {/* Info event */}
           {current.eventName && (
@@ -100,7 +99,7 @@ export function TicketQRModal({ ticket, tickets, onClose }: Props) {
           )}
         </div>
 
-        {slides.length > 1 && <div className="flex justify-center gap-2 pb-3" aria-label="Position dans les billets">{slides.map((item, i) => <button key={item.id} type="button" onClick={() => go(i)} aria-label={`Afficher le billet ${i + 1}`} className={`h-2 rounded-full transition-all ${i === index ? 'w-6 bg-[#FF791F]' : 'w-2 bg-gray-300'}`} />)}</div>}
+        {slides.length > 1 && <div className="flex justify-center gap-2 pb-3" aria-label="Position dans les billets">{slides.map((item, i) => <button key={item.id} type="button" onClick={() => go(i)} aria-label={`Afficher le billet ${i + 1}`} className={`h-2 rounded-full transition-all ${i === index ? 'w-6 bg-[#FF5C1A]' : 'w-2 bg-gray-300'}`} />)}</div>}
         {/* Footer */}
         <div className="px-5 py-4 border-t border-black/5 bg-cream-2">
           <p className="text-center text-xs text-ink-muted">
