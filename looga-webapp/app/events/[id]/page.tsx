@@ -162,6 +162,11 @@ export default function EventDetailPage() {
   const eventTime = event.time ? String(event.time).replace(/^(\d{1,2}):(\d{2})(?::\d{2})?$/, '$1h$2') : null;
   const organizer = event.organizer;
   const organizerInitial = (organizer?.name ?? event.organizerName ?? 'O').charAt(0).toUpperCase();
+  const availableTicketTypes = event.ticketTypes.filter((type) => !type.soldOut && type.active !== false);
+  const hasFreeTicket = availableTicketTypes.some((type) => type.price === 0);
+  const hasPaidTicket = availableTicketTypes.some((type) => type.price > 0);
+  const startingPrice = availableTicketTypes.length ? Math.min(...availableTicketTypes.map((type) => type.price)) : event.minPrice;
+  const fixedTicketLabel = event.isSoldOut ? 'Billets épuisés' : hasFreeTicket && hasPaidTicket ? 'Obtenir des billets' : hasFreeTicket ? 'Obtenir des billets — Gratuit' : Number.isFinite(startingPrice) ? `Billets dès ${new Intl.NumberFormat('fr-FR').format(startingPrice)} FCFA` : 'Obtenir des billets';
 
   return (
     <div className="min-h-screen bg-[#130d1c] text-white font-sans">
@@ -355,7 +360,7 @@ export default function EventDetailPage() {
                 )}
                 <div className="p-6">
                   <h3 className="text-xl font-bold text-white mb-1">
-                    {formatPriceFrom(event.minPrice)}
+                    {formatPriceFrom(startingPrice)}
                   </h3>
                   <p className="text-[#b9aec7] text-sm mb-1">
                     {formatEventDate(event.date, event.time)}
@@ -384,7 +389,7 @@ export default function EventDetailPage() {
             disabled={event.isSoldOut}
             className="w-full min-h-12 bg-[#FF5C1A] text-white text-sm sm:text-base font-bold leading-snug px-3 py-3.5 rounded-xl hover:opacity-90 transition-colors disabled:bg-white/15"
           >
-            {event.isSoldOut ? 'Billets épuisés' : event.minPrice === 0 ? 'Obtenir des billets — Gratuit' : `Billets dès ${new Intl.NumberFormat('fr-FR').format(event.minPrice)} FCFA`}
+            {fixedTicketLabel}
           </button>
         </div>
       </main>
