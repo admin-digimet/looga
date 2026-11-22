@@ -12,8 +12,8 @@ import { getTicketByReference } from '@/lib/api/payment';
 const POLL_INTERVAL_MS = 2_000;
 const LONG_WAIT_MS = 30_000;
 
-const primaryButton = 'inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#ff791f] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#ff8a3e] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ff791f]';
-const secondaryButton = 'inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#604968] px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-[#392844] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ff791f]';
+const primaryButton = 'inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#FF5C1A] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#F15313] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF5C1A]';
+const secondaryButton = 'inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#604968] px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-[#392844] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF5C1A]';
 
 function PageFrame({ children }: { children: React.ReactNode }) {
   return (
@@ -83,7 +83,7 @@ function PaymentSuccessContent() {
 
   if (!reference) {
     return <>
-      <Clock3 className="mx-auto mb-5 h-14 w-14 text-[#ff791f]" aria-hidden="true" />
+      <Clock3 className="mx-auto mb-5 h-14 w-14 text-[#FF5C1A]" aria-hidden="true" />
       <h1 className="font-heading text-2xl font-extrabold">Référence manquante</h1>
       <p className="mb-7 mt-3 text-sm leading-relaxed text-[#b8a8c9]">Impossible de retrouver la référence de ton paiement. Vérifie tes billets dans ton espace.</p>
       <TicketLink />
@@ -92,15 +92,16 @@ function PaymentSuccessContent() {
 
   if (confirmed && ticket) {
     return <>
+      <p className="mb-5 text-xs font-semibold text-[#FF5C1A]">Billets ✓ &nbsp; → &nbsp; Paiement ✓ &nbsp; → &nbsp; Confirmation ✓</p>
       <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#204734]">
         <Check className="h-9 w-9 text-[#71e3a5]" strokeWidth={3} aria-hidden="true" />
       </div>
-      <h1 className="font-heading text-2xl font-extrabold tracking-tight sm:text-3xl">Paiement confirmé !</h1>
+      <h1 className="font-heading text-2xl font-extrabold tracking-tight sm:text-3xl">C’est confirmé !</h1>
       <p className="mt-3 text-sm leading-relaxed text-[#c7b9d0]">
-        C&apos;est dans la poche ! Ton billet pour <strong className="text-white">{ticket.eventName}</strong> est prêt.
+        Ton paiement est confirmé et ton billet pour <strong className="text-white">{ticket.eventName}</strong> est prêt.
       </p>
       <div className="mt-6 rounded-xl bg-[#352440] p-4 text-left">
-        <div className="flex items-center gap-2 text-sm font-semibold text-white"><Ticket className="h-5 w-5 text-[#ff791f]" aria-hidden="true" />Ton billet est disponible</div>
+        <div className="flex items-center gap-2 text-sm font-semibold text-white"><Ticket className="h-5 w-5 text-[#FF5C1A]" aria-hidden="true" />Ton billet est disponible</div>
         <p className="mt-2 text-xs leading-relaxed text-[#b8a8c9]">Retrouve ton billet et son QR code dans « Mes billets ».</p>
       </div>
       <div className="mt-6 space-y-3">
@@ -113,7 +114,7 @@ function PaymentSuccessContent() {
 
   if (expired) {
     return <>
-      <AlertCircle className="mx-auto mb-5 h-14 w-14 text-[#ff791f]" aria-hidden="true" />
+      <AlertCircle className="mx-auto mb-5 h-14 w-14 text-[#FF5C1A]" aria-hidden="true" />
       <h1 className="font-heading text-xl font-extrabold">Billet expiré</h1>
       <p className="mb-7 mt-3 text-sm leading-relaxed text-[#b8a8c9]">Le billet associé à cette référence est expiré. Consulte « Mes billets » pour vérifier son statut.</p>
       <TicketLink />
@@ -122,14 +123,14 @@ function PaymentSuccessContent() {
 
   if (ticket?.status === 'cancelled') {
     return <>
-      <Loader2 className="mx-auto mb-4 h-11 w-11 animate-spin text-[#ff791f]" aria-hidden="true" />
+      <Loader2 className="mx-auto mb-4 h-11 w-11 animate-spin text-[#FF5C1A]" aria-hidden="true" />
       <p className="text-sm text-[#b8a8c9]">Redirection vers le suivi de ton paiement…</p>
     </>;
   }
 
   if (elapsed) {
     return <>
-      <Clock3 className="mx-auto mb-5 h-14 w-14 text-[#ff791f]" aria-hidden="true" />
+      <Clock3 className="mx-auto mb-5 h-14 w-14 text-[#FF5C1A]" aria-hidden="true" />
       <h1 className="font-heading text-xl font-extrabold leading-snug">La confirmation prend un peu plus de temps…</h1>
       <p className="mt-4 text-sm leading-relaxed text-[#b8a8c9]">Nous vérifions toujours ton paiement. Tu peux consulter « Mes billets » pour suivre sa confirmation. Évite de recommencer le paiement tant que son statut n&apos;est pas clarifié.</p>
       <div className="mt-6"><TicketLink /></div>
@@ -139,7 +140,7 @@ function PaymentSuccessContent() {
   }
 
   return <>
-    {error && !isFetching ? <AlertCircle className="mx-auto mb-5 h-12 w-12 text-[#ff791f]" aria-hidden="true" /> : <Loader2 className="mx-auto mb-5 h-12 w-12 animate-spin text-[#ff791f]" aria-hidden="true" />}
+    {error && !isFetching ? <AlertCircle className="mx-auto mb-5 h-12 w-12 text-[#FF5C1A]" aria-hidden="true" /> : <Loader2 className="mx-auto mb-5 h-12 w-12 animate-spin text-[#FF5C1A]" aria-hidden="true" />}
     <h1 className="font-heading text-xl font-extrabold">Vérification du paiement…</h1>
     <p className="mt-3 text-sm leading-relaxed text-[#b8a8c9]">Nous attendons la confirmation de ton paiement avant de rendre ton billet disponible.</p>
     {error && <button type="button" onClick={() => void refetch()} className={`${secondaryButton} mt-5`}><RefreshCw className="h-4 w-4" aria-hidden="true" />Réessayer la vérification</button>}
@@ -149,7 +150,7 @@ function PaymentSuccessContent() {
 
 export default function PaymentSuccessPage() {
   return (
-    <Suspense fallback={<PageFrame><Loader2 className="mx-auto h-12 w-12 animate-spin text-[#ff791f]" aria-label="Chargement" /></PageFrame>}>
+    <Suspense fallback={<PageFrame><Loader2 className="mx-auto h-12 w-12 animate-spin text-[#FF5C1A]" aria-label="Chargement" /></PageFrame>}>
       <PageFrame><PaymentSuccessContent /></PageFrame>
     </Suspense>
   );
