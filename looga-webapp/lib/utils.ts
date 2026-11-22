@@ -8,7 +8,8 @@ export function formatEventDate(date: string, time?: string): string {
       month: 'short',
     }).format(d);
     const capitalized = formatted.charAt(0).toUpperCase() + formatted.slice(1);
-    return time ? `${capitalized} • ${time}` : capitalized;
+    const hhmm = time && /^\d{1,2}:\d{2}/.test(time) ? time.slice(0, 5).replace(':', 'h') : time;
+    return hhmm ? `${capitalized} • ${hhmm}` : capitalized;
   } catch {
     return date;
   }
